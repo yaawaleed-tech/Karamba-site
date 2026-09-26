@@ -1,0 +1,64 @@
+---
+import { Image } from 'astro:assets';
+import logoMark from '../assets/brand/logo-mark.png';
+---
+
+<section class="relative overflow-hidden">
+	<!-- Decorative faceted mark, large and faint, bleeding off the right edge -->
+	<Image
+		src={logoMark}
+		alt=""
+		aria-hidden="true"
+		class="pointer-events-none absolute -right-24 -top-24 h-[560px] w-[560px] opacity-[0.08] sm:opacity-[0.12]"
+		widths={[560, 1120]}
+		sizes="560px"
+	/>
+
+	<div class="relative mx-auto max-w-6xl px-6 py-20 sm:py-28">
+		<span
+			class="inline-block rounded-full px-4 py-1.5 text-xs font-semibold tracking-wide"
+			style="background-color: var(--color-bg-subtle); color: var(--color-primary); border: 1px solid var(--color-border);"
+		>
+			Web &amp; Software Development
+		</span>
+
+		<h1
+			class="mt-6 max-w-2xl font-heading text-4xl font-bold leading-tight sm:text-5xl sm:leading-tight"
+			style="color: var(--color-text);"
+		>
+			Automate the work.
+			<span style="color: var(--color-primary);">Simplify the business.</span>
+		</h1>
+
+		<p class="mt-5 max-w-xl text-lg" style="color: var(--color-text-muted);">
+			Karamba Technologies builds web and mobile software that replaces paper
+			and spreadsheets — for farms, schools, NGOs and growing businesses.
+		</p>
+
+		<div class="mt-9 flex flex-wrap items-center gap-4">
+            <a
+				href="#contact"
+				class="rounded-full px-7 py-3.5 text-sm font-semibold transition-transform hover:scale-105"
+				style="background-color: var(--color-primary); color: var(--color-primary-text);"
+			>
+				Book a Free Consultation
+			</a>
+			<a
+				href="https://wa.me/2347081258889"
+				target="_blank"
+				rel="noopener noreferrer"
+				class="inline-flex items-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold transition-colors"
+				style="border: 1px solid var(--color-border); color: var(--color-text);"
+			>
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4 fill-current">
+					<path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.48 1.32 4.99L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.86 9.86 0 0 0 12.04 2zm0 1.67c2.2 0 4.27.86 5.83 2.42a8.2 8.2 0 0 1 2.42 5.82c0 4.54-3.7 8.24-8.25 8.24a8.2 8.2 0 0 1-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.18 8.18 0 0 1-1.26-4.38c0-4.55 3.7-8.24 8.25-8.24zm-4.55 4.7c-.16 0-.42.06-.64.31-.22.25-.85.83-.85 2.02s.87 2.35.99 2.51c.12.16 1.7 2.6 4.2 3.63.59.24 1.05.39 1.41.5.59.19 1.13.16 1.55.1.47-.07 1.46-.6 1.67-1.18.2-.58.2-1.07.14-1.18-.06-.1-.22-.16-.47-.28-.25-.13-1.46-.72-1.69-.8-.23-.09-.39-.13-.56.13-.16.25-.64.8-.78.97-.15.16-.29.18-.54.06-.25-.13-1.05-.39-2-1.23-.74-.66-1.24-1.47-1.38-1.72-.15-.25-.02-.38.11-.51.11-.11.25-.29.37-.44.13-.15.17-.25.25-.41.08-.16.04-.31-.02-.44-.06-.13-.56-1.36-.77-1.86-.2-.48-.4-.42-.56-.42h-.48z"/>
+				</svg>
+				Message us on WhatsApp
+			</a>
+		</div>
+
+		<p class="mt-8 text-xs uppercase tracking-wide" style="color: var(--color-text-muted);">
+			We reply within 24 hours
+		</p>
+	</div>
+</section>

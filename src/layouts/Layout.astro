@@ -1,0 +1,64 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Path to a 1200x630 social preview image, relative to /public */
+  ogImage?: string;
+}
+
+const {
+  title,
+  description,
+  ogImage = '/og-image.png',
+} = Astro.props;
+
+const siteName = 'Karamba Technologies';
+const fullTitle = title === siteName ? title : `${title} | ${siteName}`;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+		<!-- No-flash theme init: must run before first paint -->
+		<script is:inline>
+			(function () {
+				const stored = localStorage.getItem('kt-theme');
+				const theme =
+					stored ||
+					(window.matchMedia('(prefers-color-scheme: dark)').matches
+						? 'dark'
+						: 'light');
+				document.documentElement.setAttribute('data-theme', theme);
+			})();
+		</script>
+
+		<title>{fullTitle}</title>
+		<meta name="description" content={description} />
+		<link rel="canonical" href={canonicalURL} />
+
+		<!-- Favicons -->
+		<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+		<link rel="icon" href="/favicon.ico" sizes="48x48" />
+
+		<!-- Open Graph / social preview -->
+		<meta property="og:type" content="website" />
+		<meta property="og:site_name" content={siteName} />
+		<meta property="og:title" content={fullTitle} />
+		<meta property="og:description" content={description} />
+		<meta property="og:image" content={new URL(ogImage, Astro.site)} />
+		<meta property="og:url" content={canonicalURL} />
+		<meta name="twitter:card" content="summary_large_image" />
+
+		<meta name="generator" content={Astro.generator} />
+	</head>
+	<body>
+		<slot />
+	</body>
+</html>

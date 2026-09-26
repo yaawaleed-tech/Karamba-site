@@ -1,0 +1,110 @@
+---
+import { Image } from 'astro:assets';
+import logoMark from '../assets/brand/logo-mark.png';
+
+const year = new Date().getFullYear();
+
+const contactLinks = [
+	{
+		label: 'abdullahi.haroon.tech@gmail.com',
+		href: 'mailto:abdullahi.haroon.tech@gmail.com',
+	},
+	{
+		label: 'WhatsApp: +234 708 125 8889',
+		href: 'https://wa.me/2347081258889',
+	},
+	{
+		label: 'GitHub: yaawaleed-tech',
+		href: 'https://github.com/yaawaleed-tech',
+	},
+];
+
+const footerNav = [
+	{ href: '#services', label: 'What We Do' },
+	{ href: '#product', label: 'Our Product' },
+	{ href: '#work', label: 'Our Work' },
+	{ href: '#about', label: 'About' },
+	{ href: '#contact', label: 'Contact' },
+];
+---
+
+<footer
+	class="border-t"
+	style="border-color: var(--color-border); background-color: var(--color-bg-subtle);"
+>
+	<div class="mx-auto max-w-6xl px-6 py-14">
+		<div class="grid gap-10 md:grid-cols-3">
+			<!-- Brand + promise -->
+			<div>
+				<div class="flex items-center gap-2.5">
+					<Image src={logoMark} alt="" class="h-8 w-8" aria-hidden="true" widths={[64]} sizes="32px" />
+					<span class="font-heading text-lg font-semibold" style="color: var(--color-text);">
+						Karamba Technologies
+					</span>
+				</div>
+				<p class="mt-3 text-sm" style="color: var(--color-text-muted);">
+					Simple systems. Smarter business.
+				</p>
+				<p
+					class="mt-5 inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold"
+					style="background-color: var(--color-accent); color: var(--color-accent-text);"
+				>
+					We reply within 24 hours
+				</p>
+			</div>
+
+			<!-- Nav -->
+			<div>
+				<h3 class="font-heading text-sm font-semibold uppercase tracking-wide" style="color: var(--color-text);">
+					Explore
+				</h3>
+				<ul class="mt-4 space-y-2.5">
+					{footerNav.map((link) => (
+						<li>
+							<a
+								href={link.href}
+								class="text-sm transition-opacity hover:opacity-70"
+								style="color: var(--color-text-muted);"
+							>
+								{link.label}
+							</a>
+						</li>
+					))}
+				</ul>
+			</div>
+
+			<!-- Contact -->
+			<div>
+				<h3 class="font-heading text-sm font-semibold uppercase tracking-wide" style="color: var(--color-text);">
+					Get in Touch
+				</h3>
+				<ul class="mt-4 space-y-2.5">
+					{contactLinks.map((link) => (
+						<li>
+							<a
+								href={link.href}
+								target={link.href.startsWith('http') ? '_blank' : undefined}
+								rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+								class="text-sm transition-opacity hover:opacity-70"
+								style="color: var(--color-text-muted);"
+							>
+								{link.label}
+							</a>
+						</li>
+					))}
+				</ul>
+				<p class="mt-4 text-sm" style="color: var(--color-text-muted);">
+					Kano State, Nigeria
+				</p>
+			</div>
+		</div>
+
+		<div
+			class="mt-12 flex flex-col gap-3 border-t pt-6 text-xs sm:flex-row sm:items-center sm:justify-between"
+			style="border-color: var(--color-border); color: var(--color-text-muted);"
+		>
+			<p>&copy; {year} Karamba Technologies. All rights reserved.</p>
+			<p>Built in Kano, Nigeria.</p>
+		</div>
+	</div>
+</footer>

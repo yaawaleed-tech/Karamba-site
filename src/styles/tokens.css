@@ -1,0 +1,61 @@
+/* Karamba Technologies — brand tokens
+   Raw brand hex values, then semantic tokens that switch per theme.
+   Edit raw values here only; components should always use the
+   semantic --color-* variables, never the --kt-* ones directly. */
+
+:root {
+  /* Raw brand palette (from brand sheet) */
+  --kt-navy-900: #012c72;
+  --kt-blue-700: #01558e;
+  --kt-teal-600: #038bab;
+  --kt-cyan-400: #1eb7cb;
+  --kt-green-400: #36cf97;
+
+  --kt-ink: #0a1220;      /* near-black, for light-mode text */
+  --kt-paper: #ffffff;    /* light-mode background */
+  --kt-night: #05070f;    /* dark-mode background */
+  --kt-mist: #e8eefc;     /* dark-mode text */
+
+  /* Semantic tokens — light mode (default) */
+  --color-bg: var(--kt-paper);
+  --color-bg-subtle: #f3f6fc;
+  --color-text: var(--kt-ink);
+  --color-text-muted: #4b5566;
+  --color-primary: var(--kt-blue-700);      /* buttons, links */
+  --color-primary-text: #ffffff;             /* text on primary */
+  --color-accent: var(--kt-green-400);       /* highlights, badges */
+  --color-accent-text: var(--kt-navy-900);   /* text on accent */
+  --color-border: #dbe3f0;
+  --color-card-bg: #ffffff;
+}
+
+[data-theme='dark'] {
+  --color-bg: var(--kt-night);
+  --color-bg-subtle: #0b1224;
+  --color-text: var(--kt-mist);
+  --color-text-muted: #93a2c2;
+  --color-primary: var(--kt-cyan-400);
+  --color-primary-text: var(--kt-navy-900);
+  --color-accent: var(--kt-green-400);
+  --color-accent-text: var(--kt-navy-900);
+  --color-border: #1c2740;
+  --color-card-bg: #0b1224;
+}
+
+/* Respect system preference when the visitor hasn't chosen a theme yet.
+   The inline script in Layout.astro sets data-theme as soon as possible
+   to avoid a flash; this block is the CSS-only fallback/first-paint case. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --color-bg: var(--kt-night);
+    --color-bg-subtle: #0b1224;
+    --color-text: var(--kt-mist);
+    --color-text-muted: #93a2c2;
+    --color-primary: var(--kt-cyan-400);
+    --color-primary-text: var(--kt-navy-900);
+    --color-accent: var(--kt-green-400);
+    --color-accent-text: var(--kt-navy-900);
+    --color-border: #1c2740;
+    --color-card-bg: #0b1224;
+  }
+}

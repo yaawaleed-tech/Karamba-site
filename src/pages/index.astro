@@ -1,17 +1,27 @@
 ---
-import '../styles/global.css';
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Hero from '../components/Hero.astro';
+import Services from '../components/Services.astro';
+import Product from '../components/Product.astro';
+import CaseStudy from '../components/CaseStudy.astro';
+import Process from '../components/Process.astro';
+import About from '../components/About.astro';
+import Contact from '../components/Contact.astro';
+import Footer from '../components/Footer.astro';
+
+const title = 'Karamba Technologies';
+const description = 'Karamba Technologies builds web and mobile software that replaces paper and spreadsheets — for farms, schools, NGOs and growing businesses.';
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1 class="text-4xl font-bold text-blue-600">Astro</h1>
-	</body>
-</html>
+<Layout title={title} description={description}>
+	<Header />
+	<Hero />
+	<Services />
+	<Product />
+	<CaseStudy />
+	<Process />
+	<About />
+	<Contact />
+	<Footer />
+</Layout>

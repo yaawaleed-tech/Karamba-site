@@ -1,1 +1,27 @@
 @import "tailwindcss";
+
+/* Self-hosted fonts (installed via @fontsource) */
+@import "@fontsource/poppins/400.css";
+@import "@fontsource/poppins/600.css";
+@import "@fontsource/poppins/700.css";
+@import "@fontsource/montserrat/400.css";
+@import "@fontsource/montserrat/500.css";
+@import "@fontsource/montserrat/600.css";
+
+@import "./tokens.css";
+
+@theme {
+  --font-heading: "Poppins", sans-serif;
+  --font-body: "Montserrat", sans-serif;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+}
