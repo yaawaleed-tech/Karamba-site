@@ -19,7 +19,7 @@ const navLinks = [
 >
 	<div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
 		<a href="/" class="flex items-center" aria-label="Karamba Technologies home">
-			<!-- Both logos render; JS below shows the right one per theme -->
+			<!-- Both logos render; JS shows the right one per theme -->
 			<Image
 				src={logoLight}
 				alt="Karamba Technologies"
@@ -59,7 +59,50 @@ const navLinks = [
 			>
 				Book a Free Consultation
 			</a>
+
+			<!-- Hamburger, mobile only -->
+			<button
+				id="menu-toggle"
+				type="button"
+				aria-label="Open menu"
+				aria-expanded="false"
+				class="inline-flex h-10 w-10 items-center justify-center rounded-full border transition-colors md:hidden"
+				style="border-color: var(--color-border); background-color: var(--color-bg-subtle);"
+			>
+				<svg id="icon-burger" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="h-5 w-5" style="color: var(--color-text);">
+					<path d="M4 6h16M4 12h16M4 18h16"></path>
+				</svg>
+				<svg id="icon-close" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="hidden h-5 w-5" style="color: var(--color-text);">
+					<path d="M6 6l12 12M18 6L6 18"></path>
+				</svg>
+			</button>
 		</div>
+	</div>
+
+	<!-- Mobile menu panel -->
+	<div
+		id="mobile-menu"
+		class="hidden border-t md:hidden"
+		style="border-color: var(--color-border); background-color: var(--color-bg);"
+	>
+		<nav class="flex flex-col gap-1 px-6 py-4">
+			{navLinks.map((link) => (
+				<a
+					href={link.href}
+					class="mobile-nav-link rounded-lg px-3 py-3 text-base font-medium transition-colors"
+					style="color: var(--color-text);"
+				>
+					{link.label}
+				</a>
+			))}
+			<a
+				href="#contact"
+				class="mobile-nav-link mt-2 rounded-full px-5 py-3 text-center text-sm font-semibold"
+				style="background-color: var(--color-primary); color: var(--color-primary-text);"
+			>
+				Book a Free Consultation
+			</a>
+		</nav>
 	</div>
 </header>
 
@@ -77,5 +120,33 @@ const navLinks = [
 		syncLogos();
 		const observer = new MutationObserver(syncLogos);
 		observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+	})();
+
+	(function () {
+		const btn = document.getElementById('menu-toggle');
+		const menu = document.getElementById('mobile-menu');
+		const burger = document.getElementById('icon-burger');
+		const close = document.getElementById('icon-close');
+
+		function setOpen(open) {
+			menu.classList.toggle('hidden', !open);
+			burger.classList.toggle('hidden', open);
+			close.classList.toggle('hidden', !open);
+			btn.setAttribute('aria-expanded', String(open));
+			document.body.style.overflow = open ? 'hidden' : '';
+		}
+
+		btn.addEventListener('click', () => {
+			const isOpen = !menu.classList.contains('hidden');
+			setOpen(!isOpen);
+		});
+
+		menu.querySelectorAll('.mobile-nav-link').forEach((link) => {
+			link.addEventListener('click', () => setOpen(false));
+		});
+
+		window.matchMedia('(min-width: 768px)').addEventListener('change', (e) => {
+			if (e.matches) setOpen(false);
+		});
 	})();
 </script>
