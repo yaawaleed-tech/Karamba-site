@@ -1,47 +1,68 @@
 ---
-// Accessible light/dark toggle. Pairs with the inline script in
-// Layout.astro that sets the initial data-theme before paint.
+// Accessible light/dark toggle with a circular "wipe" transition,
+// expanding from the button's position, using the View Transitions API.
+// Falls back to an instant swap on unsupported browsers or reduced-motion.
 ---
 
 <button
 	id="theme-toggle"
 	type="button"
 	aria-label="Toggle light and dark theme"
-	class="inline-flex h-10 w-10 items-center justify-center rounded-full border transition-colors"
+	class="theme-btn inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border transition-colors hover:scale-105"
 	style="border-color: var(--color-border); background-color: var(--color-bg-subtle);"
 >
-	<!-- Sun icon (shown in dark mode, click to go light) -->
-	<svg
-		id="icon-sun"
-		xmlns="http://www.w3.org/2000/svg"
-		viewBox="0 0 24 24"
-		fill="none"
-		stroke="currentColor"
-		stroke-width="2"
-		stroke-linecap="round"
-		stroke-linejoin="round"
-		class="hidden h-5 w-5"
-		style="color: var(--color-text);"
-	>
-		<circle cx="12" cy="12" r="4"></circle>
-		<path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
-	</svg>
-	<!-- Moon icon (shown in light mode, click to go dark) -->
-	<svg
-		id="icon-moon"
-		xmlns="http://www.w3.org/2000/svg"
-		viewBox="0 0 24 24"
-		fill="none"
-		stroke="currentColor"
-		stroke-width="2"
-		stroke-linecap="round"
-		stroke-linejoin="round"
-		class="hidden h-5 w-5"
-		style="color: var(--color-text);"
-	>
-		<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>
-	</svg>
+	<span id="icon-wrap" class="relative flex h-5 w-5 items-center justify-center">
+		<svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="theme-icon absolute hidden h-5 w-5" style="color: var(--color-text);">
+			<circle cx="12" cy="12" r="4"></circle>
+			<path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+		</svg>
+		<svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="theme-icon absolute hidden h-5 w-5" style="color: var(--color-text);">
+			<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>
+		</svg>
+	</span>
 </button>
+
+<style>
+	.theme-icon {
+		transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+	}
+	.theme-icon.enter {
+		animation: theme-spin-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+	}
+	@keyframes theme-spin-in {
+		from { transform: rotate(-90deg) scale(0.5); opacity: 0; }
+		to { transform: rotate(0deg) scale(1); opacity: 1; }
+	}
+</style>
+
+<!-- Global (unscoped) styles: ::view-transition-* pseudo-elements live outside
+     the normal DOM tree, so Astro's scoped component styles cannot reach them. -->
+<style is:global>
+	@media (prefers-reduced-motion: no-preference) {
+		::view-transition-old(theme-root),
+		::view-transition-new(theme-root) {
+			animation: none;
+			mix-blend-mode: normal;
+		}
+
+		::view-transition-old(theme-root) {
+			z-index: 1;
+		}
+		::view-transition-new(theme-root) {
+			z-index: 2;
+			animation: theme-wipe-in 0.65s cubic-bezier(0.65, 0, 0.35, 1);
+		}
+
+		@keyframes theme-wipe-in {
+			from {
+				clip-path: circle(0% at var(--theme-toggle-x, 50%) var(--theme-toggle-y, 50%));
+			}
+			to {
+				clip-path: circle(150% at var(--theme-toggle-x, 50%) var(--theme-toggle-y, 50%));
+			}
+		}
+	}
+</style>
 
 <script is:inline>
 	(function () {
@@ -50,20 +71,52 @@
 		const moon = document.getElementById('icon-moon');
 		const root = document.documentElement;
 
-		function syncIcons() {
+		function syncIcons(animate) {
 			const isDark = root.getAttribute('data-theme') === 'dark';
 			sun.classList.toggle('hidden', !isDark);
 			moon.classList.toggle('hidden', isDark);
+			if (animate) {
+				const shown = isDark ? sun : moon;
+				shown.classList.remove('enter');
+				void shown.offsetWidth;
+				shown.classList.add('enter');
+			}
 		}
 
-		syncIcons();
+		syncIcons(false);
 
-		btn.addEventListener('click', function () {
+		// Tag the root element so the View Transitions API can target it
+		// specifically (view-transition-name must be set before the transition starts).
+		root.style.viewTransitionName = 'theme-root';
+
+		function applyTheme() {
 			const current = root.getAttribute('data-theme');
 			const next = current === 'dark' ? 'light' : 'dark';
 			root.setAttribute('data-theme', next);
 			localStorage.setItem('kt-theme', next);
-			syncIcons();
+			syncIcons(true);
+		}
+
+		btn.addEventListener('click', function (e) {
+			const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+			const supportsViewTransitions = typeof document.startViewTransition === 'function';
+
+			if (prefersReduced || !supportsViewTransitions) {
+				applyTheme();
+				return;
+			}
+
+			// Set the wipe's origin point to wherever the button actually is,
+			// so the circle expands from the toggle, not the viewport center.
+			const rect = btn.getBoundingClientRect();
+			const x = rect.left + rect.width / 2;
+			const y = rect.top + rect.height / 2;
+			document.documentElement.style.setProperty('--theme-toggle-x', `${x}px`);
+			document.documentElement.style.setProperty('--theme-toggle-y', `${y}px`);
+
+			document.startViewTransition(() => {
+				applyTheme();
+			});
 		});
 	})();
 </script>

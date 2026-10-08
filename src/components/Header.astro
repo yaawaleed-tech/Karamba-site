@@ -13,62 +13,31 @@ const navLinks = [
 ];
 ---
 
-<header
-	class="sticky top-0 z-50 border-b backdrop-blur"
-	style="border-color: var(--color-border); background-color: color-mix(in srgb, var(--color-bg) 85%, transparent);"
->
-	<div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
-		<a href="/" class="flex items-center" aria-label="Karamba Technologies home">
-			<!-- Both logos render; JS shows the right one per theme -->
-			<Image
-				src={logoLight}
-				alt="Karamba Technologies"
-				class="h-9 w-auto"
-				id="logo-light"
-				widths={[200, 400]}
-				sizes="200px"
-			/>
-			<Image
-				src={logoDark}
-				alt="Karamba Technologies"
-				class="hidden h-9 w-auto"
-				id="logo-dark"
-				widths={[200, 400]}
-				sizes="200px"
-			/>
+<header id="site-header" class="sticky top-0 z-50 border-b" style="border-color: var(--color-border);">
+	<div class="header-glow"></div>
+
+	<div id="header-inner" class="relative mx-auto flex max-w-6xl items-center justify-between px-6 transition-all duration-300">
+		<a href="/" class="relative z-10 flex items-center" aria-label="Karamba Technologies home">
+			<Image src={logoLight} alt="Karamba Technologies" id="logo-light" class="header-logo h-9 w-auto transition-all duration-300" widths={[200, 400]} sizes="200px" />
+			<Image src={logoDark} alt="Karamba Technologies" id="logo-dark" class="header-logo hidden h-9 w-auto transition-all duration-300" widths={[200, 400]} sizes="200px" />
 		</a>
 
-		<nav class="hidden items-center gap-7 md:flex">
+		<nav id="desktop-nav" class="relative hidden items-center gap-1 md:flex">
+			<span id="nav-underline" class="pointer-events-none absolute rounded-full transition-all duration-300 ease-out" style="background-color: var(--color-bg-subtle); height: 34px; opacity: 0;"></span>
 			{navLinks.map((link) => (
-				<a
-					href={link.href}
-					class="text-sm font-medium transition-opacity hover:opacity-70"
-					style="color: var(--color-text);"
-				>
+				<a href={link.href} class="nav-link relative z-10 rounded-full px-4 py-2 text-sm font-medium transition-colors" style="color: var(--color-text);">
 					{link.label}
 				</a>
 			))}
 		</nav>
 
-		<div class="flex items-center gap-3">
+		<div class="relative z-10 flex items-center gap-3">
 			<ThemeToggle />
-			<a
-				href="#contact"
-				class="hidden rounded-full px-5 py-2.5 text-sm font-semibold transition-transform hover:scale-105 sm:inline-block"
-				style="background-color: var(--color-primary); color: var(--color-primary-text);"
-			>
-				Book a Free Consultation
+			<a href="#contact" class="cta-shimmer hidden rounded-full px-5 py-2.5 text-sm font-semibold sm:inline-block" style="background-color: var(--color-primary); color: var(--color-primary-text);">
+				<span>Book a Free Consultation</span>
 			</a>
 
-			<!-- Hamburger, mobile only -->
-			<button
-				id="menu-toggle"
-				type="button"
-				aria-label="Open menu"
-				aria-expanded="false"
-				class="inline-flex h-10 w-10 items-center justify-center rounded-full border transition-colors md:hidden"
-				style="border-color: var(--color-border); background-color: var(--color-bg-subtle);"
-			>
+			<button id="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" class="inline-flex h-10 w-10 items-center justify-center rounded-full border transition-colors md:hidden" style="border-color: var(--color-border); background-color: var(--color-bg-subtle);">
 				<svg id="icon-burger" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="h-5 w-5" style="color: var(--color-text);">
 					<path d="M4 6h16M4 12h16M4 18h16"></path>
 				</svg>
@@ -79,32 +48,189 @@ const navLinks = [
 		</div>
 	</div>
 
-	<!-- Mobile menu panel -->
-	<div
-		id="mobile-menu"
-		class="hidden border-t md:hidden"
-		style="border-color: var(--color-border); background-color: var(--color-bg);"
-	>
+	<div id="mobile-menu" class="hidden border-t md:hidden" style="border-color: var(--color-border); background-color: var(--color-bg);">
 		<nav class="flex flex-col gap-1 px-6 py-4">
 			{navLinks.map((link) => (
-				<a
-					href={link.href}
-					class="mobile-nav-link rounded-lg px-3 py-3 text-base font-medium transition-colors"
-					style="color: var(--color-text);"
-				>
+				<a href={link.href} class="mobile-nav-link rounded-lg px-3 py-3 text-base font-medium" style="color: var(--color-text);">
 					{link.label}
 				</a>
 			))}
-			<a
-				href="#contact"
-				class="mobile-nav-link mt-2 rounded-full px-5 py-3 text-center text-sm font-semibold"
-				style="background-color: var(--color-primary); color: var(--color-primary-text);"
-			>
-				Book a Free Consultation
+			<a href="#contact" class="cta-shimmer mobile-nav-link mt-2 rounded-full px-5 py-3 text-center text-sm font-semibold" style="background-color: var(--color-primary); color: var(--color-primary-text);">
+				<span>Book a Free Consultation</span>
 			</a>
 		</nav>
 	</div>
 </header>
+
+<style>
+	#site-header {
+		background-color: color-mix(in srgb, var(--color-bg) 70%, transparent);
+		backdrop-filter: blur(14px);
+		-webkit-backdrop-filter: blur(14px);
+	}
+	#site-header.is-scrolled {
+		background-color: color-mix(in srgb, var(--color-bg) 92%, transparent);
+	}
+	#header-inner {
+		padding-top: 1.1rem;
+		padding-bottom: 1.1rem;
+	}
+	#site-header.is-scrolled #header-inner {
+		padding-top: 0.55rem;
+		padding-bottom: 0.55rem;
+	}
+	#site-header.is-scrolled .header-logo {
+		height: 1.85rem;
+	}
+
+	/* Logo settle bounce. The height change above is a plain linear transition,
+	   which makes the shrink read as mechanical. This one-shot scale is layered
+	   on the same crossing so the logo dips just under its compressed size and
+	   springs back up to rest, which is what sells it as a settle. The class is
+	   added by the scroll listener only on the transition INTO the compressed
+	   state and removed afterwards, so it cannot re-fire on every scroll tick.
+	   Same overshoot curve as the theme toggle, for consistency. */
+	#site-header .header-logo.logo-settle {
+		animation: logo-settle-bounce 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+	}
+	@keyframes logo-settle-bounce {
+		0% { transform: scale(1); }
+		40% { transform: scale(0.92); }
+		75% { transform: scale(1.05); }
+		100% { transform: scale(1); }
+	}
+
+	/* Cursor-follow glow.
+	   Inherently mouse-only: it tracks pointer position via the mousemove
+	   handler below and touch devices have no cursor to track. The trigger is
+	   scoped to genuine hover support, and on touch the layer is removed
+	   outright — a tap can synthesise a mouseover with no mouselever to follow
+	   it, which would otherwise leave the glow stuck on. */
+	.header-glow {
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+		opacity: 0;
+		transition: opacity 0.4s ease;
+		background: radial-gradient(
+			320px circle at var(--mx, 50%) var(--my, 0%),
+			color-mix(in srgb, var(--color-primary) 16%, transparent),
+			transparent 70%
+		);
+	}
+	@media (hover: hover) and (pointer: fine) {
+		#site-header:hover .header-glow {
+			opacity: 1;
+		}
+	}
+	@media (hover: none) {
+		.header-glow { display: none; }
+	}
+
+	/* Nav link dimming. The sliding underline below is driven by
+	   mouseenter/mouseleave, so it is hidden on touch: a tap fires
+	   mouseenter but never mouseleave and the underline would stick on. */
+	@media (hover: hover) and (pointer: fine) {
+		.nav-link:hover {
+			opacity: 0.85;
+		}
+	}
+
+	/* CTA shimmer sweep */
+	.cta-shimmer {
+		position: relative;
+		overflow: hidden;
+		transition: transform 0.25s ease, box-shadow 0.25s ease;
+	}
+	.cta-shimmer::after {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: -60%;
+		width: 40%;
+		height: 100%;
+		background: linear-gradient(120deg, transparent, rgba(255,255,255,0.45), transparent);
+		transform: skewX(-20deg);
+		transition: left 0.6s ease;
+	}
+	/* Gated on real hover support so a tap cannot leave the button stuck in
+	   its hover state. */
+	@media (hover: hover) and (pointer: fine) {
+		.cta-shimmer:hover {
+			transform: scale(1.05);
+			box-shadow: 0 8px 24px -6px color-mix(in srgb, var(--color-primary) 55%, transparent);
+		}
+		.cta-shimmer:hover::after {
+			left: 130%;
+		}
+	}
+
+	/* ---- Touch equivalents ---------------------------------------------
+	   Touch has no hover state, so each hover-only effect above needs
+	   something that still responds to a finger. */
+	@media (hover: none) {
+		/* The shimmer is decorative and needs no interaction to read, so on
+		   touch it sweeps itself once every 5s rather than waiting on a hover
+		   that will never arrive. Mouse users keep the hover-only version. */
+		.cta-shimmer::after {
+			transition: none;
+			animation: cta-shimmer-sweep 5s ease-in-out infinite;
+		}
+		/* :active fires on tap-down and clears on tap-up, so it gives
+		   immediate press feedback and cannot stick the way :hover can. */
+		.cta-shimmer:active { transform: scale(0.96); }
+		.nav-link:active { opacity: 0.6; }
+		#nav-underline { display: none; }
+	}
+	/* Parked off the left edge, one sweep, then loop. Both 0% and 100% sit
+	   outside the button, so the wrap back round is invisible. */
+	@keyframes cta-shimmer-sweep {
+		0%, 76% { left: -60%; }
+		100% { left: 130%; }
+	}
+
+	/* ---- Mobile menu open/close -----------------------------------------
+	   `hidden` (display: none) cannot be transitioned, so the panel is
+	   collapsed with max-height/opacity/translateY and the JS toggles
+	   `hidden` either side of the transition. */
+	#mobile-menu {
+		max-height: 0;
+		opacity: 0;
+		transform: translateY(-8px);
+		overflow: hidden;
+		transition:
+			max-height 0.35s ease,
+			opacity 0.3s ease,
+			transform 0.35s ease;
+	}
+	#mobile-menu.is-open {
+		max-height: 80vh;
+		opacity: 1;
+		transform: translateY(0);
+		/* Capped to the viewport so a short landscape screen scrolls the
+		   panel instead of hiding the last link off-screen. */
+		overflow-y: auto;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		/* Nothing auto-plays, and the menu appears/disappears at once. */
+		.cta-shimmer::after {
+			animation: none;
+		}
+		#mobile-menu {
+			transition: none;
+			transform: none;
+		}
+		#mobile-menu.is-open {
+			max-height: 80vh;
+			overflow-y: auto;
+		}
+		/* The header still compresses, it just does not bounce. */
+		#site-header .header-logo.logo-settle {
+			animation: none;
+		}
+	}
+</style>
 
 <script is:inline>
 	(function () {
@@ -118,35 +244,224 @@ const navLinks = [
 			}
 		}
 		syncLogos();
-		const observer = new MutationObserver(syncLogos);
-		observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+		new MutationObserver(syncLogos).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 	})();
 
+	// Cursor-follow glow
+	(function () {
+		const header = document.getElementById('site-header');
+		header.addEventListener('mousemove', (e) => {
+			const rect = header.getBoundingClientRect();
+			const x = ((e.clientX - rect.left) / rect.width) * 100;
+			const y = ((e.clientY - rect.top) / rect.height) * 100;
+			header.style.setProperty('--mx', `${x}%`);
+			header.style.setProperty('--my', `${y}%`);
+		});
+	})();
+
+	// Scroll compression
+	(function () {
+		const header = document.getElementById('site-header');
+		const logos = header.querySelectorAll('.header-logo');
+		const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+		const SETTLE_MS = 450; // matches logo-settle-bounce in the stylesheet
+		let settleTimer = null;
+
+		// A one-shot class animation will not replay while the class is simply
+		// left in place, so it is taken off after the run and forced back through
+		// a reflow on the next crossing.
+		function settle() {
+			clearTimeout(settleTimer);
+			logos.forEach((logo) => {
+				logo.classList.remove('logo-settle');
+				void logo.offsetWidth;
+				logo.classList.add('logo-settle');
+			});
+			settleTimer = setTimeout(() => {
+				logos.forEach((logo) => logo.classList.remove('logo-settle'));
+			}, SETTLE_MS);
+		}
+
+		function onScroll() {
+			const scrolled = window.scrollY > 24;
+			// Only act on the crossing. A bare toggle runs on every scroll tick,
+			// which would restart the bounce continuously and never let it land.
+			if (scrolled === header.classList.contains('is-scrolled')) return;
+			header.classList.toggle('is-scrolled', scrolled);
+			// Scrolling back up just uses the existing plain transition to grow
+			// the logo again — a second bounce in reverse reads as jitter.
+			if (scrolled && !reduced.matches) settle();
+		}
+		onScroll();
+		window.addEventListener('scroll', onScroll, { passive: true });
+	})();
+
+	// Sliding underline that follows hovered nav link
+	(function () {
+		const nav = document.getElementById('desktop-nav');
+		const underline = document.getElementById('nav-underline');
+		if (!nav || !underline) return;
+		// Mouse-driven only. On touch a tap fires mouseenter with no
+		// mouseleave to follow, so the underline would latch on; bail out
+		// instead of binding (the stylesheet hides it there too).
+		if (!window.matchMedia('(hover: hover)').matches) return;
+		const links = nav.querySelectorAll('.nav-link');
+
+		function moveTo(el) {
+			const navRect = nav.getBoundingClientRect();
+			const r = el.getBoundingClientRect();
+			underline.style.width = `${r.width}px`;
+			underline.style.left = `${r.left - navRect.left}px`;
+			underline.style.opacity = '1';
+		}
+
+		links.forEach((link) => {
+			link.addEventListener('mouseenter', () => moveTo(link));
+		});
+		nav.addEventListener('mouseleave', () => {
+			underline.style.opacity = '0';
+		});
+	})();
+
+	// Magnetic nav links
+	/* (function () {
+		document.querySelectorAll('.nav-link').forEach((link) => {
+			link.addEventListener('mousemove', (e) => {
+				const r = link.getBoundingClientRect();
+				const x = (e.clientX - r.left - r.width / 2) * 0.25;
+				const y = (e.clientY - r.top - r.height / 2) * 0.25;
+				link.style.transform = `translate(${x}px, ${y}px)`;
+			});
+			link.addEventListener('mouseleave', () => {
+				link.style.transform = 'translate(0, 0)';
+				link.style.transition = 'transform 0.3s ease';
+				setTimeout(() => { link.style.transition = ''; }, 300);
+			});
+		});
+	})();  */
+
+	// Mobile menu
 	(function () {
 		const btn = document.getElementById('menu-toggle');
 		const menu = document.getElementById('mobile-menu');
 		const burger = document.getElementById('icon-burger');
 		const close = document.getElementById('icon-close');
+		if (!btn || !menu) return;
 
-		function setOpen(open) {
-			menu.classList.toggle('hidden', !open);
+		// Must match the max-height transition in the component styles.
+		const DURATION = 350;
+		const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+		let closeTimer = null;
+		let afterClose = null;
+
+		// onClosed runs once the collapse has visually finished, so callers can
+		// chain a follow-up action onto the end of the animation instead of
+		// running it in parallel with it.
+		function setOpen(open, onClosed) {
+			clearTimeout(closeTimer);
+
+			if (open) {
+				// Re-opening cancels the pending follow-up: the tap that reversed
+				// the intent supersedes whatever it was going to trigger.
+				afterClose = null;
+				// Unhide first, then add .is-open a frame later so the browser
+				// has the collapsed state to animate away from — adding both at
+				// once would skip the transition entirely.
+				menu.classList.remove('hidden');
+				requestAnimationFrame(() => requestAnimationFrame(() => {
+					menu.classList.add('is-open');
+				}));
+			} else {
+				menu.classList.remove('is-open');
+				afterClose = onClosed || null;
+				// Wait for the collapse to finish before display:none, or the
+				// panel would disappear mid-animation.
+				closeTimer = setTimeout(() => {
+					if (!menu.classList.contains('is-open')) menu.classList.add('hidden');
+					const cb = afterClose;
+					afterClose = null;
+					if (cb) cb();
+				}, reduced.matches ? 0 : DURATION + 40);
+			}
+
 			burger.classList.toggle('hidden', open);
 			close.classList.toggle('hidden', !open);
 			btn.setAttribute('aria-expanded', String(open));
 			document.body.style.overflow = open ? 'hidden' : '';
 		}
 
-		btn.addEventListener('click', () => {
-			const isOpen = !menu.classList.contains('hidden');
-			setOpen(!isOpen);
-		});
+		// aria-expanded, not the `hidden` class, decides the next state: during
+		// the close animation `hidden` is still absent, so reading it would
+		// make a second tap close again instead of re-opening.
+		btn.addEventListener('click', () => setOpen(btn.getAttribute('aria-expanded') !== 'true'));
+		// One-shot acknowledgement that a jump landed. Deliberately restrained:
+		// a brief primary-tinted text-shadow on the heading, no loop, gone in
+		// under a second.
+		function cueArrival(section) {
+			if (reduced.matches) return;
+			const heading = section.querySelector('h2, h3');
+			if (!heading) return;
 
-		menu.querySelectorAll('.mobile-nav-link').forEach((link) => {
-			link.addEventListener('click', () => setOpen(false));
-		});
+			let settle = null;
+			let done = false;
+			let moved = false;
 
-		window.matchMedia('(min-width: 768px)').addEventListener('change', (e) => {
-			if (e.matches) setOpen(false);
-		});
+			const fire = () => {
+				if (done) return;
+				done = true;
+				window.removeEventListener('scrollend', fire);
+				window.removeEventListener('scroll', onScroll);
+				clearTimeout(settle);
+				// The animation is one-shot, so the class has to come off and go
+				// back on (past a reflow) to replay on a re-tap of the same link.
+				heading.classList.remove('section-land');
+				void heading.offsetWidth;
+				heading.classList.add('section-land');
+				heading.addEventListener('animationend', () => heading.classList.remove('section-land'), { once: true });
+			};
+
+			// scrollend is the precise signal, but it never fires when the target
+			// is already in place, and is not universal. So arrival is also
+			// detected as "no scroll event for a beat", which re-arms on every
+			// tick of an in-flight smooth scroll and can only settle once the
+			// page has genuinely stopped.
+			const onScroll = () => {
+				moved = true;
+				clearTimeout(settle);
+				settle = setTimeout(fire, 150);
+			};
+			window.addEventListener('scrollend', fire);
+			window.addEventListener('scroll', onScroll, { passive: true });
+			// Nothing scrolled at all: already in place, so the arrival is now.
+			setTimeout(() => { if (!moved) fire(); }, 260);
+		}
+
+		function goToSection(link) {
+			const href = link.getAttribute('href') || '';
+			if (!href.startsWith('#')) return;
+			const target = document.querySelector(href);
+			if (!target) return;
+
+			// Keep the URL in step with the desktop nav, which lands on the same
+			// hash natively. replaceState rather than assigning location.hash, so
+			// the jump stays under our control instead of becoming a navigation.
+			if (location.hash !== href) history.replaceState(null, '', href);
+
+			// scrollIntoView honours the global scroll-margin-top, so the section
+			// settles below the sticky header. 'auto' defers to the stylesheet,
+			// which only sets smooth when motion is allowed, so reduced motion
+			// jumps instead.
+			const instant = reduced.matches;
+			target.scrollIntoView({ behavior: instant ? 'auto' : 'smooth', block: 'start' });
+			if (!instant) cueArrival(target);
+		}
+
+		// Suppress the anchor default so the browser cannot start its own jump
+		// alongside the close, then scroll once the panel has fully retracted.
+		menu.querySelectorAll('.mobile-nav-link').forEach((link) => link.addEventListener('click', (e) => {
+			e.preventDefault();
+			setOpen(false, () => goToSection(link));
+		}));
+		window.matchMedia('(min-width: 768px)').addEventListener('change', (e) => { if (e.matches) setOpen(false); });
 	})();
 </script>

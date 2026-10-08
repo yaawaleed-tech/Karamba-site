@@ -22,6 +22,126 @@ body {
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
+/* Branded text selection, instead of the browser's default garish blue */
+::selection {
+	background-color: var(--color-accent);
+	color: var(--color-accent-text);
+}
+
+/* Faint dot-grid texture.
+   This lives on a dedicated fixed layer rather than on <body>'s own
+   background-image because the fade is done with a mask, and a mask on
+   <body> would apply to everything <body> paints — all the text, sections
+   and images — not just the background pattern. Isolating the texture in
+   its own element keeps the mask scoped to the dots alone.
+
+   `fixed` + `inset: 0` reproduces what the canvas background did before:
+   full-viewport coverage that does not scroll with the content, so there
+   is still nothing to repaint on scroll. `pointer-events: none` keeps it
+   completely inert. z-index: -1 puts it behind all content but still above
+   the background colour, which propagates to the canvas (html sets no
+   background of its own). */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  /* Unchanged pattern: 1px dots on a 24px tile, tinted from --color-border,
+     which is already low-contrast against --color-bg in both themes, so one
+     rule covers light and dark. */
+  background-image: radial-gradient(circle, color-mix(in srgb, var(--color-border) 55%, transparent) 1px, transparent 1px);
+  background-size: 24px 24px;
+  /* Fade the texture in from left to right: fully masked (invisible) at the
+     left edge, approaching its original strength at the right edge. The
+     pattern, colour and tile size are untouched — only visibility across
+     the horizontal axis changes. The ramp peaks at 0.9, just under the
+     texture's original uniform strength, so the dots never read bolder
+     than they did before. */
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.15) 35%, rgba(0, 0, 0, 0.4) 65%, rgb(0, 0, 0) 85%, rgb(0, 0, 0) 100%);
+  mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.15) 35%, rgba(0, 0, 0, 0.775) 65%, rgba(0, 0, 0, 0.983) 85%, rgb(0, 0, 0) 100%);
+}
+
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
+}
+
+/* Anchor targets stop below the sticky header (see #site-header in
+   Header.astro — ~76px rendered, 80px leaves a little breathing room). */
+[id] {
+  scroll-margin-top: 80px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Scroll-triggered reveal. Add .scroll-reveal to a block; the observer in
+   Layout.astro adds .is-visible the first time it enters the viewport, then
+   stops observing it. Deliberately an animation rather than a transition,
+   so component hover transitions (transition-transform, hover:scale-*) keep
+   working — same pattern as .reveal in Hero.astro.
+   Stagger a grid or list with .scroll-reveal-delay-1 … -4. */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+}
+/* The visible end state is declared here, not left to the animation's fill.
+   `both` holds it after the animation finishes *and* covers the stagger delay
+   before it starts; stating it explicitly as well means the content still
+   renders if the animation is dropped (reduced motion, a throttled tab, an
+   unknown UA) instead of falling back to the opacity:0 above. */
+.scroll-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  animation: scroll-reveal-in 0.7s ease both;
+  animation-delay: var(--scroll-reveal-delay, 0s);
+}
+@keyframes scroll-reveal-in {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.scroll-reveal-delay-1 { --scroll-reveal-delay: 0.1s; }
+.scroll-reveal-delay-2 { --scroll-reveal-delay: 0.2s; }
+.scroll-reveal-delay-3 { --scroll-reveal-delay: 0.3s; }
+.scroll-reveal-delay-4 { --scroll-reveal-delay: 0.4s; }
+
+/* Opt-in target for the 3D cursor tilt (Services cards, Product mockup).
+   Global rather than in a component because a scoped <style> only ever matches
+   its own component's markup, so the rule would not reach the other one.
+   The behaviour lives in the shared script at the end of Layout.astro; only the
+   static setup belongs in CSS.
+
+   transform-style is deliberately left at the default `flat`. The perspective()
+   inside the JS transform is what produces the depth, and these cards have no
+   3D children that need to share the space — preserve-3d would buy nothing and
+   risks the Product card's overflow:hidden + rounded-2xl clipping. */
+.tilt-card {
+  will-change: transform;
+}
+
+/* Landing cue: applied by the mobile menu to a section heading once the jump
+   has finished scrolling. Global rather than in Header.astro because Astro
+   scopes component styles to their own markup, and the headings live in other
+   components. One-shot, no iteration count beyond 1, and it fades back to
+   nothing well inside a second. */
+@keyframes section-land {
+  0% { text-shadow: 0 0 0 transparent; }
+  35% { text-shadow: 0 0 20px color-mix(in srgb, var(--color-primary) 40%, transparent); }
+  100% { text-shadow: 0 0 0 transparent; }
+}
+.section-land {
+  animation: section-land 0.9s ease-out 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-reveal,
+  .scroll-reveal.is-visible {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+  .section-land { animation: none; }
 }

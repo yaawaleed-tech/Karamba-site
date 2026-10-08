@@ -1,64 +1,364 @@
 ---
 import { Image } from 'astro:assets';
 import logoMark from '../assets/brand/logo-mark.png';
+import FacetField from './FacetField.astro';
 ---
 
-<section class="relative overflow-hidden">
-	<!-- Decorative faceted mark, large and faint, bleeding off the right edge -->
-	<Image
-		src={logoMark}
-		alt=""
-		aria-hidden="true"
-		class="pointer-events-none absolute -right-24 -top-24 h-[560px] w-[560px] opacity-[0.08] sm:opacity-[0.12]"
-		widths={[560, 1120]}
-		sizes="560px"
-	/>
+<section id="hero" class="relative overflow-hidden">
+	<!-- Animated gradient mesh, behind everything -->
+	<div class="mesh-blob mesh-blob-a"></div>
+	<div class="mesh-blob mesh-blob-b"></div>
+
+	<!-- Ambient corner facets. Desktop only: from lg up the large brand mark in
+	     the right column is the dominant visual, and these would muddy it.
+	     Below lg they render exactly as before. -->
+	<div id="parallax-layer-1" class="parallax-layer lg:hidden">
+		<FacetField id="hero-1" class="absolute -right-20 -top-16 h-[420px] w-[420px]" opacity={0.14} />
+	</div>
+	<div id="parallax-layer-2" class="parallax-layer lg:hidden">
+		<FacetField id="hero-2" class="absolute -bottom-24 -left-16 h-[300px] w-[300px]" opacity={0.09} flip />
+	</div>
 
 	<div class="relative mx-auto max-w-6xl px-6 py-20 sm:py-28">
-		<span
-			class="inline-block rounded-full px-4 py-1.5 text-xs font-semibold tracking-wide"
-			style="background-color: var(--color-bg-subtle); color: var(--color-primary); border: 1px solid var(--color-border);"
-		>
-			Web &amp; Software Development
-		</span>
+		<!-- Desktop becomes two columns; below lg this is a plain single-column grid. -->
+		<div class="grid grid-cols-1 lg:grid-cols-2 lg:items-center lg:gap-10">
+			<!-- Left column: the existing copy -->
+			<div>
+			<span class="reveal reveal-1 inline-block rounded-full px-4 py-1.5 text-xs font-semibold tracking-wide" style="background-color: var(--color-bg-subtle); color: var(--color-primary); border: 1px solid var(--color-border);">
+				Web &amp; Software Development
+			</span>
 
-		<h1
-			class="mt-6 max-w-2xl font-heading text-4xl font-bold leading-tight sm:text-5xl sm:leading-tight"
-			style="color: var(--color-text);"
-		>
-			Automate the work.
-			<span style="color: var(--color-primary);">Simplify the business.</span>
-		</h1>
+			<h1 class="reveal reveal-2 mt-6 max-w-2xl font-heading text-4xl font-bold leading-tight sm:text-5xl sm:leading-tight" style="color: var(--color-text);">
+				Automate the work.
+				<span style="color: var(--color-primary);">Simplify the business.</span>
+			</h1>
 
-		<p class="mt-5 max-w-xl text-lg" style="color: var(--color-text-muted);">
-			Karamba Technologies builds web and mobile software that replaces paper
-			and spreadsheets — for farms, schools, NGOs and growing businesses.
-		</p>
+			<p class="reveal reveal-3 mt-5 max-w-xl text-lg" style="color: var(--color-text-muted);">
+				Karamba Technologies builds web and mobile software that replaces paper
+				and spreadsheets for farms, schools, NGOs and growing businesses.
+			</p>
 
-		<div class="mt-9 flex flex-wrap items-center gap-4">
-            <a
-				href="#contact"
-				class="rounded-full px-7 py-3.5 text-sm font-semibold transition-transform hover:scale-105"
-				style="background-color: var(--color-primary); color: var(--color-primary-text);"
-			>
-				Book a Free Consultation
-			</a>
-			<a
-				href="https://wa.me/2347081258889"
-				target="_blank"
-				rel="noopener noreferrer"
-				class="inline-flex items-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold transition-colors"
-				style="border: 1px solid var(--color-border); color: var(--color-text);"
-			>
-				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4 fill-current">
-					<path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.48 1.32 4.99L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.86 9.86 0 0 0 12.04 2zm0 1.67c2.2 0 4.27.86 5.83 2.42a8.2 8.2 0 0 1 2.42 5.82c0 4.54-3.7 8.24-8.25 8.24a8.2 8.2 0 0 1-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.18 8.18 0 0 1-1.26-4.38c0-4.55 3.7-8.24 8.25-8.24zm-4.55 4.7c-.16 0-.42.06-.64.31-.22.25-.85.83-.85 2.02s.87 2.35.99 2.51c.12.16 1.7 2.6 4.2 3.63.59.24 1.05.39 1.41.5.59.19 1.13.16 1.55.1.47-.07 1.46-.6 1.67-1.18.2-.58.2-1.07.14-1.18-.06-.1-.22-.16-.47-.28-.25-.13-1.46-.72-1.69-.8-.23-.09-.39-.13-.56.13-.16.25-.64.8-.78.97-.15.16-.29.18-.54.06-.25-.13-1.05-.39-2-1.23-.74-.66-1.24-1.47-1.38-1.72-.15-.25-.02-.38.11-.51.11-.11.25-.29.37-.44.13-.15.17-.25.25-.41.08-.16.04-.31-.02-.44-.06-.13-.56-1.36-.77-1.86-.2-.48-.4-.42-.56-.42h-.48z"/>
-				</svg>
-				Message us on WhatsApp
-			</a>
+			<div class="reveal reveal-4 mt-9 flex flex-wrap items-center gap-4">
+				<a href="#contact" class="cta-shimmer rounded-full px-7 py-3.5 text-sm font-semibold" style="background-color: var(--color-primary); color: var(--color-primary-text);">
+					<span>Book a Free Consultation</span>
+				</a>
+				<a href="https://wa.me/2347081258889" target="_blank" rel="noopener noreferrer" class="whatsapp-btn inline-flex items-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold" style="border: 1px solid var(--color-border); color: var(--color-text);">
+					<span class="whatsapp-dot"></span>
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4 fill-current">
+						<path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.48 1.32 4.99L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.86 9.86 0 0 0 12.04 2zm0 1.67c2.2 0 4.27.86 5.83 2.42a8.2 8.2 0 0 1 2.42 5.82c0 4.54-3.7 8.24-8.25 8.24a8.2 8.2 0 0 1-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.18 8.18 0 0 1-1.26-4.38c0-4.55 3.7-8.24 8.25-8.24zm-4.55 4.7c-.16 0-.42.06-.64.31-.22.25-.85.83-.85 2.02s.87 2.35.99 2.51c.12.16 1.7 2.6 4.2 3.63.59.24 1.05.39 1.41.5.59.19 1.13.16 1.55.1.47-.07 1.46-.6 1.67-1.18.2-.58.2-1.07.14-1.18-.06-.1-.22-.16-.47-.28-.25-.13-1.46-.72-1.69-.8-.23-.09-.39-.13-.56.13-.16.25-.64.8-.78.97-.15.16-.29.18-.54.06-.25-.13-1.05-.39-2-1.23-.74-.66-1.24-1.47-1.38-1.72-.15-.25-.02-.38.11-.51.11-.11.25-.29.37-.44.13-.15.17-.25.25-.41.08-.16.04-.31-.02-.44-.06-.13-.56-1.36-.77-1.86-.2-.48-.4-.42-.56-.42h-.48z"/>
+					</svg>
+					<span class="relative z-10">Message us on WhatsApp</span>
+				</a>
+			</div>
+
+			<p class="reveal reveal-5 mt-8 text-xs uppercase tracking-wide" style="color: var(--color-text-muted);">
+				We reply within 24 hours
+			</p>
+			</div>
+
+			<!-- Right column: the brand mark as a real hero visual. Desktop only;
+			     below lg this element is display:none and the grid is a single
+			     column, so the mobile layout is byte-for-byte the old one. -->
+			<div class="reveal reveal-6 pointer-events-none relative hidden lg:flex items-center justify-center">
+				<div class="hero-mark">
+					<!-- Same gradient glow used behind the Product mockup and the About photo -->
+					<div
+						class="absolute -inset-4 rounded-3xl opacity-20 blur-2xl"
+						style="background: linear-gradient(135deg, var(--color-primary), var(--color-accent));"
+					>
+					</div>
+					<Image
+						src={logoMark}
+						alt=""
+						class="hero-mark-img"
+						widths={[440, 880]}
+						sizes="(min-width: 1536px) 540px, (min-width: 1280px) 500px, 440px"
+					/>
+				</div>
+			</div>
 		</div>
-
-		<p class="mt-8 text-xs uppercase tracking-wide" style="color: var(--color-text-muted);">
-			We reply within 24 hours
-		</p>
 	</div>
+
+	<!-- Scroll cue, sits in the hero's bottom padding -->
+	<a
+		href="#services"
+		class="scroll-cue absolute bottom-6 left-1/2 -translate-x-1/2"
+		aria-label="Scroll down to What We Do"
+	>
+		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="scroll-cue-icon h-5 w-5" style="color: var(--color-text-muted);">
+			<path d="M6 9.5l6 6 6-6" />
+		</svg>
+	</a>
 </section>
+
+<style>
+	.mesh-blob {
+		position: absolute;
+		border-radius: 9999px;
+		filter: blur(70px);
+		opacity: 0.22;
+		pointer-events: none;
+	}
+	.mesh-blob-a {
+		width: 480px; height: 480px;
+		top: -120px; right: -80px;
+		background: radial-gradient(circle, var(--kt-cyan-400), transparent 70%);
+		animation: mesh-drift-a 24s ease-in-out infinite;
+	}
+	.mesh-blob-b {
+		width: 380px; height: 380px;
+		bottom: -100px; left: -60px;
+		background: radial-gradient(circle, var(--kt-green-400), transparent 70%);
+		animation: mesh-drift-b 30s ease-in-out infinite;
+	}
+	@keyframes mesh-drift-a {
+		0%, 100% { transform: translate(0, 0) scale(1); }
+		50% { transform: translate(-30px, 40px) scale(1.1); }
+	}
+	@keyframes mesh-drift-b {
+		0%, 100% { transform: translate(0, 0) scale(1); }
+		50% { transform: translate(30px, -30px) scale(1.05); }
+	}
+
+	.parallax-layer {
+		position: absolute;
+		inset: 0;
+		will-change: transform;
+	}
+
+	/* ---- Desktop hero visual: large brand mark (lg and up only) ----
+	   The container is display:none below lg (Tailwind `hidden lg:flex`),
+	   so none of this applies on mobile. Box height tracks the asset's
+	   0.959 width/height ratio so `object-contain` doesn't letterbox. */
+	.hero-mark {
+		position: relative;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 420px;
+		height: 440px;
+	}
+	@media (min-width: 1280px) {
+		.hero-mark { width: 500px; height: 520px; }
+	}
+	/* No breakpoint above 1280: max-w-6xl caps the grid column at 532px, so a
+	   larger mark would just be shrunk back by flex-shrink. */
+	.hero-mark-img {
+		position: relative;
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
+		/* Reads as a real visual, not ambient texture. */
+		opacity: 0.7;
+		/* Ambient float. Starts at 2.05s = 1.35s entrance delay + 0.7s
+		   duration, so it begins exactly as the entrance lands. The entrance
+		   scales the parent and this rotates the child, so the two transforms
+		   never compete and no fill-mode juggling is needed. 0%/100% is the
+		   identity transform, so the hand-off from entrance to float has no jump. */
+		animation: hero-mark-float 26s ease-in-out infinite 2.05s;
+	}
+	/* Same shape as FacetField's drift-a: a couple of degrees of rotation and a
+	   few px of travel, over a slow ease-in-out loop. */
+	@keyframes hero-mark-float {
+		0%, 100% { transform: translate(0, 0) rotate(0deg); }
+		50% { transform: translate(-6px, 8px) rotate(1.5deg); }
+	}
+
+	/* Reveal-on-load animation, staggered */
+	.reveal {
+		opacity: 0;
+		transform: translateY(16px);
+		animation: reveal-in 0.7s ease forwards;
+	}
+	.reveal-1 { animation-delay: 0.05s; }
+	.reveal-2 { animation-delay: 0.15s; }
+	.reveal-3 { animation-delay: 0.28s; }
+	.reveal-4 { animation-delay: 0.4s; }
+	.reveal-5 { animation-delay: 0.52s; }
+	/* The mark is the final beat of the load sequence, so it gets its own
+	   keyframes rather than the shared translateY reveal: it scales up instead.
+	   reveal-5 (the reply line) starts at 0.52s and runs 0.7s, so the copy has
+	   finished by 1.22s. The mark starts at 1.35s and lands at 2.05s.
+	   `both` (not just `forwards`) so the 0% frame also applies during the
+	   delay — otherwise the mark would sit at its resting opacity for 1.35s
+	   and then jump to invisible as the entrance began. */
+	.reveal-6 { animation: hero-mark-in 0.7s ease both 1.35s; }
+	@keyframes hero-mark-in {
+		from { opacity: 0; transform: scale(0.85); }
+		to { opacity: 1; transform: scale(1); }
+	}
+	@keyframes reveal-in {
+		to { opacity: 1; transform: translateY(0); }
+	}
+
+	/* Scroll cue */
+	.scroll-cue {
+		display: flex;
+		transition: opacity 0.3s ease;
+	}
+	@media (hover: hover) and (pointer: fine) {
+		.scroll-cue:hover {
+			opacity: 0.7;
+		}
+	}
+	@media (hover: none) {
+		.scroll-cue:active { opacity: 0.7; }
+	}
+	.scroll-cue-icon {
+		animation: scroll-cue-bounce 2s ease-in-out infinite;
+	}
+	@keyframes scroll-cue-bounce {
+		0%, 100% { transform: translateY(0); }
+		50% { transform: translateY(6px); }
+	}
+
+	/* CTA shimmer (shared look with header CTA) */
+	.cta-shimmer {
+		position: relative;
+		overflow: hidden;
+		display: inline-block;
+		transition: transform 0.25s ease, box-shadow 0.25s ease;
+	}
+	.cta-shimmer::after {
+		content: '';
+		position: absolute;
+		top: 0; left: -60%;
+		width: 40%; height: 100%;
+		background: linear-gradient(120deg, transparent, rgba(255,255,255,0.45), transparent);
+		transform: skewX(-20deg);
+		transition: left 0.6s ease;
+	}
+	/* Gated on real hover support: on touch a tap can leave the button stuck
+	   in its hover state, since there is no pointer-out to clear it. */
+	@media (hover: hover) and (pointer: fine) {
+		.cta-shimmer:hover {
+			transform: scale(1.05);
+			box-shadow: 0 10px 28px -6px color-mix(in srgb, var(--color-primary) 55%, transparent);
+		}
+		.cta-shimmer:hover::after { left: 130%; }
+	}
+	/* Touch equivalent: the shimmer is decorative, so rather than waiting on a
+	   hover that never arrives it sweeps itself once every 5s. Scoped to
+	   (hover: none) so mouse users keep the hover-only version. */
+	@media (hover: none) {
+		.cta-shimmer::after {
+			transition: none;
+			animation: cta-shimmer-sweep 5s ease-in-out infinite;
+		}
+		.cta-shimmer:active { transform: scale(0.96); }
+	}
+	/* Parked off the left edge, one sweep, then loop. Both 0% and 100% sit
+	   outside the button, so the wrap back round is invisible. */
+	@keyframes cta-shimmer-sweep {
+		0%, 76% { left: -60%; }
+		100% { left: 130%; }
+	}
+
+	/* WhatsApp button: fills green on hover, pulsing dot */
+	.whatsapp-btn {
+		position: relative;
+		overflow: hidden;
+		transition: color 0.3s ease, border-color 0.3s ease, transform 0.25s ease;
+	}
+	/* Hover is gated on real hover support, and :active gives touch the same
+	   green fill as press-and-hold feedback — :active clears on tap-up, so it
+	   cannot latch the way :hover can. */
+	@media (hover: hover) and (pointer: fine) {
+		.whatsapp-btn:hover {
+			color: #fff;
+			border-color: #25D366;
+			transform: scale(1.05);
+		}
+		.whatsapp-btn:hover::before { transform: scaleX(1); }
+	}
+	@media (hover: none) {
+		.whatsapp-btn:active {
+			color: #fff;
+			border-color: #25D366;
+			transform: scale(0.96);
+		}
+		.whatsapp-btn:active::before { transform: scaleX(1); }
+	}
+	.whatsapp-btn::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background: #25D366;
+		transform: scaleX(0);
+		transform-origin: left;
+		transition: transform 0.35s ease;
+		z-index: 0;
+	}
+	.whatsapp-btn svg, .whatsapp-btn span { position: relative; z-index: 1; }
+
+	.whatsapp-dot {
+		position: absolute;
+		top: 6px; right: 6px;
+		width: 8px; height: 8px;
+		border-radius: 50%;
+		background: #25D366;
+		z-index: 2;
+		animation: dot-pulse 2s ease-in-out infinite;
+	}
+	@keyframes dot-pulse {
+		0%, 100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.5); }
+		50% { box-shadow: 0 0 0 6px rgba(37, 211, 102, 0); }
+	}
+
+	@media (max-width: 640px) {
+		.mesh-blob-a {
+			width: 220px;
+			height: 220px;
+			opacity: 0.14;
+		}
+		.mesh-blob-b {
+			width: 180px;
+			height: 180px;
+			opacity: 0.14;
+		}
+	}
+	/* From lg up the large brand mark owns the top-right of the hero, which is
+	   exactly where mesh-blob-a sits. Pull it back so it reads as ambient depth
+	   around the mark's edge instead of tinting the mark itself. Blob-b is
+	   bottom-left behind the copy, so it needs no change. */
+	@media (min-width: 1024px) {
+		.mesh-blob-a {
+			opacity: 0.1;
+			top: -160px;
+			right: -140px;
+		}
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.mesh-blob, .reveal, .whatsapp-dot, .scroll-cue-icon { animation: none; opacity: 1; transform: none; }
+		/* Separate rule on purpose: the shared one sets `opacity: 1`, which
+		   would override the mark's intended 0.7 and blow it out to full. */
+		.hero-mark-img { animation: none; }
+		/* The touch-only auto-loop is the one piece of motion here that plays
+		   without the user asking for it, so it is the one that gets cut. */
+		.cta-shimmer::after { animation: none; }
+	}
+</style>
+
+<script is:inline>
+	// Subtle parallax: facet layers drift opposite directions based on cursor + scroll
+	(function () {
+		const hero = document.getElementById('hero');
+		const layer1 = document.getElementById('parallax-layer-1');
+		const layer2 = document.getElementById('parallax-layer-2');
+		if (!hero || !layer1 || !layer2) return;
+
+		hero.addEventListener('mousemove', (e) => {
+			const rect = hero.getBoundingClientRect();
+			const x = (e.clientX - rect.left - rect.width / 2) / rect.width;
+			const y = (e.clientY - rect.top - rect.height / 2) / rect.height;
+			layer1.style.transform = `translate(${x * 16}px, ${y * 16}px)`;
+			layer2.style.transform = `translate(${x * -10}px, ${y * -10}px)`;
+		});
+
+		window.addEventListener('scroll', () => {
+			const offset = window.scrollY * 0.08;
+			layer1.style.marginTop = `${offset}px`;
+			layer2.style.marginTop = `${-offset * 0.6}px`;
+		}, { passive: true });
+	})();
+</script>

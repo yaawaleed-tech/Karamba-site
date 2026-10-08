@@ -1,4 +1,6 @@
 ---
+import { Image } from 'astro:assets';
+import logoMark from '../assets/brand/logo-mark.png';
 import '../styles/global.css';
 
 interface Props {
@@ -59,6 +61,278 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 		<meta name="generator" content={Astro.generator} />
 	</head>
 	<body>
+		<!-- Branded page-load curtain. Purely decorative: position:fixed and
+		     out of flow, so it adds no layout of its own and the real content
+		     behind it renders and paints normally the entire time. It stays
+		     display:none until the inline gate below adds .is-playing, so a
+		     returning visitor never sees even a flash of it. aria-hidden and
+		     pointer-events:none — it is never interactive, not even mid-fade. -->
+		<div id="intro-curtain" aria-hidden="true">
+			<Image
+				src={logoMark}
+				alt=""
+				width={104}
+				height={108}
+				densities={[1, 2]}
+				loading="eager"
+				fetchpriority="high"
+				class="intro-curtain-mark"
+			/>
+		</div>
+
+		<!-- Decides whether the curtain plays, and does it synchronously during
+		     parse — before the rest of the body and before first paint — so the
+		     curtain is on screen in the same frame as the page, never after it.
+		     Independent of the no-flash theme script in <head>, which is
+		     untouched: that one sets data-theme, this one only touches the
+		     curtain. -->
+		<script is:inline>
+			(function () {
+				const curtain = document.getElementById('intro-curtain');
+				if (!curtain) return;
+
+				// Reduced motion: no overlay, no animation, no delay at all.
+				if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+				const KEY = 'kt-intro-seen';
+				let seen = null;
+				// Storage can throw in locked-down privacy modes; treat that as
+				// "not seen" rather than letting it break the page.
+				try {
+					seen = sessionStorage.getItem(KEY);
+				} catch (e) {}
+
+				// Already played this session: leave it display:none, skip instantly.
+				if (seen === 'true') return;
+
+				// Flag it as it *starts*, not when it finishes, so reloading
+				// mid-animation does not replay the intro.
+				try {
+					sessionStorage.setItem(KEY, 'true');
+				} catch (e) {}
+
+				// The mark's own animationend bubbles up here too, so match the
+				// name before treating this as the end of the fade-out.
+				curtain.addEventListener('animationend', function onEnd(e) {
+					if (e.animationName !== 'intro-curtain-out') return;
+					curtain.removeEventListener('animationend', onEnd);
+					curtain.remove();
+				});
+
+				// Backstop: an opaque full-viewport overlay must never be left up
+				// if animationend is missed (backgrounded tab, throttling).
+				setTimeout(function () {
+					if (curtain.isConnected) curtain.remove();
+				}, 1400);
+
+				curtain.classList.add('is-playing');
+			})();
+		</script>
+
 		<slot />
+
+		<!-- Without JS there is no observer, so make sure nothing stays hidden -->
+		<noscript>
+			<style>.scroll-reveal { opacity: 1; }</style>
+		</noscript>
+
+		<!-- Scroll-triggered reveals — see .scroll-reveal in global.css. Runs
+		     once per page and fires each element a single time. -->
+		<script is:inline>
+			(function () {
+				const targets = document.querySelectorAll('.scroll-reveal');
+				if (!targets.length) return;
+
+				// Reduced-motion visitors get the CSS fallback (fully visible, no
+				// movement) — no observers needed.
+				if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+					targets.forEach((el) => el.classList.add('is-visible'));
+					return;
+				}
+
+				const observer = new IntersectionObserver((entries) => {
+					entries.forEach((entry) => {
+						if (!entry.isIntersecting) return;
+						entry.target.classList.add('is-visible');
+						observer.unobserve(entry.target);
+					});
+				}, { rootMargin: '0px 0px 60px 0px', threshold: 0.05 });
+
+				targets.forEach((el) => observer.observe(el));
+			})();
+		</script>
+
+		<!-- 3D cursor tilt for .tilt-card (Services cards, Product mockup).
+		     Page-wide and after <slot /> so one copy serves every component and
+		     every card already exists when the query runs. Being a bundled
+		     <script>, Astro emits it as a deferred module, so it executes after
+		     parsing even ahead of its position in the body. -->
+		<script>
+			const MAX_TILT = 8;      // degrees at the card's edge
+			const HOVER_SCALE = 1.02;
+			const PERSPECTIVE = 800; // px
+			// Short, but eased rather than linear: pointer moves arrive in bursts
+			// and linear reads mechanical. Long enough to take the jitter out,
+			// short enough to still feel attached to the cursor.
+			const FOLLOW = 'transform 0.05s ease-out';
+			const RETURN = 'transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)';
+			const FLAT = `perspective(${PERSPECTIVE}px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+
+			const fine = window.matchMedia('(hover: hover) and (pointer: fine)');
+			const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+			const cards = Array.from(document.querySelectorAll('.tilt-card'));
+
+			// .scroll-reveal animates transform with fill "both", so once it has
+			// finished the animation still owns the property — and animation
+			// declarations outrank normal inline styles in the cascade. Left alone
+			// the tilt below is computed and then silently discarded, which is
+			// exactly the "nothing happens on hover" symptom. The end state is
+			// already declared on .scroll-reveal.is-visible, so dropping the
+			// animation is safe and hands transform back to the inline style.
+			const released = new WeakSet();
+			function releaseReveal(card) {
+				if (released.has(card)) return;
+				released.add(card);
+				card.style.animation = 'none';
+			}
+
+			function attach(card) {
+				const onEnter = () => releaseReveal(card);
+				const onMove = (e) => {
+					releaseReveal(card);
+					const r = card.getBoundingClientRect();
+					const x = (e.clientX - r.left) / r.width; // 0 at the left edge, 1 at the right
+					const y = (e.clientY - r.top) / r.height; // 0 at the top edge, 1 at the bottom
+					card.style.transition = FOLLOW;
+					card.style.transform =
+						`perspective(${PERSPECTIVE}px) ` +
+						`rotateX(${((0.5 - y) * MAX_TILT * 2).toFixed(2)}deg) ` +
+						`rotateY(${((x - 0.5) * MAX_TILT * 2).toFixed(2)}deg) ` +
+						`scale3d(${HOVER_SCALE}, ${HOVER_SCALE}, ${HOVER_SCALE})`;
+				};
+				const onLeave = () => {
+					card.style.transition = RETURN;
+					card.style.transform = FLAT;
+				};
+				const onRevealEnd = () => releaseReveal(card);
+
+				card.addEventListener('mouseenter', onEnter);
+				card.addEventListener('mousemove', onMove);
+				card.addEventListener('mouseleave', onLeave);
+				card.addEventListener('animationend', onRevealEnd);
+
+				return () => {
+					card.removeEventListener('mouseenter', onEnter);
+					card.removeEventListener('mousemove', onMove);
+					card.removeEventListener('mouseleave', onLeave);
+					card.removeEventListener('animationend', onRevealEnd);
+					card.style.transition = '';
+					card.style.transform = '';
+				};
+			}
+
+			// Attach only where hovering is genuinely real, and re-check if that
+			// changes mid-session (a mouse plugged in, reduced motion switched on).
+			let detachers = [];
+			function sync() {
+				const wanted = fine.matches && !reduce.matches;
+				if (wanted && !detachers.length) {
+					detachers = cards.map(attach);
+				} else if (!wanted && detachers.length) {
+					detachers.forEach((off) => off());
+					detachers = [];
+				}
+			}
+			fine.addEventListener('change', sync);
+			reduce.addEventListener('change', sync);
+			sync();
+		</script>
+		<style>
+			/* Page-load curtain — markup and gate are above. Phases total 0.95s:
+			   mark in 0.35s, hold 0.25s, overlay out 0.35s. */
+
+			/* display:none by default, so it costs nothing on repeat loads and
+			   cannot flash before the gate has decided. Fixed + inset:0 keeps it
+			   out of flow, so it contributes no layout and no CLS. */
+			#intro-curtain {
+				position: fixed;
+				inset: 0;
+				z-index: 9999;
+				display: none;
+				place-items: center;
+				/* Resolves per theme, so the overlay dissolves into the exact
+				   background it reveals — no colour flash in either theme. */
+				background-color: var(--color-bg);
+				/* Never intercepts, not even during the fade-out. */
+				pointer-events: none;
+			}
+
+			#intro-curtain.is-playing {
+				display: grid;
+				/* 0.35s in + 0.25s hold, so the fade-out starts at 0.6s. */
+				animation: intro-curtain-out 0.35s ease 0.6s forwards;
+			}
+
+			/* The mark is dark navy artwork, which is near-invisible on --kt-night
+			   (measured ~1.36:1). This soft paper bloom is the fix, and it is
+			   self-adapting: paper-on-paper in light mode, so it disappears
+			   entirely there, and a light lift behind the mark in dark mode. */
+			#intro-curtain::before {
+				content: '';
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				width: 320px;
+				height: 320px;
+				margin: -160px 0 0 -160px;
+				border-radius: 50%;
+				background: radial-gradient(
+					circle,
+					var(--kt-paper) 0%,
+					color-mix(in srgb, var(--kt-paper) 62%, transparent) 42%,
+					transparent 72%
+				);
+			}
+
+			.intro-curtain-mark {
+				position: relative;
+				width: 104px;
+				height: auto;
+				opacity: 0;
+				/* Same overshoot curve as theme-spin-in in ThemeToggle.astro. */
+				animation: intro-mark-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+			}
+
+			@keyframes intro-mark-in {
+				from {
+					opacity: 0;
+					transform: scale(0.85);
+				}
+				to {
+					opacity: 1;
+					transform: scale(1);
+				}
+			}
+
+			/* Fading the parent's opacity carries the mark with it, so the whole
+			   overlay dissolves as one piece. */
+			@keyframes intro-curtain-out {
+				from {
+					opacity: 1;
+				}
+				to {
+					opacity: 0;
+				}
+			}
+
+			/* Backstop for reduced motion switched on after the gate ran. Matches
+			   the .is-playing specificity so it wins without !important. */
+			@media (prefers-reduced-motion: reduce) {
+				#intro-curtain.is-playing {
+					display: none;
+					animation: none;
+				}
+			}
+		</style>
 	</body>
 </html>

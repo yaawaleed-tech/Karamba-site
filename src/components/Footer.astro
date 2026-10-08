@@ -63,7 +63,7 @@ const footerNav = [
 						<li>
 							<a
 								href={link.href}
-								class="text-sm transition-opacity hover:opacity-70"
+								class="wrap-anywhere text-sm transition-opacity hover:opacity-70"
 								style="color: var(--color-text-muted);"
 							>
 								{link.label}
@@ -85,7 +85,7 @@ const footerNav = [
 								href={link.href}
 								target={link.href.startsWith('http') ? '_blank' : undefined}
 								rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-								class="text-sm transition-opacity hover:opacity-70"
+								class="wrap-anywhere text-sm transition-opacity hover:opacity-70"
 								style="color: var(--color-text-muted);"
 							>
 								{link.label}
@@ -104,7 +104,7 @@ const footerNav = [
 			style="border-color: var(--color-border); color: var(--color-text-muted);"
 		>
 			<p>&copy; {year} Karamba Technologies. All rights reserved.</p>
-			<p>Built in Kano, Nigeria.</p>
+			<p>Built by Karamba.</p>
 		</div>
 	</div>
 </footer>

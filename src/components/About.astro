@@ -1,12 +1,23 @@
 ---
 import { Image } from 'astro:assets';
-import founderPhoto from '../assets/about/founder.jpg';
+import founderPhoto from '../assets/about/founder.png';
+import FacetField from './FacetField.astro';
 ---
 
-<section id="about" class="mx-auto max-w-6xl px-6 py-20">
-	<div class="grid gap-12 lg:grid-cols-5 lg:gap-16">
+<!-- overflow-hidden keeps the decorative facet inside this section: the small
+     bottom-left accent mark is absolutely positioned and would otherwise bleed
+     down into the Contact section below. -->
+<section id="about" class="relative mx-auto max-w-6xl overflow-hidden px-6 py-20">
+	<!-- Single facet accent bleeding off the bottom-left, the one quadrant with
+	     no content: it sits under the shorter photo column, clear of the story
+	     text. Sized/positioned differently from Hero's two instances.
+	     lg-only: below lg the grid stacks, so this corner is occupied by the
+	     story copy and the mark would sit behind the text. -->
+	<FacetField class="absolute -bottom-24 -left-24 hidden h-[340px] w-[340px] lg:block" opacity={0.1} />
+
+	<div class="relative grid gap-12 lg:grid-cols-5 lg:gap-16">
 		<!-- Photo -->
-		<div class="lg:col-span-2">
+		<div class="scroll-reveal scroll-reveal-delay-1 lg:col-span-2">
 			<div class="relative">
 				<div
 					class="absolute -inset-3 rounded-3xl opacity-20 blur-2xl"
@@ -26,7 +37,7 @@ import founderPhoto from '../assets/about/founder.jpg';
 		</div>
 
 		<!-- Story -->
-		<div class="lg:col-span-3">
+		<div class="scroll-reveal scroll-reveal-delay-2 lg:col-span-3">
 			<span class="text-sm font-semibold" style="color: var(--color-primary);">About Us</span>
 			<h2 class="mt-2 font-heading text-3xl font-bold sm:text-4xl" style="color: var(--color-text);">
 				Our Story
@@ -34,13 +45,17 @@ import founderPhoto from '../assets/about/founder.jpg';
 
 			<p class="mt-5 text-lg leading-relaxed" style="color: var(--color-text-muted);">
 				Karamba began on a broiler farm in Kano. Running our own farm showed us how much of a
-				business lives in notebooks, chat threads and spreadsheets — and how much time that costs.
+				business lives in notebooks, chat threads and spreadsheets, and how much time that costs.
 				So we started building the tools we wished we had: simple software that does the
 				repetitive work for you.
 			</p>
 			<p class="mt-4 text-lg leading-relaxed" style="color: var(--color-text-muted);">
-				Our vision is to grow into a large enterprise — starting with the software solutions
+				Our vision is to grow into a large enterprise, starting with the software solutions for
 				Nigerian farms, schools, NGOs and SMEs need most, and building from there.
+			</p>
+			<p class="mt-4 text-lg leading-relaxed" style="color: var(--color-text-muted);">
+				As a Muslim-owned company, honesty and amanah, the trust our faith calls us to
+				honour, guide how we treat every client and every project.
 			</p>
 
 			<div class="mt-8 flex items-center gap-4 rounded-2xl p-5" style="background-color: var(--color-bg-subtle); border: 1px solid var(--color-border);">

@@ -1,0 +1,85 @@
+---
+import { Image } from 'astro:assets';
+import logoMark from '../assets/brand/logo-mark.png';
+
+interface Props {
+	/** Extra classes for positioning/sizing the container (e.g. "absolute -right-32 -top-20 h-[500px] w-[500px]") */
+	class?: string;
+	/** Base opacity, 0–1. Defaults to a level where the shape reads clearly but stays a background element. */
+	opacity?: number;
+	/** Mirror horizontally */
+	flip?: boolean;
+	/** Enable the slow ambient drift animation. Default true. */
+	animate?: boolean;
+}
+
+const { class: className = '', opacity = 0.14, flip = false, animate = true } = Astro.props;
+---
+
+<div
+	class={`facet-field pointer-events-none absolute select-none overflow-hidden ${className}`}
+	style={`${flip ? 'transform: scaleX(-1);' : ''}`}
+	aria-hidden="true"
+>
+	<!-- One large, clearly-legible mark -->
+	<div class={`mark-copy mark-main ${animate ? 'mark-drift-1' : ''}`} style={`opacity:${opacity};`}>
+		<Image src={logoMark} alt="" class="h-full w-full object-contain" widths={[500, 1000]} sizes="500px" />
+	</div>
+	<!-- One small, well-separated accent, fainter -->
+	<div class={`mark-copy mark-accent ${animate ? 'mark-drift-2' : ''}`} style={`opacity:${opacity * 0.5};`}>
+		<Image src={logoMark} alt="" class="h-full w-full object-contain" widths={[300, 600]} sizes="300px" />
+	</div>
+</div>
+
+<style>
+	/* NOTE: no width/height here. This rule is unlayered, so it would beat every
+	   Tailwind v4 sizing utility (utilities live in @layer utilities, and layer
+	   precedence resolves before specificity). Sizing must come from the
+	   caller's `class`, e.g. "h-[420px] w-[420px]". */
+	.mark-copy {
+		position: absolute;
+	}
+	/* Large, mostly-visible mark — bleeds off the top-right corner only, no overlap with the accent */
+	.mark-main {
+		width: 62%;
+		aspect-ratio: 1;
+		top: -8%;
+		right: -10%;
+		transform: rotate(4deg);
+	}
+	/* Small accent, opposite corner, far enough away to never overlap the main mark */
+	.mark-accent {
+		width: 20%;
+		aspect-ratio: 1;
+		bottom: 4%;
+		left: 2%;
+		transform: rotate(-18deg);
+	}
+
+	.mark-drift-1 { animation: drift-a 28s ease-in-out infinite; }
+	.mark-drift-2 { animation: drift-b 22s ease-in-out infinite; }
+
+	@keyframes drift-a {
+		0%, 100% { transform: rotate(4deg) translate(0, 0); }
+		50% { transform: rotate(6deg) translate(-8px, 6px); }
+	}
+	@keyframes drift-b {
+		0%, 100% { transform: rotate(-18deg) translate(0, 0); }
+		50% { transform: rotate(-15deg) translate(6px, -6px); }
+	}
+
+	@media (max-width: 640px) {
+		.mark-accent {
+			display: none;
+		}
+		.mark-main {
+			width: 46%;
+			top: -6%;
+			right: -8%;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.mark-copy { animation: none; }
+	}
+</style>
