@@ -1,45 +1,50 @@
-/* Karamba Technologies — brand tokens
+/* Karamba Technologies - brand tokens
    Raw brand hex values, then semantic tokens that switch per theme.
    Edit raw values here only; components should always use the
    semantic --color-* variables, never the --kt-* ones directly. */
 
 :root {
-  /* Raw brand palette (from brand sheet) */
-  --kt-navy-900: #012c72;
-  --kt-blue-700: #01558e;
-  --kt-teal-600: #038bab;
-  --kt-cyan-400: #1eb7cb;
-  --kt-green-400: #36cf97;
+  /* Raw brand palette */
+  --kt-cream: #EFEADF;
+  --kt-paper: #F7F3EA;
+  --kt-indigo: #1B2A4E;
+  --kt-ink-deep: #131C36;
+  --kt-mist: #B9CCE0;
+  --kt-teal: #5FA3A8;
+  --kt-teal-light: #8FD0CF;
+  --kt-clay: #C26A45;
+  --kt-clay-light: #E08A63;
 
-  --kt-ink: #0a1220;      /* near-black, for light-mode text */
-  --kt-paper: #ffffff;    /* light-mode background */
-  --kt-night: #05070f;    /* dark-mode background */
-  --kt-mist: #e8eefc;     /* dark-mode text */
-
-  /* Semantic tokens — light mode (default) */
-  --color-bg: var(--kt-paper);
-  --color-bg-subtle: #f3f6fc;
-  --color-text: var(--kt-ink);
-  --color-text-muted: #4b5566;
-  --color-primary: var(--kt-blue-700);      /* buttons, links */
-  --color-primary-text: #ffffff;             /* text on primary */
-  --color-accent: var(--kt-green-400);       /* highlights, badges */
-  --color-accent-text: var(--kt-navy-900);   /* text on accent */
-  --color-border: #dbe3f0;
-  --color-card-bg: #ffffff;
+  /* Semantic tokens - light mode (default) */
+  --color-bg: var(--kt-cream);
+  --color-bg-subtle: #E6E0D2;
+  --color-text: var(--kt-indigo);
+  --color-text-muted: #4A5878;
+  --color-primary: var(--kt-indigo);        /* buttons, links */
+  --color-primary-text: var(--kt-cream);    /* text on primary */
+  --color-accent: var(--kt-teal);           /* highlights, badges */
+  --color-accent-text: #0F1B38;             /* text on accent */
+  --color-border: #CFC8B6;
+  --color-card-bg: var(--kt-paper);
+  --color-soft: var(--kt-mist);             /* mist blue surface */
+  --color-clay: var(--kt-clay);             /* rare warm accent */
+  --color-clay-text: #FFFFFF;               /* text on clay */
 }
 
 [data-theme='dark'] {
-  --color-bg: var(--kt-night);
-  --color-bg-subtle: #0b1224;
-  --color-text: var(--kt-mist);
-  --color-text-muted: #93a2c2;
-  --color-primary: var(--kt-cyan-400);
-  --color-primary-text: var(--kt-navy-900);
-  --color-accent: var(--kt-green-400);
-  --color-accent-text: var(--kt-navy-900);
-  --color-border: #1c2740;
-  --color-card-bg: #0b1224;
+  --color-bg: var(--kt-ink-deep);
+  --color-bg-subtle: #172344;
+  --color-text: var(--kt-cream);
+  --color-text-muted: #A9B4CC;
+  --color-primary: var(--kt-cream);
+  --color-primary-text: var(--kt-indigo);
+  --color-accent: var(--kt-teal-light);
+  --color-accent-text: #0F1B38;
+  --color-border: #2A3860;
+  --color-card-bg: var(--kt-indigo);
+  --color-soft: #22345F;
+  --color-clay: var(--kt-clay-light);
+  --color-clay-text: #1B1008;
 }
 
 /* Respect system preference when the visitor hasn't chosen a theme yet.
@@ -47,15 +52,18 @@
    to avoid a flash; this block is the CSS-only fallback/first-paint case. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --color-bg: var(--kt-night);
-    --color-bg-subtle: #0b1224;
-    --color-text: var(--kt-mist);
-    --color-text-muted: #93a2c2;
-    --color-primary: var(--kt-cyan-400);
-    --color-primary-text: var(--kt-navy-900);
-    --color-accent: var(--kt-green-400);
-    --color-accent-text: var(--kt-navy-900);
-    --color-border: #1c2740;
-    --color-card-bg: #0b1224;
+    --color-bg: var(--kt-ink-deep);
+    --color-bg-subtle: #172344;
+    --color-text: var(--kt-cream);
+    --color-text-muted: #A9B4CC;
+    --color-primary: var(--kt-cream);
+    --color-primary-text: var(--kt-indigo);
+    --color-accent: var(--kt-teal-light);
+    --color-accent-text: #0F1B38;
+    --color-border: #2A3860;
+    --color-card-bg: var(--kt-indigo);
+    --color-soft: #22345F;
+    --color-clay: var(--kt-clay-light);
+    --color-clay-text: #1B1008;
   }
 }

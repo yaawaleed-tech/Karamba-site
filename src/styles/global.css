@@ -1,18 +1,66 @@
 @import "tailwindcss";
 
-/* Self-hosted fonts (installed via @fontsource) */
-@import "@fontsource/poppins/400.css";
-@import "@fontsource/poppins/600.css";
-@import "@fontsource/poppins/700.css";
-@import "@fontsource/montserrat/400.css";
-@import "@fontsource/montserrat/500.css";
-@import "@fontsource/montserrat/600.css";
+/* Self-hosted fonts (from @fontsource, latin subset, woff2 only).
+   Static per-weight files are used rather than the package CSS: the
+   Fontsource CSS bundles every subset (latin-ext, vietnamese, cyrillic,
+   devanagari) and also references .woff alongside .woff2, while these
+   @font-face rules pull in only the latin woff2 files actually needed. */
+@font-face {
+  font-family: "Fraunces";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("../../node_modules/@fontsource/fraunces/files/fraunces-latin-400-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Fraunces";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url("../../node_modules/@fontsource/fraunces/files/fraunces-latin-600-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Instrument Sans";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("../../node_modules/@fontsource/instrument-sans/files/instrument-sans-latin-400-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Instrument Sans";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url("../../node_modules/@fontsource/instrument-sans/files/instrument-sans-latin-500-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Instrument Sans";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url("../../node_modules/@fontsource/instrument-sans/files/instrument-sans-latin-600-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("../../node_modules/@fontsource/jetbrains-mono/files/jetbrains-mono-latin-400-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url("../../node_modules/@fontsource/jetbrains-mono/files/jetbrains-mono-latin-500-normal.woff2") format("woff2");
+}
 
 @import "./tokens.css";
 
 @theme {
-  --font-heading: "Poppins", sans-serif;
-  --font-body: "Montserrat", sans-serif;
+  --font-heading: "Fraunces", Georgia, serif;
+  --font-body: "Instrument Sans", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }
 
 body {
@@ -22,44 +70,57 @@ body {
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
+/* Tabular figures for numeric content, set in the mono face. */
+.figures {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
 /* Branded text selection, instead of the browser's default garish blue */
 ::selection {
 	background-color: var(--color-accent);
 	color: var(--color-accent-text);
 }
 
-/* Faint dot-grid texture.
-   This lives on a dedicated fixed layer rather than on <body>'s own
-   background-image because the fade is done with a mask, and a mask on
-   <body> would apply to everything <body> paints — all the text, sections
-   and images — not just the background pattern. Isolating the texture in
-   its own element keeps the mask scoped to the dots alone.
+/* Soft paper grain, drawn from an inline SVG feTurbulence noise tile.
+   Static SVG, no JavaScript and no canvas, so nothing repaints on scroll.
 
-   `fixed` + `inset: 0` reproduces what the canvas background did before:
-   full-viewport coverage that does not scroll with the content, so there
-   is still nothing to repaint on scroll. `pointer-events: none` keeps it
-   completely inert. z-index: -1 puts it behind all content but still above
-   the background colour, which propagates to the canvas (html sets no
-   background of its own). */
+   As before, the texture lives on a dedicated fixed layer rather than on
+   <body>'s own background, so it cannot interfere with layout or content.
+   `fixed` + `inset: 0` gives full-viewport coverage that does not scroll;
+   `pointer-events: none` keeps it inert; z-index: -1 puts it behind all
+   content but still above the background colour, which propagates to the
+   canvas (html sets no background of its own).
+
+   The tile is tinted per theme: indigo in light mode, cream in dark. The
+   SVG's alpha is derived from the noise luminance (so speckles vary), and
+   --grain-opacity scales the whole layer. Because the noise alpha averages
+   around 0.5, the opacity values below read as roughly half that as an
+   average tint. */
+:root {
+  --grain-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.1059 0 0 0 0 0.1647 0 0 0 0 0.3059 0.2126 0.7152 0.0722 0 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  --grain-opacity: 0.12;
+}
+[data-theme='dark'] {
+  --grain-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.9373 0 0 0 0 0.9176 0 0 0 0 0.8745 0.2126 0.7152 0.0722 0 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  --grain-opacity: 0.08;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --grain-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.9373 0 0 0 0 0.9176 0 0 0 0 0.8745 0.2126 0.7152 0.0722 0 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+    --grain-opacity: 0.08;
+  }
+}
+
 body::before {
   content: "";
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  /* Unchanged pattern: 1px dots on a 24px tile, tinted from --color-border,
-     which is already low-contrast against --color-bg in both themes, so one
-     rule covers light and dark. */
-  background-image: radial-gradient(circle, color-mix(in srgb, var(--color-border) 55%, transparent) 1px, transparent 1px);
-  background-size: 24px 24px;
-  /* Fade the texture in from left to right: fully masked (invisible) at the
-     left edge, approaching its original strength at the right edge. The
-     pattern, colour and tile size are untouched — only visibility across
-     the horizontal axis changes. The ramp peaks at 0.9, just under the
-     texture's original uniform strength, so the dots never read bolder
-     than they did before. */
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.15) 35%, rgba(0, 0, 0, 0.4) 65%, rgb(0, 0, 0) 85%, rgb(0, 0, 0) 100%);
-  mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.15) 35%, rgba(0, 0, 0, 0.775) 65%, rgba(0, 0, 0, 0.983) 85%, rgb(0, 0, 0) 100%);
+  background-image: var(--grain-image);
+  background-size: 200px 200px;
+  opacity: var(--grain-opacity);
 }
 
 h1, h2, h3, h4, h5, h6 {
