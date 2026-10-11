@@ -23,9 +23,11 @@ const services = [
 ];
 ---
 
-<!-- Full-bleed band: the section paints edge to edge, the container lives inside -->
-<section id="services" style="background-color: var(--color-bg-subtle);">
-	<div class="mx-auto max-w-6xl px-6 py-20">
+<!-- Full-bleed band: the section paints edge to edge, the container lives inside.
+     The background lives on a masked ::before (see style below) so the top
+     edge dissolves into the hero instead of cutting a hard line. -->
+<section id="services">
+	<div class="mx-auto max-w-6xl px-6 py-20 services-rise">
 		<div class="scroll-reveal max-w-xl">
 			<h2 class="font-heading text-3xl font-bold sm:text-4xl" style="color: var(--color-text);">
 				What We Do
@@ -68,3 +70,43 @@ const services = [
 		</div>
 	</div>
 </section>
+
+<style>
+	/* ---- Pinned-hero overlap (desktop only, motion-safe, view-timeline
+	   browsers only) ----
+	   Overlap knob (--hero-overlap) lives on :root in global.css. The
+	   section rises over the pinned hero tail; its background sits on a
+	   masked layer that is transparent at the very top and opaque by
+	   160px, and the content starts below that fade. Outside this gate
+	   the section renders exactly as before: flat background, no overlap.
+	   Dark mode needs no colour change: the hero stage and this band share
+	   --color-bg-subtle, so the seam shows no line. */
+	@supports (animation-timeline: view()) {
+		@media (min-width: 720px) and (prefers-reduced-motion: no-preference) {
+			#services {
+				position: relative;
+				z-index: 1;
+				margin-top: calc(-1 * var(--hero-overlap));
+			}
+			#services::before {
+				content: '';
+				position: absolute;
+				inset: 0;
+				background-color: var(--color-bg-subtle);
+				-webkit-mask-image: linear-gradient(180deg, transparent 0, #000 160px);
+				mask-image: linear-gradient(180deg, transparent 0, #000 160px);
+			}
+			#services .services-rise {
+				position: relative;
+				padding-top: 10rem;
+				animation: services-in linear both;
+				animation-timeline: view();
+				animation-range: entry 0% entry 60%;
+			}
+			@keyframes services-in {
+				from { opacity: 0; transform: translateY(60px); }
+				to { opacity: 1; transform: none; }
+			}
+		}
+	}
+</style>

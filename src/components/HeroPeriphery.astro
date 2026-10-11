@@ -1,0 +1,360 @@
+---
+/* Vertical caption for the left rail. */
+const RAIL_CAPTION = 'KARAMBA TECHNOLOGIES';
+
+interface Shard {
+  left: number;
+  top: number;
+  size: number;
+  dx: number;
+  dy: number;
+  rot: number;
+  delay: number;
+}
+
+const SHAPES = [
+  'polygon(50% 0, 100% 100%, 0 100%)',
+  'polygon(0 0, 100% 20%, 70% 100%, 10% 80%)',
+  'polygon(30% 0, 100% 40%, 60% 100%, 0 60%)',
+];
+
+/* Edge shards drifting outward: dx is -90px on the left, +90px on the
+   right, dy spreads -26 to 26, rotation alternates, delays stagger. */
+const SHARDS: Shard[] = [
+  { left: 4, top: 22, size: 18, dx: -90, dy: -14, rot: 70, delay: -0.3 },
+  { left: 10, top: 62, size: 13, dx: -90, dy: 20, rot: -70, delay: -1.4 },
+  { left: 15, top: 38, size: 24, dx: -90, dy: -24, rot: 70, delay: -2.2 },
+  { left: 3, top: 80, size: 15, dx: -90, dy: 10, rot: -70, delay: -3.1 },
+  { left: 9, top: 10, size: 21, dx: -90, dy: -8, rot: 70, delay: -4.0 },
+  { left: 7, top: 48, size: 12, dx: -90, dy: 26, rot: -70, delay: -4.8 },
+  { left: 92, top: 18, size: 16, dx: 90, dy: -20, rot: -70, delay: -0.8 },
+  { left: 96, top: 54, size: 13, dx: 90, dy: 12, rot: 70, delay: -1.7 },
+  { left: 88, top: 72, size: 25, dx: 90, dy: 24, rot: -70, delay: -2.6 },
+  { left: 94, top: 34, size: 19, dx: 90, dy: -12, rot: 70, delay: -3.5 },
+  { left: 90, top: 86, size: 14, dx: 90, dy: 8, rot: -70, delay: -4.4 },
+  { left: 97, top: 66, size: 22, dx: 90, dy: -26, rot: 70, delay: -5.1 },
+];
+---
+
+<div class="peri" id="hero-peri" data-visible="true" aria-hidden="true">
+  <div class="warp">
+    <div class="rw">
+      <div class="ray"></div>
+      <div class="ray two"></div>
+    </div>
+  </div>
+
+  <div class="shards">
+  {
+    SHARDS.map((s, i) => (
+      <div
+        class="shard"
+        style={`left:${s.left}%;top:${s.top}%;width:${s.size}px;height:${s.size}px;clip-path:${SHAPES[i % SHAPES.length]};--dx:${s.dx}px;--dy:${s.dy}px;--rr:${s.rot}deg;animation-delay:${s.delay}s`}
+      />
+    ))
+  }
+  </div>
+
+  <div class="rail left">
+    <div class="mk mk-l"></div>
+    <span class="rail-cap">{RAIL_CAPTION}</span>
+  </div>
+  <div class="rail right">
+    <div class="mk mk-r"></div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var peri = document.getElementById('hero-peri');
+    if (!peri || !('IntersectionObserver' in window)) return;
+    var hero = document.getElementById('hero');
+    var track = document.getElementById('hero-track');
+    var io = new IntersectionObserver(
+      function (entries) {
+        peri.dataset.visible = entries.some(function (e) {
+          return e.isIntersecting;
+        })
+          ? 'true'
+          : 'false';
+      },
+      { threshold: 0 },
+    );
+    io.observe(track || hero || peri);
+  })();
+</script>
+
+<style>
+  /* Strength knobs. Light and dark follow the same three-selector theme
+     pattern as tokens.css. --ray-amount is the main strength knob: it is
+     the wrapper opacity that scales both animated ray layers at once. */
+  :global(:root) {
+    --ray-color: color-mix(in srgb, var(--color-text) 30%, transparent);
+    --ray-line: color-mix(in srgb, var(--color-text) 28%, transparent);
+    --ray-amount: 0.55;
+  }
+  :global([data-theme='dark']) {
+    --ray-color: color-mix(in srgb, var(--color-accent-strong) 50%, transparent);
+    --ray-line: color-mix(in srgb, var(--color-accent-strong) 30%, transparent);
+    --ray-amount: 0.7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme='light'])) {
+      --ray-color: color-mix(in srgb, var(--color-accent-strong) 50%, transparent);
+      --ray-line: color-mix(in srgb, var(--color-accent-strong) 30%, transparent);
+      --ray-amount: 0.7;
+    }
+  }
+
+  .peri {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  @media (max-width: 719px) {
+    .peri {
+      display: none;
+    }
+  }
+  .peri[data-visible='false'] .ray,
+  .peri[data-visible='false'] .shard {
+    animation-play-state: paused;
+  }
+
+  /* Static wrapper carries the mask and the strength; the animated layers
+     inside stay mask-free so nothing fights the compositor. Horizontal:
+     opaque at the screen edges, fully transparent past the label zone.
+     Vertical: faded at the top and bottom 16 percent. */
+  .warp {
+    position: absolute;
+    inset: 0;
+    opacity: var(--ray-amount);
+    -webkit-mask-image:
+      linear-gradient(
+        90deg,
+        #000 0,
+        transparent calc((100% - min(100%, 1200px)) / 2 + 110px),
+        transparent calc(100% - ((100% - min(100%, 1200px)) / 2 + 110px)),
+        #000 100%
+      ),
+      linear-gradient(180deg, transparent 0, #000 16%, #000 84%, transparent 100%);
+    -webkit-mask-composite: source-in;
+    mask-image:
+      linear-gradient(
+        90deg,
+        #000 0,
+        transparent calc((100% - min(100%, 1200px)) / 2 + 110px),
+        transparent calc(100% - ((100% - min(100%, 1200px)) / 2 + 110px)),
+        #000 100%
+      ),
+      linear-gradient(180deg, transparent 0, #000 16%, #000 84%, transparent 100%);
+    mask-composite: intersect;
+  }
+
+  /* Zoom shell for the scroll exit: same box as the warp so the scale
+     stays centred on the hero. */
+  .rw {
+    position: absolute;
+    inset: 0;
+    will-change: transform;
+  }
+
+  .ray {
+    position: absolute;
+    inset: -40%;
+    background-image:
+      repeating-conic-gradient(
+        from 3deg at center,
+        var(--ray-color) 0deg 0.35deg,
+        transparent 0.35deg 5.3deg
+      ),
+      repeating-conic-gradient(
+        from 11deg at center,
+        var(--ray-color) 0deg 0.22deg,
+        transparent 0.22deg 8.1deg
+      );
+    background-position: center, center;
+    animation: warp-in 6s linear infinite;
+    will-change: transform, opacity;
+  }
+  .ray.two {
+    background-image:
+      repeating-conic-gradient(
+        from 47deg at center,
+        var(--ray-color) 0deg 0.3deg,
+        transparent 0.3deg 6.4deg
+      ),
+      repeating-conic-gradient(
+        from 63deg at center,
+        var(--ray-color) 0deg 0.18deg,
+        transparent 0.18deg 9.7deg
+      );
+    animation-delay: -3s;
+  }
+  @keyframes warp-in {
+    0% {
+      transform: scale(0.55);
+      opacity: 0;
+    }
+    20% {
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1.6);
+      opacity: 0;
+    }
+  }
+
+  /* Transparent shell so the shard field fades as one without touching
+     the per-shard drift animations underneath. */
+  .shards {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .shard {
+    position: absolute;
+    background: var(--color-accent-strong);
+    opacity: 0;
+    animation: shard-out 5.5s linear infinite;
+    will-change: transform, opacity;
+  }
+  @keyframes shard-out {
+    0% {
+      opacity: 0;
+      transform: translate(0, 0) scale(0.6) rotate(0deg);
+    }
+    25% {
+      opacity: 0.5;
+    }
+    100% {
+      opacity: 0;
+      transform: translate(var(--dx), var(--dy)) scale(1.5) rotate(var(--rr));
+    }
+  }
+
+  /* Slim rulers: 1px spine, 7px ticks every 20px, 14px ticks every 100px,
+     all from three background layers, no extra elements. */
+  .rail {
+    position: absolute;
+    top: 70px;
+    bottom: 70px;
+    width: 14px;
+    background-image:
+      linear-gradient(var(--ray-line), var(--ray-line)),
+      repeating-linear-gradient(to bottom, var(--ray-line) 0 1px, transparent 1px 20px),
+      repeating-linear-gradient(to bottom, var(--ray-line) 0 1px, transparent 1px 100px);
+    background-size:
+      1px 100%,
+      7px 100%,
+      14px 100%;
+    background-position:
+      0 0,
+      0 0,
+      0 0;
+    background-repeat: no-repeat;
+  }
+  .rail.left {
+    left: 26px;
+  }
+  .rail.right {
+    right: 26px;
+    transform: scaleX(-1);
+  }
+
+  /* Active-callout marker: 12px triangle riding its rail. The hero root
+     carries the label centre in --mk-l/--mk-r; minus 76px for the 70px
+     rail offset and half the marker height. */
+  .mk {
+    position: absolute;
+    top: 0;
+    left: 1px;
+    width: 12px;
+    height: 12px;
+    background: var(--color-accent-strong);
+    clip-path: polygon(0 50%, 100% 0, 100% 100%);
+    opacity: 1;
+    transform: translateY(calc(var(--mk-l, 0px) - 76px));
+    transition:
+      transform 0.6s ease,
+      opacity 0.6s ease;
+  }
+  .mk-r {
+    transform: translateY(calc(var(--mk-r, 0px) - 76px));
+  }
+  :global(#hero[data-mk-l='off']) .mk-l {
+    opacity: 0;
+  }
+  :global(#hero[data-mk-r='off']) .mk-r {
+    opacity: 0;
+  }
+
+  .rail-cap {
+    position: absolute;
+    top: 50%;
+    left: 34px;
+    transform: translate(-50%, -50%) rotate(-90deg);
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    white-space: nowrap;
+    color: var(--color-text-muted);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ray {
+      animation: none;
+    }
+    .warp {
+      opacity: calc(var(--ray-amount) * 0.5);
+    }
+    .shard {
+      display: none;
+    }
+    .mk {
+      transition: none;
+    }
+  }
+
+  /* ---- Pinned scroll exit (desktop only, motion-safe, view-timeline
+     browsers only) ----
+     Streaks zoom 0 to 100% (.rw scales 1 to 2.6) while the masked wrapper
+     opacity falls from its knob value to 0 between 45% and 100%. Rails
+     (markers ride along, data-driven fades untouched) and the shard field
+     fade 0 to 18%. */
+  @supports (animation-timeline: view()) {
+    @media (min-width: 720px) and (prefers-reduced-motion: no-preference) {
+      .rw {
+        animation: hero-rays-zoom linear both;
+        animation-timeline: --hero;
+        animation-range: contain 0% contain 100%;
+      }
+      @keyframes hero-rays-zoom {
+        0% { transform: scale(1); }
+        100% { transform: scale(2.6); }
+      }
+      .warp {
+        animation: hero-rays-fade linear both;
+        animation-timeline: --hero;
+        animation-range: contain 0% contain 100%;
+      }
+      @keyframes hero-rays-fade {
+        0%, 45% { opacity: var(--ray-amount); }
+        100% { opacity: 0; }
+      }
+      .rail,
+      .shards {
+        animation: hero-peri-out linear both;
+        animation-timeline: --hero;
+        animation-range: contain 0% contain 100%;
+      }
+      @keyframes hero-peri-out {
+        0% { opacity: 1; }
+        18%, 100% { opacity: 0; }
+      }
+    }
+  }
+</style>

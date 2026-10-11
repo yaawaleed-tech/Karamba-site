@@ -1,6 +1,4 @@
 ---
-import { Image } from 'astro:assets';
-import logoMark from '../assets/brand/logo-mark.png';
 import '../styles/global.css';
 
 interface Props {
@@ -61,74 +59,6 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 		<meta name="generator" content={Astro.generator} />
 	</head>
 	<body>
-		<!-- Branded page-load curtain. Purely decorative: position:fixed and
-		     out of flow, so it adds no layout of its own and the real content
-		     behind it renders and paints normally the entire time. It stays
-		     display:none until the inline gate below adds .is-playing, so a
-		     returning visitor never sees even a flash of it. aria-hidden and
-		     pointer-events:none — it is never interactive, not even mid-fade. -->
-		<div id="intro-curtain" aria-hidden="true">
-			<Image
-				src={logoMark}
-				alt=""
-				width={104}
-				height={108}
-				densities={[1, 2]}
-				loading="eager"
-				fetchpriority="high"
-				class="intro-curtain-mark"
-			/>
-		</div>
-
-		<!-- Decides whether the curtain plays, and does it synchronously during
-		     parse — before the rest of the body and before first paint — so the
-		     curtain is on screen in the same frame as the page, never after it.
-		     Independent of the no-flash theme script in <head>, which is
-		     untouched: that one sets data-theme, this one only touches the
-		     curtain. -->
-		<script is:inline>
-			(function () {
-				const curtain = document.getElementById('intro-curtain');
-				if (!curtain) return;
-
-				// Reduced motion: no overlay, no animation, no delay at all.
-				if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-				const KEY = 'kt-intro-seen';
-				let seen = null;
-				// Storage can throw in locked-down privacy modes; treat that as
-				// "not seen" rather than letting it break the page.
-				try {
-					seen = sessionStorage.getItem(KEY);
-				} catch (e) {}
-
-				// Already played this session: leave it display:none, skip instantly.
-				if (seen === 'true') return;
-
-				// Flag it as it *starts*, not when it finishes, so reloading
-				// mid-animation does not replay the intro.
-				try {
-					sessionStorage.setItem(KEY, 'true');
-				} catch (e) {}
-
-				// The mark's own animationend bubbles up here too, so match the
-				// name before treating this as the end of the fade-out.
-				curtain.addEventListener('animationend', function onEnd(e) {
-					if (e.animationName !== 'intro-curtain-out') return;
-					curtain.removeEventListener('animationend', onEnd);
-					curtain.remove();
-				});
-
-				// Backstop: an opaque full-viewport overlay must never be left up
-				// if animationend is missed (backgrounded tab, throttling).
-				setTimeout(function () {
-					if (curtain.isConnected) curtain.remove();
-				}, 1400);
-
-				curtain.classList.add('is-playing');
-			})();
-		</script>
-
 		<slot />
 
 		<!-- Without JS there is no observer, so make sure nothing stays hidden -->
@@ -136,7 +66,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 			<style>.scroll-reveal { opacity: 1; }</style>
 		</noscript>
 
-		<!-- Scroll-triggered reveals — see .scroll-reveal in global.css. Runs
+		<!-- Scroll-triggered reveals - see .scroll-reveal in global.css. Runs
 		     once per page and fires each element a single time. -->
 		<script is:inline>
 			(function () {
@@ -144,7 +74,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 				if (!targets.length) return;
 
 				// Reduced-motion visitors get the CSS fallback (fully visible, no
-				// movement) — no observers needed.
+				// movement) - no observers needed.
 				if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
 					targets.forEach((el) => el.classList.add('is-visible'));
 					return;
@@ -183,7 +113,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 			const cards = Array.from(document.querySelectorAll('.tilt-card'));
 
 			// .scroll-reveal animates transform with fill "both", so once it has
-			// finished the animation still owns the property — and animation
+			// finished the animation still owns the property - and animation
 			// declarations outrank normal inline styles in the cascade. Left alone
 			// the tilt below is computed and then silently discarded, which is
 			// exactly the "nothing happens on hover" symptom. The end state is
@@ -247,92 +177,5 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 			reduce.addEventListener('change', sync);
 			sync();
 		</script>
-		<style>
-			/* Page-load curtain — markup and gate are above. Phases total 0.95s:
-			   mark in 0.35s, hold 0.25s, overlay out 0.35s. */
-
-			/* display:none by default, so it costs nothing on repeat loads and
-			   cannot flash before the gate has decided. Fixed + inset:0 keeps it
-			   out of flow, so it contributes no layout and no CLS. */
-			#intro-curtain {
-				position: fixed;
-				inset: 0;
-				z-index: 9999;
-				display: none;
-				place-items: center;
-				/* Resolves per theme, so the overlay dissolves into the exact
-				   background it reveals — no colour flash in either theme. */
-				background-color: var(--color-bg);
-				/* Never intercepts, not even during the fade-out. */
-				pointer-events: none;
-			}
-
-			#intro-curtain.is-playing {
-				display: grid;
-				/* 0.35s in + 0.25s hold, so the fade-out starts at 0.6s. */
-				animation: intro-curtain-out 0.35s ease 0.6s forwards;
-			}
-
-			/* The mark is dark navy artwork, which is near-invisible on --kt-night
-			   (measured ~1.36:1). This soft paper bloom is the fix, and it is
-			   self-adapting: paper-on-paper in light mode, so it disappears
-			   entirely there, and a light lift behind the mark in dark mode. */
-			#intro-curtain::before {
-				content: '';
-				position: absolute;
-				top: 50%;
-				left: 50%;
-				width: 320px;
-				height: 320px;
-				margin: -160px 0 0 -160px;
-				border-radius: 50%;
-				background: radial-gradient(
-					circle,
-					var(--kt-paper) 0%,
-					color-mix(in srgb, var(--kt-paper) 62%, transparent) 42%,
-					transparent 72%
-				);
-			}
-
-			.intro-curtain-mark {
-				position: relative;
-				width: 104px;
-				height: auto;
-				opacity: 0;
-				/* Same overshoot curve as theme-spin-in in ThemeToggle.astro. */
-				animation: intro-mark-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-			}
-
-			@keyframes intro-mark-in {
-				from {
-					opacity: 0;
-					transform: scale(0.85);
-				}
-				to {
-					opacity: 1;
-					transform: scale(1);
-				}
-			}
-
-			/* Fading the parent's opacity carries the mark with it, so the whole
-			   overlay dissolves as one piece. */
-			@keyframes intro-curtain-out {
-				from {
-					opacity: 1;
-				}
-				to {
-					opacity: 0;
-				}
-			}
-
-			/* Backstop for reduced motion switched on after the gate ran. Matches
-			   the .is-playing specificity so it wins without !important. */
-			@media (prefers-reduced-motion: reduce) {
-				#intro-curtain.is-playing {
-					display: none;
-					animation: none;
-				}
-			}
-		</style>
 	</body>
 </html>

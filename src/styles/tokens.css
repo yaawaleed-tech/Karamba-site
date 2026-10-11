@@ -24,6 +24,7 @@
   --color-primary-text: var(--kt-cream);    /* text on primary */
   --color-accent: var(--kt-teal);           /* highlights, badges */
   --color-accent-text: #0F1B38;             /* text on accent */
+  --color-accent-strong: #26707F;           /* small text and lines, legible on cream */
   --color-border: #CFC8B6;
   --color-card-bg: var(--kt-paper);
   --color-soft: var(--kt-mist);             /* mist blue surface */
@@ -40,6 +41,7 @@
   --color-primary-text: var(--kt-indigo);
   --color-accent: var(--kt-teal-light);
   --color-accent-text: #0F1B38;
+  --color-accent-strong: #8FD0CF;
   --color-border: #2A3860;
   --color-card-bg: var(--kt-indigo);
   --color-soft: #22345F;
@@ -60,6 +62,7 @@
     --color-primary-text: var(--kt-indigo);
     --color-accent: var(--kt-teal-light);
     --color-accent-text: #0F1B38;
+    --color-accent-strong: #8FD0CF;
     --color-border: #2A3860;
     --color-card-bg: var(--kt-indigo);
     --color-soft: #22345F;

@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Karamba hero prototype</title>
+<style>
+:root{--bg:#EFEADF;--ink:#1B2A4E;--mut:#4A5878;--hi:#2E7C8C;--grid:rgba(27,42,78,.07);--glow:drop-shadow(0 20px 36px rgba(27,42,78,.3));box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0B1330;--ink:#EFEADF;--mut:#A9B4CC;--hi:#8FD0CF;--grid:rgba(143,208,207,.07);--glow:drop-shadow(0 0 40px rgba(80,200,225,.4))}}
+:root[data-theme="dark"]{--bg:#0B1330;--ink:#EFEADF;--mut:#A9B4CC;--hi:#8FD0CF;--grid:rgba(143,208,207,.07);--glow:drop-shadow(0 0 40px rgba(80,200,225,.4))}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,sans-serif;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:64px 64px;overflow-x:hidden}
+.bar{display:flex;gap:8px;justify-content:flex-end;padding:12px 16px}
+.bar button{font:inherit;font-size:13px;color:var(--ink);background:transparent;border:1px solid var(--hi);border-radius:999px;padding:6px 14px;cursor:pointer}
+.wrap{max-width:1200px;margin:0 auto;padding:0 16px}
+.stage{position:relative;aspect-ratio:100/62;container-type:inline-size}
+h1{position:absolute;left:0;top:3%;margin:0;width:46%;font-family:Georgia,'Times New Roman',serif;font-weight:600;font-size:clamp(28px,5.4cqw,64px);line-height:1.05}
+h1 em{font-style:normal;color:var(--hi)}
+.sub{position:absolute;left:0;top:29%;width:25%;margin:0;color:var(--mut);font-size:clamp(11px,1.4cqw,17px);line-height:1.5}
+.mark{position:absolute;left:46%;top:16.9%;width:34%;aspect-ratio:656/684}
+.mark.done{filter:var(--glow)}
+.pc{position:absolute}
+.pc img{display:block;width:100%;height:100%;transition:transform .25s,filter .25s;user-select:none}
+.pc.hot img{transform:translate(var(--hx),var(--hy));filter:brightness(1.18) saturate(1.1)}
+.pc.lit img{filter:brightness(1.1)}
+.hit{position:absolute;inset:0;width:100%;height:100%}
+.hit polygon{fill:transparent;pointer-events:all;cursor:pointer;outline:none}
+.lines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.lines path{fill:none;stroke:var(--hi);stroke-width:1.3;stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset .8s ease}
+.lines path.on{stroke-dashoffset:0}
+.lines circle{fill:var(--hi);opacity:0;transition:opacity .5s}
+.lines circle.on{opacity:1}
+.lb{position:absolute;opacity:0;transition:opacity .7s;pointer-events:none;width:17%}
+.lb.on{opacity:1}
+.lb.L{transform:translate(-100%,-.75em);text-align:right;padding-right:14px}
+.lb.R{transform:translate(0,-.75em);padding-left:14px}
+.lb b{display:block;font-size:clamp(8px,1.05cqw,13px);letter-spacing:.22em;text-transform:uppercase;color:var(--hi);font-weight:600;margin-bottom:3px}
+.lb span{font-size:clamp(9px,1.3cqw,15px);line-height:1.35}
+.cap{display:none;text-align:center;margin:8px 20px 0;min-height:48px;color:var(--mut);font-size:15px}
+.cap b{color:var(--hi);letter-spacing:.14em;text-transform:uppercase;font-size:12px;display:block}
+.note{max-width:1200px;margin:0 auto;padding:8px 20px 28px;color:var(--mut);font-size:13px}
+@media (max-width:719px){
+.wrap{padding:0 20px}.stage{aspect-ratio:auto}
+h1,.sub{position:static;width:auto}
+h1{font-size:34px}.sub{font-size:15px;margin:10px 0 0}
+.mark{position:relative;left:auto;top:auto;width:84%;margin:18px auto 0}
+.lines,.lb{display:none}.cap{display:block}}
+</style></head>
+<body>
+<div class="bar"><button id="re" type="button">Replay</button><button id="th" type="button">Light / dark</button></div>
+<div class="wrap"><div class="stage" id="stage">
+<h1>Complexity,<br>made <em>connected.</em></h1>
+<p class="sub">Technology, logistics, automation and digital solutions, working together to build smarter, more resilient businesses.</p>
+<svg class="lines" id="ln" viewBox="0 0 1000 620" aria-hidden="true"></svg>
+<div class="mark" id="mark"><svg class="hit" id="hit" viewBox="0 0 656 684"></svg></div>
+</div></div>
+<div class="cap" id="cap" aria-live="polite"></div>
+<div class="note">Prototype. Pieces are cut from your real logo. Hover a piece, click or tap it, and watch the descriptions come and go on their own. Fonts here are fallbacks.</div>
+<script>
+var PIECES=/*PIECES*/;
+var F={arrow:{n:'Technology',d:'Digital systems built to move you forward.',s:4},next:{n:'Next',d:'Tell us what to build next.',s:1},education:{n:'Education',d:'Admissions, records and results without the paperwork.',s:1},core:{n:'Software',d:'Custom systems built around how you work.',s:5},commerce:{n:'Commerce',d:'Orders, stock and customers in one place.',s:2},cloud:{n:'Cloud',d:'Secure, reliable and ready to scale.',s:5},logistics:{n:'Logistics',d:'Connecting operations with precision.',s:3},automation:{n:'Automation',d:'Smarter workflows, less friction.',s:3},intelligence:{n:'Intelligence',d:'AI that takes on the repetitive work.',s:6}};
+var SL={1:[440,200,'L'],2:[440,310,'L'],3:[440,430,'L'],4:[830,90,'R'],5:[850,290,'R'],6:[850,450,'R']};
+(function(){
+var $=function(s){return document.querySelector(s)};
+var m=$('#mark'),hit=$('#hit'),ln=$('#ln'),st=$('#stage'),cap=$('#cap');
+var MX=460,MY=105,MS=340/656,CX=328,CY=342,NS='http://www.w3.org/2000/svg',TARGET=3;
+var el={},act={},timer;
+function circ(x,y){var c=document.createElementNS(NS,'circle');c.setAttribute('cx',x);c.setAttribute('cy',y);c.setAttribute('r',4);return c}
+PIECES.forEach(function(p){
+  var f=F[p.k],s=SL[f.s],w=document.createElement('div');w.className='pc';
+  w.style.cssText='left:'+p.x/6.56+'%;top:'+p.y/6.84+'%;width:'+p.w/6.56+'%;height:'+p.h/6.84+'%';
+  var i=new Image();i.src=p.src;i.alt='';i.draggable=false;
+  var cx=p.ax-CX,cy=p.ay-CY,n=Math.hypot(cx,cy)||1;
+  w.style.setProperty('--hx',cx/n*10+'px');w.style.setProperty('--hy',cy/n*10+'px');
+  w.appendChild(i);m.insertBefore(w,hit);
+  var pg=document.createElementNS(NS,'polygon');pg.setAttribute('points',p.poly);
+  pg.setAttribute('tabindex','0');pg.setAttribute('role','button');pg.setAttribute('aria-label',f.n);
+  pg.onmouseenter=function(){w.classList.add('hot')};pg.onmouseleave=function(){w.classList.remove('hot')};
+  pg.onfocus=pg.onmouseenter;pg.onblur=pg.onmouseleave;
+  pg.onclick=function(){pin(p.k)};pg.onkeydown=function(e){if(e.key==='Enter')pin(p.k)};
+  hit.appendChild(pg);
+  var ax=MX+p.ax*MS,ay=MY+p.ay*MS,ex=ax+(s[0]-ax)*.5;
+  var path=document.createElementNS(NS,'path');path.setAttribute('d','M'+ax+','+ay+' L'+ex+','+s[1]+' L'+s[0]+','+s[1]);path.setAttribute('pathLength','1');
+  var d1=circ(ax,ay),d2=circ(s[0],s[1]);ln.appendChild(path);ln.appendChild(d1);ln.appendChild(d2);
+  var lb=document.createElement('div');lb.className='lb '+s[2];lb.style.left=(s[0]/10)+'%';lb.style.top=(s[1]/6.2)+'%';
+  lb.innerHTML='<b>'+f.n+'</b><span>'+f.d+'</span>';st.appendChild(lb);
+  el[p.k]={w:w,path:path,d:[d1,d2],lb:lb,s:f.s,p:p};
+});
+function on(k,v){var e=el[k];[e.path,e.d[0],e.d[1],e.lb].forEach(function(x){x.classList.toggle('on',v)});e.w.classList.toggle('lit',v)}
+function drop(k){delete act[k];on(k,false)}
+function show(k,ms){act[k]=Date.now()+ms;on(k,true);cap.innerHTML='<b>'+F[k].n+'</b>'+F[k].d}
+function pin(k){Object.keys(act).forEach(function(o){if(o!==k&&el[o].s===el[k].s)drop(o)});show(k,9000)}
+function tick(){
+  var now=Date.now();Object.keys(act).forEach(function(k){if(act[k]<now)drop(k)});
+  var a=Object.keys(act);
+  if(a.length<TARGET&&Math.random()<.65){
+    var free=Object.keys(el).filter(function(k){return !act[k]&&!a.some(function(o){return el[o].s===el[k].s})});
+    if(free.length)show(free[Math.random()*free.length|0],4000+Math.random()*5000)}
+  if(Math.random()<.08)TARGET=2+(Math.random()*3|0)}
+var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function assemble(){
+  clearInterval(timer);Object.keys(act).forEach(drop);m.classList.remove('done');
+  var an=[];
+  Object.keys(el).forEach(function(k,i){
+    var p=el[k].p,a=Math.atan2(p.ay-CY,p.ax-CX),d=700+Math.random()*500,r=(Math.random()<.5?-1:1)*(30+Math.random()*60);
+    var o=k==='arrow'?8:(k==='core'?0:1+i%7);
+    if(!reduce)an.push(el[k].w.animate([{transform:'translate('+Math.cos(a)*d+'px,'+Math.sin(a)*d+'px) rotate('+r+'deg) scale(.55)',opacity:0},{opacity:1,offset:.3},{transform:'none',opacity:1}],{duration:1500+Math.random()*400,delay:o*90,easing:'cubic-bezier(.16,1,.3,1)',fill:'backwards'}).finished)});
+  Promise.all(an).then(function(){m.classList.add('done');timer=setInterval(tick,600);show('arrow',6000)})}
+$('#re').onclick=assemble;
+$('#th').onclick=function(){var r=document.documentElement,c=r.dataset.theme||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');r.dataset.theme=c==='dark'?'light':'dark'};
+assemble();
+})();
+</script>
+</body></html>

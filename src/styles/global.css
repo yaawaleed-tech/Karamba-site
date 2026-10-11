@@ -101,6 +101,23 @@ body {
   --grain-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.1059 0 0 0 0 0.1647 0 0 0 0 0.3059 0.2126 0.7152 0.0722 0 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
   --grain-opacity: 0.12;
 }
+
+/* Pinned-hero scroll exit (Chunk 2E) knobs, shared by Hero.astro (track and
+   sticky offsets) and Services.astro (overlap). Plain lengths on :root so
+   every component scope can read them.
+   --header-h: the sticky header's at-rest height, matching the existing
+   100svh - 76px hero sizing. Note the header compresses while scrolled.
+   --header-h-compact: the compressed height (0.55rem padding x2 + 40px
+   tallest row + 1px border = 58.6px, rounded to 59px); the pinned hero
+   uses this for its sticky offset so it sits flush while pinned.
+   --hero-scroll-distance: extra scroll length the hero stays pinned.
+   --hero-overlap: how far the next section rises over the hero tail. */
+:root {
+  --header-h: 76px;
+  --header-h-compact: 59px;
+  --hero-scroll-distance: 100svh;
+  --hero-overlap: 60svh;
+}
 [data-theme='dark'] {
   --grain-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.9373 0 0 0 0 0.9176 0 0 0 0 0.8745 0.2126 0.7152 0.0722 0 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
   --grain-opacity: 0.08;
@@ -128,7 +145,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Anchor targets stop below the sticky header (see #site-header in
-   Header.astro — ~76px rendered, 80px leaves a little breathing room). */
+   Header.astro - ~76px rendered, 80px leaves a little breathing room). */
 [id] {
   scroll-margin-top: 80px;
 }
@@ -143,7 +160,7 @@ h1, h2, h3, h4, h5, h6 {
    Layout.astro adds .is-visible the first time it enters the viewport, then
    stops observing it. Deliberately an animation rather than a transition,
    so component hover transitions (transition-transform, hover:scale-*) keep
-   working — same pattern as .reveal in Hero.astro.
+   working - same pattern as .reveal in Hero.astro.
    Stagger a grid or list with .scroll-reveal-delay-1 … -4. */
 .scroll-reveal {
   opacity: 0;
@@ -177,7 +194,7 @@ h1, h2, h3, h4, h5, h6 {
 
    transform-style is deliberately left at the default `flat`. The perspective()
    inside the JS transform is what produces the depth, and these cards have no
-   3D children that need to share the space — preserve-3d would buy nothing and
+   3D children that need to share the space - preserve-3d would buy nothing and
    risks the Product card's overflow:hidden + rounded-2xl clipping. */
 .tilt-card {
   will-change: transform;

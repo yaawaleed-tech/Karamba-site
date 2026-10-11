@@ -1,0 +1,1030 @@
+---
+import manifest from '../assets/brand/karamba-pieces/manifest.json';
+import {
+  HERO_LAYOUT,
+  HERO_FACETS,
+  HERO_ASSEMBLY_ORDER,
+  HERO_FIXED_FACETS,
+} from '../data/hero-facets';
+
+interface ManifestPiece {
+  k: string;
+  file: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  ax: number;
+  ay: number;
+  poly: string;
+}
+
+interface Props {
+  headline: string;
+  support: string;
+}
+
+const { headline, support } = Astro.props;
+
+const { stage, mark, canvas, slots } = HERO_LAYOUT;
+const pieces = (manifest.pieces as ManifestPiece[]).filter((p) =>
+  HERO_FACETS.some((f) => f.key === p.k),
+);
+const facetByKey = new Map(HERO_FACETS.map((f) => [f.key, f]));
+const slotById = new Map(slots.map((s) => [s.id, s]));
+
+/* Unprocessed file URLs: the pieces are served byte-identical, never
+   re-encoded. Keys look like ../assets/brand/karamba-pieces/next.webp. */
+const pieceUrls = import.meta.glob(
+  '../assets/brand/karamba-pieces/*.webp',
+  { query: '?url', import: 'default', eager: true },
+) as Record<string, string>;
+function pieceUrl(file: string): string {
+  const hit = Object.entries(pieceUrls).find(([path]) => path.endsWith('/' + file));
+  return hit ? hit[1] : '';
+}
+
+/* Logo centre in canvas coordinates, for the fly-in and hover vectors. */
+const CX = 328;
+const CY = 342;
+const scale = mark.width / canvas.width;
+
+const pct = (v: number, base: number) => ((v / base) * 100).toFixed(3) + '%';
+const r1 = (v: number) => Math.round(v * 10) / 10;
+
+function anchorStage(p: ManifestPiece) {
+  return { x: r1(mark.left + p.ax * scale), y: r1(mark.top + p.ay * scale) };
+}
+
+/* Diagonal from the anchor, then horizontal into the slot dot. */
+function linePath(a: { x: number; y: number }, s: { x: number; y: number }) {
+  const ex = r1(a.x + (s.x - a.x) * 0.5);
+  return `M${a.x},${a.y} L${ex},${s.y} L${s.x},${s.y}`;
+}
+
+/* About 10px away from the logo centre, in rendered pixels. */
+function lift(p: ManifestPiece) {
+  const dx = p.ax - CX;
+  const dy = p.ay - CY;
+  const n = Math.hypot(dx, dy) || 1;
+  return { x: ((dx / n) * 10).toFixed(1), y: ((dy / n) * 10).toFixed(1) };
+}
+
+/* Scroll-exit vectors (Chunk 2E): unit vector away from the logo centre
+   (same direction source as the hover lift), per-piece depth, and rotation
+   sign alternating in manifest order. */
+const DEPTH: Record<string, number> = {
+  arrow: 1.4,
+  intelligence: 1.3,
+  cloud: 1.2,
+  commerce: 1.1,
+  next: 1.0,
+  logistics: 0.9,
+  education: 0.8,
+  automation: 0.7,
+  core: 0.6,
+};
+const RS: Record<string, number> = {
+  next: 1,
+  arrow: -1,
+  education: 1,
+  core: -1,
+  commerce: 1,
+  cloud: -1,
+  logistics: 1,
+  automation: -1,
+  intelligence: 1,
+};
+function unit(p: ManifestPiece) {
+  const dx = p.ax - CX;
+  const dy = p.ay - CY;
+  const n = Math.hypot(dx, dy) || 1;
+  return { x: (dx / n).toFixed(3), y: (dy / n).toFixed(3) };
+}
+
+/* Headline choreography (Chunk 2G): split the first sentence into one span
+   per character with deterministic scatter vectors; the rest stays one
+   span. Derived from the headline prop so the copy has a single source. */
+const HL_A_TEXT = headline.includes('. ') ? headline.split('. ')[0] + '.' : headline;
+const HL_B_TEXT = headline.slice(HL_A_TEXT.length).trim();
+interface HlLetter {
+  ch: string;
+  i: number;
+  dx: number;
+  dy: number;
+  r: number;
+  o: number;
+}
+const HL_A: HlLetter[] = HL_A_TEXT.split('').map((ch, i) => ({
+  ch: ch === ' ' ? ' ' : ch,
+  i,
+  dx: ((i * 37) % 11 - 5) * 38,
+  dy: ((i * 53) % 9 - 4) * 30 - 50,
+  r: ((i * 29) % 13 - 6) * 16,
+  o: +(i * 1.2).toFixed(1),
+}));
+---
+
+<div class="hero-stage" id="hero-stage" data-fixed={HERO_FIXED_FACETS.join(' ')}>
+  <div class="hero-mark" id="hero-mark">
+    {
+      pieces.map((p) => {
+        const v = lift(p);
+        const u = unit(p);
+        return (
+          <div
+            class="pc"
+            data-facet={p.k}
+            data-ax={p.ax}
+            data-ay={p.ay}
+            data-order={HERO_ASSEMBLY_ORDER.indexOf(p.k)}
+            style={`left:${pct(p.x, canvas.width)};top:${pct(p.y, canvas.height)};width:${pct(p.w, canvas.width)};height:${pct(p.h, canvas.height)};--hx:${v.x}px;--hy:${v.y}px;--ux:${u.x};--uy:${u.y};--depth:${DEPTH[p.k] ?? 1};--rs:${RS[p.k] ?? 1}`}
+            aria-hidden="true"
+          >
+            <img
+              src={pieceUrl(p.file)}
+              width={p.w}
+              height={p.h}
+              alt=""
+              decoding="async"
+              draggable="false"
+            />
+          </div>
+        );
+      })
+    }
+    <svg class="hit" viewBox="0 0 656 684">
+      {
+        pieces.map((p) => {
+          const f = facetByKey.get(p.k);
+          if (!f) return null;
+          return p.k === 'next' ? (
+            <a href="#contact" class="hit-link" data-facet={p.k} aria-label={f.name}>
+              <polygon points={p.poly} fill="transparent" />
+            </a>
+          ) : (
+            <polygon
+              data-facet={p.k}
+              points={p.poly}
+              fill="transparent"
+              role="button"
+              tabindex="0"
+              aria-label={f.name}
+            />
+          );
+        })
+      }
+    </svg>
+  </div>
+
+  {/* Scroll-exit shell around labels and leader lines: fading this one
+      wrapper never touches the class-driven opacity underneath. */}
+  <div class="hero-callouts">
+  <svg class="lines" viewBox="0 0 1000 620" aria-hidden="true">
+    {
+      pieces.map((p) => {
+        const f = facetByKey.get(p.k);
+        const s = f && slotById.get(f.slot);
+        if (!f || !s) return null;
+        const a = anchorStage(p);
+        return (
+          <g data-facet={p.k}>
+            <path d={linePath(a, s)} pathLength="1" />
+            <circle cx={a.x} cy={a.y} r="4" />
+            <circle cx={s.x} cy={s.y} r="4" />
+          </g>
+        );
+      })
+    }
+  </svg>
+
+  {
+    pieces.map((p) => {
+      const f = facetByKey.get(p.k);
+      const s = f && slotById.get(f.slot);
+      if (!f || !s) return null;
+      return (
+        <div
+          class={`lb ${s.side}`}
+          data-facet={p.k}
+          data-slot={f.slot}
+          data-side={s.side}
+          style={`left:${(s.x / stage.width) * 100}%;top:${((s.y / stage.height) * 100).toFixed(2)}%`}
+          aria-hidden="true"
+        >
+          <b>{f.name}</b>
+          <span>{f.description}</span>
+        </div>
+      );
+    })
+  }
+  </div>
+
+  <p class="cap cap-hide" aria-live="polite" aria-atomic="true">
+    <b id="hero-cap-name"></b><span id="hero-cap-desc"></span>
+  </p>
+
+  {/* Scroll-exit shell around the headline: the lift and fade animate
+      this box so .hero-copy keeps its own reveal transition. */}
+  <div class="hero-copy-outer">
+    <div class="hero-copy">
+      <h1 class="hero-title">
+        <span class="visually-hidden">{headline}</span>
+        <span class="hl-visual" aria-hidden="true">
+          <span class="hl-a">
+            {HL_A.map((l) => (
+              <span
+                class="hl-letter"
+                style={`--i:${l.i};--dx:${l.dx}px;--dy:${l.dy}px;--r:${l.r}deg;--o:${l.o}`}
+              >
+                {l.ch}
+              </span>
+            ))}
+          </span>{' '}
+          <span class="hl-b">{HL_B_TEXT}</span>
+        </span>
+      </h1>
+      <p class="hero-support">{support}</p>
+    </div>
+  </div>
+
+  <ul class="visually-hidden">
+    {
+      HERO_FACETS.map((f) => (
+        <li>
+          <strong>{f.name}:</strong> {f.description}
+        </li>
+      ))
+    }
+  </ul>
+
+</div>
+
+<noscript>
+  <style>
+    .hero-mark .pc { opacity: 1; }
+    .hero-copy { opacity: 1; transform: none; }
+  </style>
+</noscript>
+
+<script>
+  (function () {
+    var stage = document.getElementById('hero-stage');
+    if (!stage) return;
+    var mark = document.getElementById('hero-mark');
+    var heroRoot = document.getElementById('hero');
+    var capName = document.getElementById('hero-cap-name');
+    var capDesc = document.getElementById('hero-cap-desc');
+    var capEl = stage.querySelector('.cap');
+    var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var mobileQ = window.matchMedia('(max-width: 719px)');
+
+    var pieceEls = new Map();
+    var labelEls = new Map();
+    var lineGroups = new Map();
+    stage.querySelectorAll('.pc').forEach(function (el) {
+      pieceEls.set(el.dataset.facet, el);
+    });
+    stage.querySelectorAll('.lb').forEach(function (el) {
+      labelEls.set(el.dataset.facet, el);
+    });
+    stage.querySelectorAll('.lines g').forEach(function (el) {
+      lineGroups.set(el.dataset.facet, el);
+    });
+    var hitEls = Array.from(stage.querySelectorAll('.hit [data-facet]'));
+
+    function slotOf(key) {
+      var lb = labelEls.get(key);
+      return lb ? lb.dataset.slot : '';
+    }
+
+    function sideOf(key) {
+      var lb = labelEls.get(key);
+      return lb ? lb.dataset.side : '';
+    }
+
+    /* Last shown callout per side, for the periphery rail markers. */
+    var lastBySide = { L: '', R: '' };
+
+    function heroLabelCenter(key) {
+      var lb = labelEls.get(key);
+      if (!lb || !heroRoot) return null;
+      var lr = lb.getBoundingClientRect();
+      var hr = heroRoot.getBoundingClientRect();
+      if (!lr.height) return null;
+      return Math.round((lr.top + lr.height / 2 - hr.top) * 10) / 10;
+    }
+
+    /* Publish one side's marker: the label centre in px relative to the
+       hero through --mk-l/--mk-r, visibility through data-mk-l/data-mk-r.
+       Falls back to any remaining callout on that side, else switches off. */
+    function refreshMarker(side) {
+      if (!heroRoot) return;
+      var attr = side === 'L' ? 'mkL' : 'mkR';
+      var prop = side === 'L' ? '--mk-l' : '--mk-r';
+      var pick = lastBySide[side] && active.has(lastBySide[side]) ? lastBySide[side] : '';
+      if (!pick) {
+        active.forEach(function (exp, k) {
+          if (!pick && sideOf(k) === side) pick = k;
+        });
+        lastBySide[side] = pick;
+      }
+      if (pick) {
+        var y = heroLabelCenter(pick);
+        if (y !== null) heroRoot.style.setProperty(prop, y + 'px');
+        heroRoot.dataset[attr] = 'on';
+      } else {
+        heroRoot.dataset[attr] = 'off';
+      }
+    }
+
+    /* Visible callouts: key -> expiry timestamp. */
+    var active = new Map();
+    var target = 3;
+    var lastMobileKey = '';
+    var mobileGapUntil = 0;
+    var hoverPaused = false;
+    var focusPaused = false;
+    var heroVisible = true;
+    var timer = 0;
+
+    function setOn(key, v) {
+      var lb = labelEls.get(key);
+      if (lb) lb.classList.toggle('on', v);
+      var g = lineGroups.get(key);
+      if (g) {
+        g.querySelectorAll('path, circle').forEach(function (n) {
+          n.classList.toggle('on', v);
+        });
+      }
+      var pc = pieceEls.get(key);
+      if (pc) pc.classList.toggle('lit', v);
+    }
+
+    function show(key, ms) {
+      active.set(key, Date.now() + ms);
+      setOn(key, true);
+      var lb = labelEls.get(key);
+      if (lb && capName && capDesc) {
+        var b = lb.querySelector('b');
+        var s = lb.querySelector('span');
+        capName.textContent = b ? b.textContent : '';
+        capDesc.textContent = s ? s.textContent : '';
+      }
+      if (capEl) capEl.classList.remove('cap-hide');
+      var shown = sideOf(key);
+      if (shown === 'L' || shown === 'R') {
+        lastBySide[shown] = key;
+        refreshMarker(shown);
+      }
+    }
+
+    function hide(key) {
+      active.delete(key);
+      setOn(key, false);
+      var sd = sideOf(key);
+      if ((sd === 'L' || sd === 'R') && lastBySide[sd] === key) {
+        var rep = '';
+        active.forEach(function (exp, k) {
+          if (!rep && sideOf(k) === sd) rep = k;
+        });
+        lastBySide[sd] = rep;
+        refreshMarker(sd);
+      }
+    }
+
+    /* Pin, evicting whoever holds the same slot. On mobile there is only
+       ever one callout, so evict everything; taps hold 10s there, 9s here. */
+    function pin(key) {
+      var mobile = mobileQ.matches;
+      if (mobile) {
+        Array.from(active.keys()).forEach(function (k) {
+          if (k !== key) hide(k);
+        });
+      } else {
+        var slot = slotOf(key);
+        Array.from(active.keys()).forEach(function (k) {
+          if (k !== key && slotOf(k) === slot) hide(k);
+        });
+      }
+      show(key, mobile ? 10000 : 9000);
+    }
+
+    function activate(key) {
+      pin(key);
+      if (key === 'next') {
+        var contact = document.getElementById('contact');
+        if (contact) {
+          contact.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+        } else {
+          window.location.hash = '#contact';
+        }
+      }
+    }
+
+    hitEls.forEach(function (el) {
+      var key = el.dataset.facet;
+      var wrap = pieceEls.get(key);
+      el.addEventListener('mouseenter', function () {
+        if (wrap) wrap.classList.add('hot');
+        hoverPaused = true;
+      });
+      el.addEventListener('mouseleave', function () {
+        if (wrap) wrap.classList.remove('hot');
+        hoverPaused = false;
+      });
+      el.addEventListener('focus', function () {
+        if (wrap) wrap.classList.add('hot');
+        focusPaused = true;
+      });
+      el.addEventListener('blur', function () {
+        if (wrap) wrap.classList.remove('hot');
+        focusPaused = false;
+      });
+      el.addEventListener('click', function () {
+        activate(key);
+      });
+      el.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && key !== 'next') {
+          /* Links already activate natively on Enter; Space needs help. */
+          e.preventDefault();
+          activate(key);
+        } else if (e.key === ' ') {
+          e.preventDefault();
+          activate(key);
+        }
+      });
+    });
+
+    function expire(now) {
+      Array.from(active.keys()).forEach(function (k) {
+        if (active.get(k) <= now) hide(k);
+      });
+    }
+
+    /* Mobile cycle: strictly one callout at a time, each living 6.5 to
+       8.5s. When one expires it fades out and the next starts only after
+       the 400ms gap, so two never overlap. */
+    function mobileTick(now) {
+      var keys = Array.from(active.keys());
+      if (keys.length > 1) {
+        keys.sort(function (a, b) {
+          return active.get(b) - active.get(a);
+        });
+        keys.slice(1).forEach(hide);
+        keys = keys.slice(0, 1);
+      }
+      if (keys.length && active.get(keys[0]) <= now) {
+        hide(keys[0]);
+        keys = [];
+        mobileGapUntil = now + 400;
+        if (capEl) capEl.classList.add('cap-hide');
+      }
+      if (!keys.length && now >= mobileGapUntil) {
+        var pool = Array.from(pieceEls.keys()).filter(function (k) {
+          return k !== lastMobileKey;
+        });
+        if (!pool.length) return;
+        lastMobileKey = pool[(Math.random() * pool.length) | 0];
+        show(lastMobileKey, 6500 + Math.random() * 2000);
+      }
+    }
+
+    function tick() {
+      if (hoverPaused || focusPaused || document.hidden || !heroVisible) return;
+      var now = Date.now();
+      if (reduced) {
+        expire(now);
+        return;
+      }
+      if (mobileQ.matches) {
+        mobileTick(now);
+        return;
+      }
+      expire(now);
+      if (active.size < target && Math.random() < 0.65) {
+        var used = new Set(Array.from(active.keys()).map(slotOf));
+        var order = Array.from(pieceEls.keys());
+        var free = order.filter(function (k) {
+          return !active.has(k) && !used.has(slotOf(k));
+        });
+        if (free.length) show(free[(Math.random() * free.length) | 0], 4000 + Math.random() * 5000);
+      }
+      if (Math.random() < 0.08) target = 2 + ((Math.random() * 3) | 0);
+    }
+
+    var EASE = 'cubic-bezier(.16,1,.3,1)';
+
+    function assemble() {
+      var ordered = Array.from(pieceEls.values()).sort(function (a, b) {
+        return parseInt(a.dataset.order || '0', 10) - parseInt(b.dataset.order || '0', 10);
+      });
+      var flights = [];
+      ordered.forEach(function (el, i) {
+        el.style.opacity = '1';
+        if (reduced) return;
+        var ax = parseFloat(el.dataset.ax || '328');
+        var ay = parseFloat(el.dataset.ay || '342');
+        var ang = Math.atan2(ay - 342, ax - 328);
+        var dist = 700 + Math.random() * 500;
+        var rot = (Math.random() < 0.5 ? -1 : 1) * (30 + Math.random() * 60);
+        try {
+          var anim = el.animate(
+            [
+              {
+                transform:
+                  'translate(' +
+                  Math.round(Math.cos(ang) * dist) +
+                  'px,' +
+                  Math.round(Math.sin(ang) * dist) +
+                  'px) rotate(' +
+                  Math.round(rot) +
+                  'deg) scale(.55)',
+                opacity: '0',
+              },
+              { opacity: '1', offset: 0.3 },
+              { transform: 'none', opacity: '1' },
+            ],
+            {
+              duration: 1500 + Math.random() * 400,
+              delay: i * 90,
+              easing: EASE,
+              fill: 'backwards',
+            },
+          );
+          if (anim && anim.finished) flights.push(anim.finished);
+        } catch (err) {
+          /* No Web Animations: the piece is already visible, skip it. */
+        }
+      });
+      var done = function () {
+        if (mark) mark.classList.add('done');
+        if (reduced) {
+          var fixed = (stage.dataset.fixed || '')
+            .split(' ')
+            .filter(function (k) {
+              return pieceEls.has(k);
+            });
+          fixed.forEach(function (k) {
+            show(k, Infinity);
+          });
+        } else {
+          show('arrow', mobileQ.matches ? 7000 : 6000);
+        }
+        timer = window.setInterval(tick, 600);
+      };
+      if (flights.length) {
+        Promise.all(flights).then(done, done);
+      } else {
+        done();
+      }
+    }
+
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(
+        function (entries) {
+          heroVisible = entries.some(function (e) {
+            return e.isIntersecting;
+          });
+        },
+        { threshold: 0 },
+      );
+      io.observe(stage);
+    }
+
+    /* Rail markers track label positions across resizes. */
+    if ('ResizeObserver' in window && heroRoot) {
+      var mro = new ResizeObserver(function () {
+        refreshMarker('L');
+        refreshMarker('R');
+      });
+      mro.observe(heroRoot);
+    }
+
+    assemble();
+  })();
+</script>
+
+<style>
+  .hero-stage {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1000 / 620;
+    container-type: inline-size;
+    /* Scroll-exit knob: final scale of "One system." so it finishes at
+       about 88% of the stage width. At a 1200px stage the span measures
+       about 290px (5.26em at 55.2px Fraunces 600); 0.88 x 1200 / 290 is
+       3.64, rounded to 3.6. Tune by eye: raise it if the ending reads
+       narrow, lower it if the span touches the stage edges. */
+    --one-system-final-scale: 3.6;
+  }
+
+  .hero-mark {
+    position: absolute;
+    left: 33%;
+    top: 16.94%;
+    width: 34%;
+    aspect-ratio: 656 / 684;
+    transition: filter 0.8s ease;
+    /* Paint above the growing headline (which comes later in the DOM) so
+       scattering pieces stay on top; the filter already creates a
+       stacking context, so sibling order is the only thing this changes. */
+    z-index: 1;
+  }
+  /* Soft glow once the pieces have landed. Light: indigo shadow, no neon. */
+  .hero-mark.done {
+    filter: drop-shadow(0 18px 32px color-mix(in srgb, var(--color-primary) 30%, transparent));
+  }
+  /* Dark: cyan-teal glow. The data-theme ancestor is :global because it lives
+     on <html>, which Astro never scopes; scoping it would match nothing. */
+  :global([data-theme='dark']) .hero-mark.done {
+    filter: drop-shadow(0 0 44px color-mix(in srgb, var(--color-accent) 45%, transparent));
+  }
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme='light'])) .hero-mark.done {
+      filter: drop-shadow(0 0 44px color-mix(in srgb, var(--color-accent) 45%, transparent));
+    }
+  }
+
+  /* Hidden until the script starts the fly-in; the noscript style below is
+     the no-JavaScript fallback. */
+  .pc {
+    position: absolute;
+    opacity: 0;
+  }
+  .pc img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    user-select: none;
+    transition: transform 0.25s ease, filter 0.25s ease;
+  }
+  .pc.lit img {
+    filter: brightness(1.1);
+  }
+  /* Hover lift and brighten only where hovering is real: on touch a tap
+     would otherwise leave the hot state stuck on the piece. Taps use the
+     pinned lit state instead. Keyboard focus still adds .hot for its lift
+     on hover-capable devices. */
+  @media (hover: hover) {
+    .pc.hot img {
+      transform: translate(var(--hx), var(--hy));
+      filter: brightness(1.18) saturate(1.1);
+    }
+  }
+
+  .hit {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .hit polygon {
+    cursor: pointer;
+  }
+  /* No outline on the hit areas: browsers draw SVG outlines as the
+     bounding box, so clicking a piece showed a stray rectangle. Keyboard
+     focus instead gets a stroke that follows the piece's real shape. */
+  .hit polygon,
+  .hit a {
+    outline: none;
+  }
+  .hit polygon:focus-visible,
+  .hit a:focus-visible polygon {
+    stroke: var(--color-accent-strong);
+    stroke-width: 3;
+    stroke-linejoin: round;
+  }
+
+  .lines {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: visible;
+  }
+  .lines path {
+    fill: none;
+    stroke: var(--color-accent-strong);
+    stroke-width: 1.6;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    transition: stroke-dashoffset 0.8s ease;
+  }
+  .lines path.on {
+    stroke-dashoffset: 0;
+  }
+  /* Thinner in dark mode, where the glow already carries the line. */
+  :global([data-theme='dark']) .lines path {
+    stroke-width: 1.3;
+  }
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme='light'])) .lines path {
+      stroke-width: 1.3;
+    }
+  }
+  .lines circle {
+    fill: var(--color-accent-strong);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  .lines circle.on {
+    opacity: 1;
+  }
+
+  /* Labels sit beside their slot dot: L labels extend left (right-aligned),
+     R labels extend right. translateY lifts the block so the dot meets the
+     name line, and the 120-unit slot spacing keeps neighbours apart. */
+  .lb {
+    position: absolute;
+    width: 21%;
+    opacity: 0;
+    transition: opacity 0.7s ease;
+    pointer-events: none;
+  }
+  .lb.on {
+    opacity: 1;
+  }
+  .lb.L {
+    transform: translate(-100%, -0.75em);
+    text-align: right;
+    padding-right: 14px;
+  }
+  .lb.R {
+    transform: translate(0, -0.75em);
+    padding-left: 14px;
+  }
+  .lb b {
+    display: block;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 11px;
+    font-size: clamp(8px, 1.05cqw, 13px);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-accent-strong);
+    margin-bottom: 3px;
+  }
+  .lb span {
+    display: block;
+    font-size: 13px;
+    font-size: clamp(10px, 1.3cqw, 15px);
+    line-height: 1.4;
+    color: var(--color-text);
+  }
+
+  /* Transparent shells for the scroll exit: stage-sized boxes with no
+     visual effect of their own. Clicks pass through; the copy keeps its
+     own pointer events so the headline stays selectable. */
+  .hero-callouts {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .hero-copy-outer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .hero-copy-outer .hero-copy {
+    pointer-events: auto;
+  }
+
+  /* Headline and support line in the empty band under the logo (77 to 98
+     percent of stage height), clear of the logo above and the labels
+     beside it. Out of flow, so stage sizing is untouched. Fades up the
+     moment the pieces land: the rule reaches through the scroll-exit
+     shell, since .hero-copy itself is no longer a sibling of .hero-mark. */
+  .hero-copy {
+    position: absolute;
+    left: 4%;
+    right: 4%;
+    top: 77%;
+    bottom: 1%;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .hero-mark.done ~ .hero-copy-outer .hero-copy {
+    opacity: 1;
+    transform: none;
+  }
+  .hero-title {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 28px;
+    font-size: clamp(28px, 4.6cqw, 56px);
+    line-height: 1.1;
+    color: var(--color-text);
+  }
+  /* First sentence stays glued: breaks may only happen between sentences,
+     as before. Letters and the second sentence are inline-blocks so the
+     scroll transforms apply (transforms ignore plain inline boxes). */
+  .hl-a {
+    white-space: nowrap;
+  }
+  .hl-letter,
+  .hl-b {
+    display: inline-block;
+  }
+  .hero-support {
+    margin: 0.6em auto 0;
+    max-width: 38em;
+    font-size: 12px;
+    font-size: clamp(12px, 1.35cqw, 17px);
+    line-height: 1.5;
+    color: var(--color-text-muted);
+  }
+
+  /* Mobile caption under the logo. On desktop it is visually hidden but
+     still live, so screen readers hear the current callout. Fixed height
+     fits the name plus the longest description on two lines, so swapping
+     callouts never moves the layout. The 400ms fade is the mobile
+     crossfade; desktop swaps are instant under the hidden clipping. */
+  .cap {
+    text-align: center;
+    margin: 10px 20px 0;
+    min-height: 4.6em;
+    font-size: 15px;
+    color: var(--color-text-muted);
+    transition: opacity 0.4s ease;
+  }
+  .cap-hide {
+    opacity: 0;
+  }
+  .cap b {
+    display: block;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-accent-strong);
+  }
+  @media (min-width: 720px) {
+    .cap {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      padding: 0;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      clip-path: inset(50%);
+      white-space: nowrap;
+      border: 0;
+    }
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  @media (max-width: 719px) {
+    .hero-stage {
+      aspect-ratio: auto;
+    }
+    .hero-mark {
+      position: relative;
+      left: auto;
+      top: auto;
+      width: min(84%, 380px);
+      margin: 4px auto 0;
+    }
+    .lines,
+    .lb {
+      display: none;
+    }
+    /* In-flow order on mobile: logo, caption, headline, support. The fade
+       still runs when the pieces land; the title drops to about 30px so
+       the line fits a 360px screen with room to spare. */
+    .hero-copy-outer {
+      position: static;
+    }
+    .hero-copy {
+      position: static;
+      padding: 20px 12px 0;
+    }
+    .hero-title {
+      font-size: 28px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-mark,
+    .hero-copy,
+    .cap,
+    .pc img,
+    .lines path,
+    .lines circle,
+    .lb {
+      transition: none;
+    }
+  }
+
+  /* ---- Pinned scroll exit (desktop only, motion-safe, view-timeline
+     browsers only) ----
+     The logo holds assembled 0 to 20%, drifts apart 20 to 70% (130px times
+     depth, rotation up to 16deg times depth), flies out 70 to 100% (650px
+     times depth) fading 82 to 100%. Opacity is specified only from 82% so
+     the pre-JS hidden state and the WAAPI assembly underneath are left
+     alone; the hover transform on the img is untouched. */
+  @supports (animation-timeline: view()) {
+    @media (min-width: 720px) and (prefers-reduced-motion: no-preference) {
+      /* Whole-logo zoom 15 to 100%: scale 1 to 1.5. */
+      .hero-mark {
+        animation: hero-mark-zoom linear both;
+        animation-timeline: --hero;
+        animation-range: contain 0% contain 100%;
+      }
+      @keyframes hero-mark-zoom {
+        0%, 15% { transform: scale(1); }
+        100% { transform: scale(1.5); }
+      }
+      /* Callouts and leader lines fade as one shell 0 to 18%. */
+      .hero-callouts {
+        animation: hero-callouts-out linear both;
+        animation-timeline: --hero;
+        animation-range: contain 0% contain 100%;
+      }
+      @keyframes hero-callouts-out {
+        0% { opacity: 1; }
+        18%, 100% { opacity: 0; }
+      }
+      .pc {
+        animation: hero-piece-out linear both;
+        animation-timeline: --hero;
+        animation-range: contain 0% contain 100%;
+      }
+      @keyframes hero-piece-out {
+        0%, 20% { transform: none; }
+        70% {
+          transform:
+            translate(calc(var(--ux) * 130px * var(--depth)), calc(var(--uy) * 130px * var(--depth)))
+            rotate(calc(var(--rs) * 16deg * var(--depth)));
+        }
+        82% { opacity: 1; }
+        100% {
+          opacity: 0;
+          transform:
+            translate(calc(var(--ux) * 650px * var(--depth)), calc(var(--uy) * 650px * var(--depth)))
+            rotate(calc(var(--rs) * 16deg * var(--depth)));
+        }
+      }
+      /* Headline choreography. "Many pieces." scatters letter by letter,
+         each with a staggered range (offset --o in percent, from the
+         frontmatter math); "One system." grows to the stage centre and
+         never fades; the support line is gone by 16%. The shell itself
+         only positions now. Opacity on the letters starts at 1 because
+         the parent copy governs pre-reveal visibility. */
+      .hl-letter {
+        animation: hero-letter-out linear both;
+        animation-timeline: --hero;
+        animation-range: contain calc(10% + var(--o) * 1%) contain calc(50% + var(--o) * 1%);
+      }
+      @keyframes hero-letter-out {
+        0% { transform: none; opacity: 1; }
+        60% { opacity: 1; }
+        100% { transform: translate(var(--dx), var(--dy)) rotate(var(--r)); opacity: 0; }
+      }
+      .hl-b {
+        transform-origin: center;
+        animation: hero-one-out linear both;
+        animation-timeline: --hero;
+        animation-range: contain 18% contain 100%;
+      }
+      @keyframes hero-one-out {
+        /* Colour finishes by ~67% timeline (about 60% of the 18 to 100%
+           range); the span rises to the stage centre and holds opacity 1
+           to the end. -19cqw moves the line centre (about 81% of stage
+           height) to the stage middle (50% of 62cqw). */
+        0% { transform: translateY(0) scale(1); color: var(--color-text); }
+        67% { color: var(--color-accent-strong); }
+        100% {
+          transform: translateY(-19cqw) scale(var(--one-system-final-scale));
+          color: var(--color-accent-strong);
+        }
+      }
+      .hero-support {
+        animation: hero-support-out linear both;
+        animation-timeline: --hero;
+        animation-range: contain 0% contain 16%;
+      }
+      @keyframes hero-support-out {
+        0% { opacity: 1; }
+        16%, 100% { opacity: 0; }
+      }
+    }
+  }
+</style>
