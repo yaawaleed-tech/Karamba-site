@@ -148,6 +148,7 @@ const HL_A: HlLetter[] = HL_A_TEXT.split('').map((ch, i) => ({
               alt=""
               decoding="async"
               draggable="false"
+              fetchpriority="high"
             />
           </div>
         );
@@ -224,6 +225,22 @@ const HL_A: HlLetter[] = HL_A_TEXT.split('').map((ch, i) => ({
     <b id="hero-cap-name"></b><span id="hero-cap-desc"></span>
   </p>
 
+  {/* Phone facet dots, in scheduler order: the lit dot names the facet
+      the caption belongs to. Hidden on desktop. */}
+  <div class="dots" role="group" aria-label="Facet selector">
+    {HERO_FACETS.map((f) => (
+      <button
+        type="button"
+        class="dot"
+        data-facet={f.key}
+        aria-label={`Show ${f.name}`}
+        aria-pressed="false"
+      >
+        <span aria-hidden="true"></span>
+      </button>
+    ))}
+  </div>
+
   {/* Scroll-exit shell around the headline: the lift and fade animate
       this box so .hero-copy keeps its own reveal transition. */}
   <div class="hero-copy-outer">
@@ -277,7 +294,50 @@ const HL_A: HlLetter[] = HL_A_TEXT.split('').map((ch, i) => ({
     var capDesc = document.getElementById('hero-cap-desc');
     var capEl = stage.querySelector('.cap');
     var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var mobileQ = window.matchMedia('(max-width: 719px)');
+    var mobileQ = window.matchMedia('(max-width: 719.98px)');
+    var coarseQ = window.matchMedia('(pointer: coarse)');
+
+    /* Phone exit geometry for "One system.", measured from LAYOUT so
+       transforms cannot feed back into the numbers. Both values land on
+       #hero-track next to each other and the keyframes read them there.
+       scale: 0.87 of the viewport over the span's own width.
+       dx: distance from the span's centre to the track's centre, because
+       the span sits in the right half of the one-line headline at rest.
+       If either measurement is unusable, the CSS fallbacks in global.css
+       stay in charge. */
+    var hlB = stage.querySelector('.hl-b');
+    var heroTrack = document.getElementById('hero-track');
+    function offsetCentreX(el) {
+      var x = 0;
+      var node = el;
+      while (node && node !== heroTrack) {
+        x += node.offsetLeft || 0;
+        node = node.offsetParent;
+      }
+      return x;
+    }
+    function measureOneSystem() {
+      if (!hlB || !heroTrack) return;
+      var w = hlB.offsetWidth;
+      if (!w) return;
+      var scale = (0.87 * window.innerWidth) / w;
+      if (scale < 1.2 || scale > 6) return;
+      heroTrack.style.setProperty('--one-system-final-scale', scale.toFixed(3));
+      var dx = heroTrack.clientWidth / 2 - (offsetCentreX(hlB) + w / 2);
+      if (isFinite(dx)) {
+        heroTrack.style.setProperty('--one-system-dx', dx.toFixed(1) + 'px');
+      }
+    }
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(measureOneSystem);
+    } else {
+      measureOneSystem();
+    }
+    var resizeTimer = 0;
+    window.addEventListener('resize', function () {
+      clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(measureOneSystem, 200);
+    });
 
     var pieceEls = new Map();
     var labelEls = new Map();
@@ -292,6 +352,10 @@ const HL_A: HlLetter[] = HL_A_TEXT.split('').map((ch, i) => ({
       lineGroups.set(el.dataset.facet, el);
     });
     var hitEls = Array.from(stage.querySelectorAll('.hit [data-facet]'));
+    var dotEls = new Map();
+    stage.querySelectorAll('.dots .dot').forEach(function (el) {
+      dotEls.set(el.dataset.facet, el);
+    });
 
     function slotOf(key) {
       var lb = labelEls.get(key);
@@ -346,6 +410,11 @@ const HL_A: HlLetter[] = HL_A_TEXT.split('').map((ch, i) => ({
     var hoverPaused = false;
     var focusPaused = false;
     var heroVisible = true;
+    /* True only while the hero still sits at the top of the page. Once the
+       visitor scrolls into the phone exit the timed captions stop, so they
+       never fight the scroll. Driven by a 1px sentinel, not a scroll
+       listener. */
+    var atRest = true;
     var timer = 0;
 
     function setOn(key, v) {
@@ -359,6 +428,11 @@ const HL_A: HlLetter[] = HL_A_TEXT.split('').map((ch, i) => ({
       }
       var pc = pieceEls.get(key);
       if (pc) pc.classList.toggle('lit', v);
+      var dot = dotEls.get(key);
+      if (dot) {
+        dot.classList.toggle('on', v);
+        dot.setAttribute('aria-pressed', v ? 'true' : 'false');
+      }
     }
 
     function show(key, ms) {
@@ -401,13 +475,16 @@ const HL_A: HlLetter[] = HL_A_TEXT.split('').map((ch, i) => ({
         Array.from(active.keys()).forEach(function (k) {
           if (k !== key) hide(k);
         });
+        /* Resume the fixed order from the facet just tapped. */
+        var idx = PHONE_ORDER.indexOf(key);
+        if (idx >= 0) phoneCursor = idx;
       } else {
         var slot = slotOf(key);
         Array.from(active.keys()).forEach(function (k) {
           if (k !== key && slotOf(k) === slot) hide(k);
         });
       }
-      show(key, mobile ? 10000 : 9000);
+      show(key, mobile ? 7000 : 9000);
     }
 
     function activate(key) {
@@ -442,6 +519,12 @@ const HL_A: HlLetter[] = HL_A_TEXT.split('').map((ch, i) => ({
         focusPaused = false;
       });
       el.addEventListener('click', function () {
+        if (coarseQ.matches && wrap) {
+          wrap.classList.add('pulse');
+          window.setTimeout(function () {
+            wrap.classList.remove('pulse');
+          }, 120);
+        }
         activate(key);
       });
       el.addEventListener('keydown', function (e) {
@@ -456,15 +539,49 @@ const HL_A: HlLetter[] = HL_A_TEXT.split('').map((ch, i) => ({
       });
     });
 
+    dotEls.forEach(function (el, key) {
+      el.addEventListener('click', function () {
+        activate(key);
+      });
+    });
+
     function expire(now) {
       Array.from(active.keys()).forEach(function (k) {
         if (active.get(k) <= now) hide(k);
       });
     }
 
-    /* Mobile cycle: strictly one callout at a time, each living 6.5 to
-       8.5s. When one expires it fades out and the next starts only after
-       the 400ms gap, so two never overlap. */
+    /* Phone caption cycle (Chunk 3B3): strictly one callout at a time,
+       walked in a fixed order so it reads as a tour of the logo rather
+       than random flicker. Dwell comes from --phone-caption-dwell
+       (reduced motion uses 6000ms and no crossfade). When one expires it
+       fades out and the next starts only after the crossfade gap, so two
+       never overlap. Taps pin and the cycle resumes from that facet. */
+    var PHONE_ORDER = [
+      'arrow',
+      'core',
+      'education',
+      'commerce',
+      'logistics',
+      'automation',
+      'cloud',
+      'intelligence',
+      'next',
+    ];
+    var phoneCursor = -1;
+    function phoneDwell() {
+      if (reduced) return 6000;
+      var base = parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue('--phone-caption-dwell'),
+      );
+      if (!isFinite(base) || !base) return 4200;
+      /* Plus or minus 600ms so it does not feel mechanical. */
+      return base + (Math.random() * 1200 - 600);
+    }
+    function nextInOrder() {
+      phoneCursor = (phoneCursor + 1) % PHONE_ORDER.length;
+      return PHONE_ORDER[phoneCursor];
+    }
     function mobileTick(now) {
       var keys = Array.from(active.keys());
       if (keys.length > 1) {
@@ -477,21 +594,19 @@ const HL_A: HlLetter[] = HL_A_TEXT.split('').map((ch, i) => ({
       if (keys.length && active.get(keys[0]) <= now) {
         hide(keys[0]);
         keys = [];
-        mobileGapUntil = now + 400;
+        mobileGapUntil = now + 300;
         if (capEl) capEl.classList.add('cap-hide');
       }
       if (!keys.length && now >= mobileGapUntil) {
-        var pool = Array.from(pieceEls.keys()).filter(function (k) {
-          return k !== lastMobileKey;
-        });
-        if (!pool.length) return;
-        lastMobileKey = pool[(Math.random() * pool.length) | 0];
-        show(lastMobileKey, 6500 + Math.random() * 2000);
+        var key = nextInOrder();
+        if (!pieceEls.has(key)) return;
+        lastMobileKey = key;
+        show(key, phoneDwell());
       }
     }
 
     function tick() {
-      if (hoverPaused || focusPaused || document.hidden || !heroVisible) return;
+      if (hoverPaused || focusPaused || document.hidden || !heroVisible || !atRest) return;
       var now = Date.now();
       if (reduced) {
         expire(now);
@@ -590,6 +705,22 @@ const HL_A: HlLetter[] = HL_A_TEXT.split('').map((ch, i) => ({
         { threshold: 0 },
       );
       io.observe(stage);
+
+      /* 1px sentinel at the very top of the track: it leaves the viewport
+         as soon as the visitor scrolls down, which pauses the caption
+         scheduler for the rest of the phone exit. */
+      var sentinel = heroTrack && heroTrack.querySelector('.hero-sentinel');
+      if (sentinel) {
+        var sio = new IntersectionObserver(
+          function (entries) {
+            atRest = entries.some(function (e) {
+              return e.isIntersecting;
+            });
+          },
+          { threshold: 0 },
+        );
+        sio.observe(sentinel);
+      }
     }
 
     /* Rail markers track label positions across resizes. */
@@ -602,6 +733,42 @@ const HL_A: HlLetter[] = HL_A_TEXT.split('').map((ch, i) => ({
     }
 
     assemble();
+
+    /* Dev-only readout (?hero=debug). import.meta.env.DEV is replaced with
+       false at build time, so this whole block is tree-shaken out of the
+       production bundle and nothing of it ships. */
+    if (import.meta.env.DEV && window.location.search.includes('hero=debug')) {
+      var box = document.createElement('pre');
+      box.setAttribute('aria-hidden', 'true');
+      box.style.cssText =
+        'position:fixed;top:6px;right:6px;z-index:99999;margin:0;padding:6px 8px;' +
+        'font:10px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;color:#EFEADF;' +
+        'background:rgba(19,28,54,.86);border-radius:6px;pointer-events:none;' +
+        'white-space:pre;text-align:right';
+      document.body.appendChild(box);
+      function debugFrame() {
+        var tr = heroTrack;
+        var p = 0;
+        if (tr) {
+          var rect = tr.getBoundingClientRect();
+          var dist = tr.offsetHeight - parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hero-scroll-distance-phone'));
+          var span = dist > 0 ? dist : tr.offsetHeight;
+          p = Math.max(0, Math.min(100, ((-rect.top) / span) * 100));
+        }
+        var cs = hlB ? getComputedStyle(hlB) : null;
+        var rootStyle = heroTrack ? heroTrack.style : null;
+        box.textContent =
+          'progress ' + p.toFixed(1) + '%\n' +
+          'hl-b transform: ' + (cs ? cs.transform : 'n/a') + '\n' +
+          'hl-b opacity: ' + (cs ? cs.opacity : 'n/a') + '\n' +
+          'scale: ' + (rootStyle ? rootStyle.getPropertyValue('--one-system-final-scale') || 'fallback' : 'n/a') + '\n' +
+          'dx: ' + (rootStyle ? rootStyle.getPropertyValue('--one-system-dx') || 'fallback' : 'n/a') + '\n' +
+          'innerWidth: ' + window.innerWidth + '\n' +
+          'cycle: ' + (timer && atRest && !document.hidden && !reduced ? 'running' : 'paused');
+        requestAnimationFrame(debugFrame);
+      }
+      requestAnimationFrame(debugFrame);
+    }
   })();
 </script>
 
@@ -666,7 +833,7 @@ const HL_A: HlLetter[] = HL_A_TEXT.split('').map((ch, i) => ({
      would otherwise leave the hot state stuck on the piece. Taps use the
      pinned lit state instead. Keyboard focus still adds .hot for its lift
      on hover-capable devices. */
-  @media (hover: hover) {
+  @media (hover: hover) and (pointer: fine) {
     .pc.hot img {
       transform: translate(var(--hx), var(--hy));
       filter: brightness(1.18) saturate(1.1);
@@ -863,6 +1030,11 @@ const HL_A: HlLetter[] = HL_A_TEXT.split('').map((ch, i) => ({
     text-transform: uppercase;
     color: var(--color-accent-strong);
   }
+
+  /* Facet dots live on phones only; hidden everywhere else. */
+  .dots {
+    display: none;
+  }
   @media (min-width: 720px) {
     .cap {
       position: absolute;
@@ -923,6 +1095,8 @@ const HL_A: HlLetter[] = HL_A_TEXT.split('').map((ch, i) => ({
 
   @media (prefers-reduced-motion: reduce) {
     .hero-mark,
+    .hero-mark::before,
+    .dot span,
     .hero-copy,
     .cap,
     .pc img,
@@ -1024,6 +1198,242 @@ const HL_A: HlLetter[] = HL_A_TEXT.split('').map((ch, i) => ({
       @keyframes hero-support-out {
         0% { opacity: 1; }
         16%, 100% { opacity: 0; }
+      }
+    }
+  }
+
+  /* Touch rules: every coarse-pointer screen, any width. */
+  @media (pointer: coarse) {
+    .hit polygon,
+    .hit a,
+    .dots .dot {
+      touch-action: manipulation;
+    }
+    /* 120ms tap feedback, added by the pin path on coarse pointers only. */
+    .pc.pulse img {
+      filter: brightness(1.28);
+    }
+  }
+
+  /* ---- Mobile base (Chunk 3A): phone hero below 720px. Desktop rules
+     above are untouched; this block comes last so equal-specificity ties
+     resolve here. No scroll-driven animation in this chunk. */
+  @media (max-width: 719.98px) {
+    /* Logo fits the viewport height: the height budget times the 656/684
+       mark ratio, capped by viewport width and an absolute max. */
+    .hero-mark {
+      width: min(78vw, 420px, calc((100svh - var(--header-h) - 320px) * 0.959));
+    }
+    /* Drop-shadow is expensive on phones: no filter once landed, in every
+       theme (mirroring the three glow selectors above). */
+    .hero-mark.done {
+      filter: none;
+    }
+    :global([data-theme='dark']) .hero-mark.done {
+      filter: none;
+    }
+    @media (prefers-color-scheme: dark) {
+      :global(:root:not([data-theme='light'])) .hero-mark.done {
+        filter: none;
+      }
+    }
+    /* Static radial glow behind the logo instead: opacity-only reveal on
+       landing, no filter, no animation. */
+    .hero-mark::before {
+      content: '';
+      position: absolute;
+      inset: -22%;
+      z-index: -1;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+      background: radial-gradient(
+        closest-side,
+        color-mix(in srgb, var(--color-primary) 13%, transparent),
+        transparent 70%
+      );
+    }
+    :global([data-theme='dark']) .hero-mark::before {
+      background: radial-gradient(
+        closest-side,
+        color-mix(in srgb, var(--color-accent-strong) 38%, transparent),
+        transparent 72%
+      );
+    }
+    @media (prefers-color-scheme: dark) {
+      :global(:root:not([data-theme='light'])) .hero-mark::before {
+        background: radial-gradient(
+          closest-side,
+          color-mix(in srgb, var(--color-accent-strong) 38%, transparent),
+          transparent 72%
+        );
+      }
+    }
+    .hero-mark.done::before {
+      opacity: 1;
+    }
+    /* Growth safety: the pinned hero only clips sideways, so the grown
+       "One system." can reach the viewport edges without producing a
+       horizontal scrollbar. */
+    .hero-stage {
+      overflow-x: clip;
+    }
+    .hero-inner {
+      overflow-x: clip;
+    }
+    .hero-support {
+      font-size: 14px;
+    }
+    .cap {
+      margin: 16px 20px 0;
+      /* 300ms crossfade, matching the scheduler's gap. */
+      transition: opacity 0.3s ease;
+    }
+    /* Reduced motion: the cycle still runs, but without the fade. */
+    @media (prefers-reduced-motion: reduce) {
+      .cap {
+        transition: none;
+      }
+    }
+    .hero-copy {
+      padding: 16px 12px 0;
+    }
+    /* Facet dots under the caption: 24px touch targets, small visuals. */
+    .dots {
+      display: flex;
+      justify-content: center;
+      gap: 2px;
+      margin: 16px 0 0;
+      padding: 0;
+    }
+    .dot {
+      appearance: none;
+      border: 0;
+      background: transparent;
+      margin: 0;
+      padding: 9px;
+      line-height: 0;
+      cursor: pointer;
+    }
+    .dot span {
+      display: block;
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--color-border);
+      transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+    .dot.on span {
+      background: var(--color-accent-strong);
+      transform: scale(1.35);
+    }
+    .dot:focus-visible {
+      outline: 2px solid var(--color-accent-strong);
+      outline-offset: 2px;
+    }
+  }
+
+  /* ---- Phone hero exit (Chunk 3B2) ----
+     Simple scatter sequence, phone only. Gated on the same support test as
+     desktop plus the phone width and motion preference, so Firefox, older
+     iOS and reduced motion keep the 3A hero untouched. Knobs live on :root
+     in global.css. Every rule animates transform, opacity or visibility
+     only, and each element carries a single animation. */
+  @supports (animation-timeline: view()) {
+    @media (max-width: 719.98px) and (prefers-reduced-motion: no-preference) {
+      /* Exit order: caption, dots, support line and scroll cue are gone
+         by 10% and become visibility:hidden so nothing can be tapped
+         afterwards. */
+      .cap,
+      .dots,
+      .hero-support {
+        animation: phone-ui-out linear both;
+        animation-timeline: --hero;
+        animation-range: contain 0% contain 100%;
+      }
+      @keyframes phone-ui-out {
+        0% { opacity: 1; visibility: visible; }
+        10%, 100% { opacity: 0; visibility: hidden; }
+      }
+      /* Letters scatter and are gone by 50%. */
+      .hl-letter {
+        animation: phone-letter-out linear both;
+        animation-timeline: --hero;
+        animation-range: contain 8% contain 50%;
+      }
+      @keyframes phone-letter-out {
+        0% { transform: none; opacity: 1; }
+        60% { opacity: 1; }
+        100% {
+          transform:
+            translate(calc(var(--dx) * var(--scatter)), calc(var(--dy) * var(--scatter)))
+            rotate(calc(var(--r) * var(--scatter)));
+          opacity: 0;
+        }
+      }
+      /* Logo grows while the pieces drift apart from 12%, keep going to
+         90vw by 100% and are fully faded by 90%. One animation per piece,
+         so drift and fly-out never fight over transform. */
+      .hero-mark {
+        animation: phone-mark-zoom linear both;
+        animation-timeline: --hero;
+        animation-range: contain 0% contain 100%;
+      }
+      @keyframes phone-mark-zoom {
+        0%, 12% { transform: scale(1); }
+        55%, 100% { transform: scale(1.25); }
+      }
+      .pc {
+        animation: phone-piece-out linear both;
+        animation-timeline: --hero;
+        animation-range: contain 0% contain 100%;
+      }
+      @keyframes phone-piece-out {
+        0%, 12% { transform: none; opacity: 1; }
+        55% {
+          transform:
+            translate(calc(var(--ux) * 22vw), calc(var(--uy) * 22vw))
+            rotate(calc(var(--rs) * 12deg * var(--depth)));
+        }
+        78% { opacity: 1; }
+        90%, 100% { opacity: 0; }
+        100% {
+          transform:
+            translate(calc(var(--ux) * 90vw), calc(var(--uy) * 90vw))
+            rotate(calc(var(--rs) * 12deg * var(--depth)))
+            scale(1.4);
+        }
+      }
+      /* "One system." rises to the middle of the pinned view, moves from
+         the right half of the headline line to the horizontal centre
+         (both offsets measured in JS), and grows to the measured scale.
+         Colour settles by 60% and it never fades. */
+      .hl-b {
+        animation: phone-one-out linear both;
+        animation-timeline: --hero;
+        animation-range: contain 15% contain 100%;
+      }
+      @keyframes phone-one-out {
+        0% {
+          transform: translate(0, 0) scale(1);
+          color: var(--color-text);
+        }
+        60% { color: var(--color-accent-strong); }
+        100% {
+          transform:
+            translate(var(--one-system-dx, -22vw), -26svh)
+            scale(var(--one-system-final-scale, 2.4));
+          color: var(--color-accent-strong);
+        }
+      }
+      /* Static glow is gone by 60%. */
+      .hero-mark::before {
+        animation: phone-glow-out linear both;
+        animation-timeline: --hero;
+        animation-range: contain 0% contain 100%;
+      }
+      @keyframes phone-glow-out {
+        0%, 60% { opacity: 1; }
+        100% { opacity: 0; }
       }
     }
   }

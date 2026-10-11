@@ -10,6 +10,10 @@ const HERO_SUPPORT =
 ---
 
 <div class="hero-track" id="hero-track">
+<!-- 1px marker at the very top of the track. It leaves the viewport as
+     soon as the page scrolls, which pauses the phone caption scheduler.
+     No scroll listener involved. -->
+<div class="hero-sentinel" aria-hidden="true"></div>
 <section id="hero" class="hero" data-mk-l="off" data-mk-r="off">
 	<HeroPeriphery />
 	<div class="hero-inner">
@@ -135,6 +139,58 @@ const HERO_SUPPORT =
 			@keyframes hero-cue-out {
 				0% { opacity: 1; }
 				18%, 100% { opacity: 0; }
+			}
+		}
+	}
+
+	/* ---- Mobile base (Chunk 3A): phone hero below 720px. The flex column
+	   is already vertically centred; this only pins the height to the
+	   header variable. The stage stacks logo, caption, dots, headline and
+	   support in order (see HeroMark). */
+	@media (max-width: 719.98px) {
+		.hero {
+			min-height: calc(100svh - var(--header-h));
+		}
+	}
+
+	/* 1px, out of flow, so it never affects layout or sizing. */
+	.hero-sentinel {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 1px;
+		height: 1px;
+		pointer-events: none;
+	}
+
+	/* ---- Phone hero exit (Chunk 3B2): the hero pins for the phone
+	   distance and plays the scatter sequence from scroll. Knobs live on
+	   :root in global.css (--hero-scroll-distance-phone). The header
+	   variable matches desktop because the header markup is identical on
+	   phones, so --header-h-compact already describes it. */
+	@supports (animation-timeline: view()) {
+		@media (max-width: 719.98px) and (prefers-reduced-motion: no-preference) {
+			.hero-track {
+				height: calc(100svh - var(--header-h) + var(--hero-scroll-distance-phone));
+				view-timeline: --hero block;
+				view-timeline-inset: var(--header-h) 0 0 0;
+			}
+			.hero {
+				position: sticky;
+				top: var(--header-h-compact);
+				height: calc(100vh - var(--header-h));
+				height: calc(100svh - var(--header-h));
+			}
+			/* Scroll cue leaves with the rest of the rest-state UI, 0 to
+			   10%, then cannot be tapped. */
+			.scroll-cue-fade {
+				animation: phone-cue-out linear both;
+				animation-timeline: --hero;
+				animation-range: contain 0% contain 100%;
+			}
+			@keyframes phone-cue-out {
+				0% { opacity: 1; visibility: visible; }
+				10%, 100% { opacity: 0; visibility: hidden; }
 			}
 		}
 	}

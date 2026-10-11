@@ -34,6 +34,10 @@ const SHARDS: Shard[] = [
   { left: 90, top: 86, size: 14, dx: 90, dy: 8, rot: -70, delay: -4.4 },
   { left: 97, top: 66, size: 22, dx: 90, dy: -26, rot: 70, delay: -5.1 },
 ];
+
+/* Phone survivors: at most four shards, two per side, spread vertically
+   (indices into SHARDS above). */
+const PHONE_SHARDS = [0, 1, 6, 10];
 ---
 
 <div class="peri" id="hero-peri" data-visible="true" aria-hidden="true">
@@ -48,7 +52,7 @@ const SHARDS: Shard[] = [
   {
     SHARDS.map((s, i) => (
       <div
-        class="shard"
+        class={PHONE_SHARDS.includes(i) ? 'shard shard-phone' : 'shard'}
         style={`left:${s.left}%;top:${s.top}%;width:${s.size}px;height:${s.size}px;clip-path:${SHAPES[i % SHAPES.length]};--dx:${s.dx}px;--dy:${s.dy}px;--rr:${s.rot}deg;animation-delay:${s.delay}s`}
       />
     ))
@@ -87,22 +91,28 @@ const SHARDS: Shard[] = [
 <style>
   /* Strength knobs. Light and dark follow the same three-selector theme
      pattern as tokens.css. --ray-amount is the main strength knob: it is
-     the wrapper opacity that scales both animated ray layers at once. */
+     the wrapper opacity that scales both animated ray layers at once.
+     --ray-amount-phone does the same for the reduced phone layer below
+     720px; setting it to 0 fades the wrapper to fully transparent, which
+     disables the effect (transparent layers skip paint). */
   :global(:root) {
     --ray-color: color-mix(in srgb, var(--color-text) 30%, transparent);
     --ray-line: color-mix(in srgb, var(--color-text) 28%, transparent);
     --ray-amount: 0.55;
+    --ray-amount-phone: 0.3;
   }
   :global([data-theme='dark']) {
     --ray-color: color-mix(in srgb, var(--color-accent-strong) 50%, transparent);
     --ray-line: color-mix(in srgb, var(--color-accent-strong) 30%, transparent);
     --ray-amount: 0.7;
+    --ray-amount-phone: 0.4;
   }
   @media (prefers-color-scheme: dark) {
     :global(:root:not([data-theme='light'])) {
       --ray-color: color-mix(in srgb, var(--color-accent-strong) 50%, transparent);
       --ray-line: color-mix(in srgb, var(--color-accent-strong) 30%, transparent);
       --ray-amount: 0.7;
+      --ray-amount-phone: 0.4;
     }
   }
 
@@ -112,11 +122,8 @@ const SHARDS: Shard[] = [
     overflow: hidden;
     pointer-events: none;
   }
-  @media (max-width: 719px) {
-    .peri {
-      display: none;
-    }
-  }
+  /* Phone rules live in the Chunk 3A block at the end of this stylesheet,
+     where they resolve after the desktop rules. */
   .peri[data-visible='false'] .ray,
   .peri[data-visible='false'] .shard {
     animation-play-state: paused;
@@ -354,6 +361,81 @@ const SHARDS: Shard[] = [
       @keyframes hero-peri-out {
         0% { opacity: 1; }
         18%, 100% { opacity: 0; }
+      }
+    }
+  }
+
+  /* ---- Mobile base (Chunk 3A): light periphery on phones. One streak
+     layer behind an edge-only mask, four shards, no rails. Desktop rules
+     above are untouched; this block comes last so ties resolve here. */
+  @media (max-width: 719.98px) {
+    .ray.two {
+      display: none;
+    }
+    .warp {
+      opacity: var(--ray-amount-phone);
+      -webkit-mask-image:
+        linear-gradient(90deg, #000 0, transparent 18%, transparent 82%, #000 100%),
+        linear-gradient(180deg, transparent 0, #000 16%, #000 84%, transparent 100%);
+      -webkit-mask-composite: source-in;
+      mask-image:
+        linear-gradient(90deg, #000 0, transparent 18%, transparent 82%, #000 100%),
+        linear-gradient(180deg, transparent 0, #000 16%, #000 84%, transparent 100%);
+      mask-composite: intersect;
+    }
+    .shard {
+      display: none;
+    }
+    .shard-phone {
+      display: block;
+    }
+    .rail {
+      display: none;
+    }
+  }
+
+  /* Reduced motion on phones: static streaks at half phone strength, no
+     shards at all (overrides the mobile block above). */
+  @media (max-width: 719.98px) and (prefers-reduced-motion: reduce) {
+    .warp {
+      opacity: calc(var(--ray-amount-phone) * 0.5);
+    }
+    .shard-phone {
+      display: none;
+    }
+  }
+
+  /* Phone hero exit (Chunk 3B2): streaks scale 1 to 2 across the range and
+     fade 45 to 100%; shards are gone by 25%. Same support test, phone width
+     and motion preference as the rest of the sequence. */
+  @supports (animation-timeline: view()) {
+    @media (max-width: 719.98px) and (prefers-reduced-motion: no-preference) {
+      .rw {
+        animation: phone-rays linear both;
+        animation-timeline: --hero;
+        animation-range: contain 0% contain 100%;
+      }
+      @keyframes phone-rays {
+        0% { transform: scale(1); }
+        100% { transform: scale(2); }
+      }
+      .warp {
+        animation: phone-rays-fade linear both;
+        animation-timeline: --hero;
+        animation-range: contain 0% contain 100%;
+      }
+      @keyframes phone-rays-fade {
+        0%, 30% { opacity: var(--ray-amount-phone); }
+        100% { opacity: 0; }
+      }
+      .shards {
+        animation: phone-shards-out linear both;
+        animation-timeline: --hero;
+        animation-range: contain 0% contain 100%;
+      }
+      @keyframes phone-shards-out {
+        0% { opacity: 1; }
+        30%, 100% { opacity: 0; }
       }
     }
   }

@@ -117,6 +117,25 @@ body {
   --header-h-compact: 59px;
   --hero-scroll-distance: 100svh;
   --hero-overlap: 60svh;
+
+  /* ---- Phone hero exit (Chunk 3B2) ----
+     All phone knobs live here, read by HeroMark (CSS + JS), Hero,
+     HeroPeriphery and Services.
+     --hero-scroll-distance-phone: extra pinned scroll length on phones.
+     --hero-overlap-phone: how far the next section rises over the hero.
+     --scatter: multiplier on the letter scatter distance.
+     --one-system-final-scale: measured in JS (see HeroMark) so the grown
+       line lands at 87% of the viewport width; 2.4 is the no-JS fallback.
+     --one-system-dx: measured in JS, the horizontal move that pulls the
+       span from the right half of the headline line to the viewport
+       centre; -22vw is the no-JS fallback.
+     --phone-caption-dwell: how long each at-rest phone caption stays up. */
+  --hero-scroll-distance-phone: 170svh;
+  --hero-overlap-phone: 45svh;
+  --scatter: 0.6;
+  --one-system-final-scale: 2.4;
+  --one-system-dx: -22vw;
+  --phone-caption-dwell: 4200ms;
 }
 [data-theme='dark'] {
   --grain-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.9373 0 0 0 0 0.9176 0 0 0 0 0.8745 0.2126 0.7152 0.0722 0 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
