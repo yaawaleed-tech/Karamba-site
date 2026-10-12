@@ -1,0 +1,61 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import QuoteForm from '../components/QuoteForm.astro';
+import {
+  CONTACT_EMAIL,
+  CONTACT_EMAIL_URL,
+  CONTACT_GITHUB_LABEL,
+  CONTACT_GITHUB_URL,
+  CONTACT_WHATSAPP_DISPLAY,
+  WHATSAPP_QUOTE_URL,
+} from '../data/contact';
+
+const TITLE = 'Get a quote';
+const DESCRIPTION = 'Request a quote from Karamba Technologies.';
+const LINE = 'Tell us what you want to build. We reply within 24 hours.';
+---
+
+<Layout title={TITLE} description={DESCRIPTION}>
+	<Header />
+	<section class="mx-auto max-w-6xl px-6 py-20">
+		<h1 class="max-w-2xl font-heading text-4xl font-bold leading-tight sm:text-5xl sm:leading-tight" style="color: var(--color-text);">
+			{TITLE}
+		</h1>
+		<p class="mt-4 max-w-xl text-lg" style="color: var(--color-text-muted);">
+			{LINE}
+		</p>
+		<div class="mx-auto mt-10 max-w-2xl">
+			<QuoteForm idPrefix="quote-page" successMode="home" />
+		</div>
+		<p class="mt-8 flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium">
+			<a
+				href={WHATSAPP_QUOTE_URL}
+				target="_blank"
+				rel="noopener noreferrer"
+				class="transition-opacity hover:opacity-70"
+				style="color: var(--color-primary);"
+			>
+				WhatsApp: {CONTACT_WHATSAPP_DISPLAY}
+			</a>
+			<a
+				href={CONTACT_EMAIL_URL}
+				class="wrap-anywhere transition-opacity hover:opacity-70"
+				style="color: var(--color-primary);"
+			>
+				{CONTACT_EMAIL}
+			</a>
+			<a
+				href={CONTACT_GITHUB_URL}
+				target="_blank"
+				rel="noopener noreferrer"
+				class="transition-opacity hover:opacity-70"
+				style="color: var(--color-primary);"
+			>
+				{CONTACT_GITHUB_LABEL}
+			</a>
+		</p>
+	</section>
+	<Footer />
+</Layout>

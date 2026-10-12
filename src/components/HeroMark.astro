@@ -160,7 +160,7 @@ const HL_A: HlLetter[] = HL_A_TEXT.split('').map((ch, i) => ({
           const f = facetByKey.get(p.k);
           if (!f) return null;
           return p.k === 'next' ? (
-            <a href="#contact" class="hit-link" data-facet={p.k} aria-label={f.name}>
+            <a href="/quote" class="hit-link" data-facet={p.k} aria-label={f.name}>
               <polygon points={p.poly} fill="transparent" />
             </a>
           ) : (
@@ -487,16 +487,17 @@ const HL_A: HlLetter[] = HL_A_TEXT.split('').map((ch, i) => ({
       show(key, mobile ? 7000 : 9000);
     }
 
-    function activate(key) {
-      pin(key);
-      if (key === 'next') {
-        var contact = document.getElementById('contact');
-        if (contact) {
-          contact.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
-        } else {
-          window.location.hash = '#contact';
-        }
+    function openQuoteDialog(opener) {
+      if (typeof window.__quoteDialogOpen === 'function') {
+        window.__quoteDialogOpen(opener || null);
+      } else {
+        window.location.href = '/quote';
       }
+    }
+
+    function activate(key, el) {
+      pin(key);
+      if (key === 'next') openQuoteDialog(el || null);
     }
 
     hitEls.forEach(function (el) {
@@ -518,23 +519,29 @@ const HL_A: HlLetter[] = HL_A_TEXT.split('').map((ch, i) => ({
         if (wrap) wrap.classList.remove('hot');
         focusPaused = false;
       });
-      el.addEventListener('click', function () {
+      el.addEventListener('click', function (e) {
         if (coarseQ.matches && wrap) {
           wrap.classList.add('pulse');
           window.setTimeout(function () {
             wrap.classList.remove('pulse');
           }, 120);
         }
-        activate(key);
+        if (key === 'next') {
+          // Plain left click opens the dialog; anything else (middle-click,
+          // modifiers) follows the /quote href natively in a new tab.
+          if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+          e.preventDefault();
+          e.stopPropagation();
+          openQuoteDialog(el);
+          return;
+        }
+        activate(key, el);
       });
       el.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' && key !== 'next') {
-          /* Links already activate natively on Enter; Space needs help. */
+        if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          activate(key);
-        } else if (e.key === ' ') {
-          e.preventDefault();
-          activate(key);
+          if (key === 'next') openQuoteDialog(el);
+          else activate(key, el);
         }
       });
     });

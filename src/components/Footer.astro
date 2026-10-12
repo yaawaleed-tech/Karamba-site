@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import logoMark from '../assets/brand/logo-mark.png';
+import { FOOTER_EXPLORE } from '../data/nav';
 
 const year = new Date().getFullYear();
 
@@ -19,13 +20,7 @@ const contactLinks = [
 	},
 ];
 
-const footerNav = [
-	{ href: '#services', label: 'What We Do' },
-	{ href: '#product', label: 'Our Product' },
-	{ href: '#work', label: 'Our Work' },
-	{ href: '#about', label: 'About' },
-	{ href: '#contact', label: 'Contact' },
-];
+const footerNav = FOOTER_EXPLORE;
 ---
 
 <footer

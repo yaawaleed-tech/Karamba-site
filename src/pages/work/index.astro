@@ -1,0 +1,31 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import PagePlaceholder from '../../components/PagePlaceholder.astro';
+import { NAV_MENUS } from '../../data/nav';
+
+const MENU_KEY = 'work';
+
+const menu = NAV_MENUS.find((m) => m.key === MENU_KEY)!;
+
+const TITLE = menu.label;
+const DESCRIPTION = menu.introText;
+---
+
+<Layout title={TITLE} description={DESCRIPTION}>
+	<Header />
+	<PagePlaceholder
+		hubHref="/"
+		hubLabel="Home"
+		title={TITLE}
+		description={DESCRIPTION}
+		children={menu.items.map((item) => ({
+			label: item.name,
+			href: item.href,
+			description: item.description,
+			status: item.status,
+		}))}
+	/>
+	<Footer />
+</Layout>

@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import QuoteDialog from '../components/QuoteDialog.astro';
 
 /* Above-the-fold hero fonts, preloaded by URL below. Same files the
    @font-face rules reference, so the hashed build output is shared. */
@@ -70,7 +71,12 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 		<meta name="generator" content={Astro.generator} />
 	</head>
 	<body>
-		<slot />
+		<a href="#main" class="skip-link">Skip to content</a>
+		<main id="main" tabindex="-1">
+			<slot />
+		</main>
+
+		<QuoteDialog />
 
 		<!-- Without JS there is no observer, so make sure nothing stays hidden -->
 		<noscript>
@@ -188,5 +194,36 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 			reduce.addEventListener('change', sync);
 			sync();
 		</script>
+
+		<style>
+			/* Skip link: out of sight until keyboard focus lands on it. */
+			.skip-link {
+				position: absolute;
+				left: 1rem;
+				top: -4rem;
+				z-index: 100;
+				padding: 0.6rem 1.1rem;
+				border-radius: 999px;
+				background-color: var(--color-primary);
+				color: var(--color-primary-text);
+				font-size: 0.875rem;
+				font-weight: 600;
+				text-decoration: none;
+				transition: top 0.2s ease;
+			}
+			.skip-link:focus-visible {
+				top: 1rem;
+				outline: 2px solid var(--color-accent-strong);
+				outline-offset: 2px;
+			}
+			#main:focus {
+				outline: none;
+			}
+			@media (prefers-reduced-motion: reduce) {
+				.skip-link {
+					transition: none;
+				}
+			}
+		</style>
 	</body>
 </html>

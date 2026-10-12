@@ -3,38 +3,64 @@ import { Image } from 'astro:assets';
 import logoLight from '../assets/brand/logo-full.png';
 import logoDark from '../assets/brand/logo-full-dark.png';
 import ThemeToggle from './ThemeToggle.astro';
+import manifest from '../assets/brand/karamba-pieces/manifest.json';
+import { NAV_MENUS, PRIMARY_ACTION, menuForPath } from '../data/nav';
 
-const navLinks = [
-	{ href: '#services', label: 'What We Do' },
-	{ href: '#product', label: 'Our Product' },
-	{ href: '#work', label: 'Our Work' },
-	{ href: '#about', label: 'About' },
-	{ href: '#contact', label: 'Contact' },
-];
+interface ManifestPiece {
+  k: string;
+  file: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+/* Unprocessed file URLs for the mini logo, same pattern as the hero:
+   byte-identical files, never re-encoded. */
+const pieceUrls = import.meta.glob(
+  '../assets/brand/karamba-pieces/*.webp',
+  { query: '?url', import: 'default', eager: true },
+) as Record<string, string>;
+function pieceUrl(file: string): string {
+  const hit = Object.entries(pieceUrls).find(([path]) => path.endsWith('/' + file));
+  return hit ? hit[1] : '';
+}
+
+const pieces = manifest.pieces as ManifestPiece[];
+const pct = (v: number, base: number) => `${((v / base) * 100).toFixed(3)}%`;
+const current = menuForPath(Astro.url.pathname);
 ---
 
 <header id="site-header" class="sticky top-0 z-50 border-b" style="border-color: var(--color-border);">
 	<div class="header-glow"></div>
 
 	<div id="header-inner" class="relative mx-auto flex max-w-6xl items-center justify-between px-6 transition-all duration-300">
-		<a href="/" class="relative z-10 flex items-center" aria-label="Karamba Technologies home">
+		<a href="/" class="relative z-10 flex items-center" aria-label="Karamba Technologies, home">
 			<Image src={logoLight} alt="Karamba Technologies" id="logo-light" class="header-logo h-9 w-auto transition-all duration-300" widths={[200, 400]} sizes="200px" />
 			<Image src={logoDark} alt="Karamba Technologies" id="logo-dark" class="header-logo hidden h-9 w-auto transition-all duration-300" widths={[200, 400]} sizes="200px" />
 		</a>
 
-		<nav id="desktop-nav" class="relative hidden items-center gap-1 md:flex">
+		<nav id="desktop-nav" aria-label="Primary" class="relative hidden items-center gap-1 md:flex">
 			<span id="nav-underline" class="pointer-events-none absolute rounded-full transition-all duration-300 ease-out" style="background-color: var(--color-bg-subtle); height: 34px; opacity: 0;"></span>
-			{navLinks.map((link) => (
-				<a href={link.href} class="nav-link relative z-10 rounded-full px-4 py-2 text-sm font-medium transition-colors" style="color: var(--color-text);">
-					{link.label}
+			{NAV_MENUS.map((menu) => (
+				<a
+					href={menu.hubHref}
+					class="nav-link relative z-10 rounded-full px-4 py-2 text-sm font-medium transition-colors"
+					style={current?.key === menu.key ? 'color: var(--color-accent);' : 'color: var(--color-text);'}
+					data-menu={menu.key}
+					aria-expanded="false"
+					aria-controls="menu-panel"
+					aria-current={current?.key === menu.key ? 'page' : undefined}
+				>
+					{menu.label}
 				</a>
 			))}
 		</nav>
 
 		<div class="relative z-10 flex items-center gap-3">
 			<ThemeToggle />
-			<a href="#contact" class="cta-shimmer hidden rounded-full px-5 py-2.5 text-sm font-semibold sm:inline-block" style="background-color: var(--color-primary); color: var(--color-primary-text);">
-				<span>Get a quote</span>
+			<a href={PRIMARY_ACTION.href} class="cta-shimmer hidden rounded-full px-5 py-2.5 text-sm font-semibold sm:inline-block" style="background-color: var(--color-primary); color: var(--color-primary-text);">
+				<span>{PRIMARY_ACTION.label}</span>
 			</a>
 
 			<button id="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" class="inline-flex h-10 w-10 items-center justify-center rounded-full border transition-colors md:hidden" style="border-color: var(--color-border); background-color: var(--color-bg-subtle);">
@@ -48,15 +74,72 @@ const navLinks = [
 		</div>
 	</div>
 
+	<!-- Shared dropdown card. One panel, one menu's content visible at a
+	     time; every card is server-rendered so all links exist with or
+	     without JavaScript. -->
+	<div id="menu-panel" class="menu-panel" hidden>
+		{NAV_MENUS.map((menu) => (
+			<div class="menu-card" data-menu-card={menu.key} hidden>
+				<div class="menu-intro-col">
+					<div class="menu-intro">
+						<p class="menu-intro-text">{menu.introText}</p>
+						<a href={menu.hubHref} class="menu-hub-btn">{menu.introButtonText}</a>
+					</div>
+					<div class="menu-logo" aria-hidden="true">
+						{pieces.map((p) => (
+							<img
+								src={pieceUrl(p.file)}
+								alt=""
+								loading="lazy"
+								draggable="false"
+								data-facet={p.k}
+								style={`left:${pct(p.x, 656)};top:${pct(p.y, 684)};width:${pct(p.w, 656)};height:${pct(p.h, 684)}`}
+							/>
+						))}
+					</div>
+				</div>
+				<ul class="menu-items">
+					{menu.items.map((item) => (
+						<li>
+							<a href={item.href} class="menu-item" data-facet={item.facet}>
+								<span class="menu-item-name">{item.name}</span>
+								<span class="menu-item-desc">{item.description}</span>
+								{item.status && <span class="menu-item-status">{item.status}</span>}
+							</a>
+						</li>
+					))}
+				</ul>
+			</div>
+		))}
+	</div>
+
 	<div id="mobile-menu" class="hidden border-t md:hidden" style="border-color: var(--color-border); background-color: var(--color-bg);">
-		<nav class="flex flex-col gap-1 px-6 py-4">
-			{navLinks.map((link) => (
-				<a href={link.href} class="mobile-nav-link rounded-lg px-3 py-3 text-base font-medium" style="color: var(--color-text);">
-					{link.label}
-				</a>
+		<nav aria-label="Mobile" class="flex flex-col gap-1 px-6 py-4">
+			{NAV_MENUS.map((menu) => (
+				<div class="mobile-group">
+					<button
+						type="button"
+						class="mobile-group-btn"
+						aria-expanded="false"
+						aria-controls={`mobile-panel-${menu.key}`}
+					>
+						<span>{menu.label}</span>
+						<span class="mobile-chev" aria-hidden="true"></span>
+					</button>
+					<div id={`mobile-panel-${menu.key}`} class="mobile-group-panel" hidden>
+						<a href={menu.hubHref} class="mobile-nav-link mobile-hub-link">{menu.introButtonText}</a>
+						{menu.items.map((item) => (
+							<a href={item.href} class="mobile-nav-link mobile-item-link">
+								<span class="mobile-item-name">{item.name}</span>
+								<span class="mobile-item-desc">{item.description}</span>
+								{item.status && <span class="mobile-item-status">{item.status}</span>}
+							</a>
+						))}
+					</div>
+				</div>
 			))}
-			<a href="#contact" class="cta-shimmer mobile-nav-link mt-2 rounded-full px-5 py-3 text-center text-sm font-semibold" style="background-color: var(--color-primary); color: var(--color-primary-text);">
-				<span>Book a Free Consultation</span>
+			<a href={PRIMARY_ACTION.href} class="cta-shimmer mobile-nav-link mt-2 rounded-full px-5 py-3 text-center text-sm font-semibold" style="background-color: var(--color-primary); color: var(--color-primary-text);">
+				<span>{PRIMARY_ACTION.label}</span>
 			</a>
 		</nav>
 	</div>
@@ -104,7 +187,7 @@ const navLinks = [
 	   Inherently mouse-only: it tracks pointer position via the mousemove
 	   handler below and touch devices have no cursor to track. The trigger is
 	   scoped to genuine hover support, and on touch the layer is removed
-	   outright — a tap can synthesise a mouseover with no mouselever to follow
+	   outright - a tap can synthesise a mouseover with no mouselever to follow
 	   it, which would otherwise leave the glow stuck on. */
 	.header-glow {
 		position: absolute;
@@ -134,6 +217,12 @@ const navLinks = [
 		.nav-link:hover {
 			opacity: 0.85;
 		}
+	}
+
+	/* Visible keyboard focus everywhere in the header. */
+	#site-header :focus-visible {
+		outline: 2px solid var(--color-accent-strong);
+		outline-offset: 2px;
 	}
 
 	/* CTA shimmer sweep */
@@ -189,6 +278,190 @@ const navLinks = [
 		100% { left: 130%; }
 	}
 
+	/* ---- Dropdown card --------------------------------------------------
+	   One shared fixed panel; a single menu card shows at a time. Hidden
+	   uses the attribute (works with no JavaScript); opening removes it
+	   and fades the panel in. */
+	.menu-panel {
+		position: fixed;
+		left: 50%;
+		transform: translateX(-50%) translateY(-8px);
+		width: min(760px, calc(100vw - 2rem));
+		z-index: 60;
+		background-color: var(--color-card-bg);
+		border: 1px solid var(--color-border);
+		border-radius: 20px;
+		box-shadow: 0 24px 60px -12px color-mix(in srgb, var(--color-text) 25%, transparent);
+		visibility: hidden;
+		opacity: 0;
+		transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s linear 0.2s;
+	}
+	.menu-panel.is-open {
+		visibility: visible;
+		opacity: 1;
+		transform: translateX(-50%) translateY(0);
+		transition: opacity 0.2s ease, transform 0.2s ease;
+	}
+	.menu-panel[hidden] {
+		display: none;
+	}
+	@media (max-width: 767.98px) {
+		.menu-panel {
+			display: none;
+		}
+	}
+	.menu-card {
+		display: grid;
+		grid-template-columns: 250px 1fr;
+		gap: 1.5rem;
+		padding: 1.25rem;
+	}
+	.menu-card[hidden] {
+		display: none;
+	}
+	.menu-intro {
+		background-color: var(--color-soft);
+		border-radius: 14px;
+		padding: 1.25rem;
+	}
+	.menu-intro-text {
+		font-family: var(--font-heading);
+		font-size: 1.05rem;
+		line-height: 1.5;
+		color: var(--color-text);
+		margin: 0 0 1rem;
+	}
+	.menu-hub-btn {
+		display: inline-block;
+		border-radius: 999px;
+		padding: 0.55rem 1.2rem;
+		font-size: 0.8rem;
+		font-weight: 600;
+		text-decoration: none;
+		background-color: var(--color-primary);
+		color: var(--color-primary-text);
+	}
+	.menu-logo {
+		position: relative;
+		width: 120px;
+		aspect-ratio: 656 / 684;
+		margin-top: 1rem;
+	}
+	.menu-logo img {
+		position: absolute;
+		opacity: 0.22;
+		transition: opacity 0.25s ease, filter 0.25s ease;
+	}
+	.menu-logo img.lit {
+		opacity: 1;
+		filter: brightness(1.25);
+	}
+	.menu-items {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		align-self: start;
+	}
+	.menu-item {
+		display: block;
+		border-radius: 12px;
+		padding: 0.65rem 0.8rem;
+		text-decoration: none;
+		transition: background-color 0.2s ease;
+	}
+	.menu-item:hover {
+		background-color: var(--color-bg-subtle);
+	}
+	.menu-item-name {
+		display: block;
+		font-family: var(--font-heading);
+		font-weight: 600;
+		font-size: 0.95rem;
+		color: var(--color-text);
+	}
+	.menu-item-desc {
+		display: block;
+		font-size: 0.82rem;
+		margin-top: 0.15rem;
+		color: var(--color-text-muted);
+	}
+	.menu-item-status {
+		display: block;
+		font-size: 0.68rem;
+		font-weight: 600;
+		letter-spacing: 0.18em;
+		text-transform: uppercase;
+		margin-top: 0.25rem;
+		color: var(--color-accent-strong);
+	}
+
+	/* ---- Mobile sheet: accordion rows ------------------------------------
+	   Same open/close mechanics as before; only the link list changed. */
+	.mobile-group-btn {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		width: 100%;
+		min-height: 48px;
+		padding: 12px;
+		border: 0;
+		border-radius: 12px;
+		background: transparent;
+		font-size: 1rem;
+		font-weight: 600;
+		color: var(--color-text);
+		cursor: pointer;
+	}
+	.mobile-chev {
+		flex: none;
+		width: 10px;
+		height: 10px;
+		border-left: 2px solid currentColor;
+		border-bottom: 2px solid currentColor;
+		transform: rotate(-45deg);
+		transition: transform 0.25s ease;
+	}
+	.mobile-group-btn[aria-expanded="true"] .mobile-chev {
+		transform: rotate(135deg);
+	}
+	.mobile-group-panel[hidden] {
+		display: none;
+	}
+	.mobile-group-panel .mobile-nav-link {
+		display: block;
+		border-radius: 10px;
+		padding: 10px 12px 10px 16px;
+		text-decoration: none;
+	}
+	.mobile-hub-link {
+		font-weight: 600;
+		color: var(--color-text);
+	}
+	.mobile-item-name {
+		display: block;
+		font-size: 1rem;
+		font-weight: 600;
+		color: var(--color-text);
+	}
+	.mobile-item-desc {
+		display: block;
+		font-size: 0.85rem;
+		margin-top: 0.15rem;
+		color: var(--color-text-muted);
+	}
+	.mobile-item-status {
+		display: block;
+		font-size: 0.68rem;
+		font-weight: 600;
+		letter-spacing: 0.18em;
+		text-transform: uppercase;
+		margin-top: 0.25rem;
+		color: var(--color-accent-strong);
+	}
+
 	/* ---- Mobile menu open/close -----------------------------------------
 	   `hidden` (display: none) cannot be transitioned, so the panel is
 	   collapsed with max-height/opacity/translateY and the JS toggles
@@ -213,7 +486,7 @@ const navLinks = [
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		/* Nothing auto-plays, and the menu appears/disappears at once. */
+		/* Nothing auto-plays, and menus appear/disappear at once. */
 		.cta-shimmer::after {
 			animation: none;
 		}
@@ -224,6 +497,11 @@ const navLinks = [
 		#mobile-menu.is-open {
 			max-height: 80vh;
 			overflow-y: auto;
+		}
+		.menu-panel,
+		.menu-logo img,
+		.mobile-chev {
+			transition: none;
 		}
 		/* The header still compresses, it just does not bounce. */
 		#site-header .header-logo.logo-settle {
@@ -246,7 +524,9 @@ const navLinks = [
 		syncLogos();
 		new MutationObserver(syncLogos).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 	})();
+</script>
 
+<script is:inline>
 	// Cursor-follow glow
 	(function () {
 		const header = document.getElementById('site-header');
@@ -258,7 +538,9 @@ const navLinks = [
 			header.style.setProperty('--my', `${y}%`);
 		});
 	})();
+</script>
 
+<script is:inline>
 	// Scroll compression
 	(function () {
 		const header = document.getElementById('site-header');
@@ -289,13 +571,15 @@ const navLinks = [
 			if (scrolled === header.classList.contains('is-scrolled')) return;
 			header.classList.toggle('is-scrolled', scrolled);
 			// Scrolling back up just uses the existing plain transition to grow
-			// the logo again — a second bounce in reverse reads as jitter.
+			// the logo again - a second bounce in reverse reads as jitter.
 			if (scrolled && !reduced.matches) settle();
 		}
 		onScroll();
 		window.addEventListener('scroll', onScroll, { passive: true });
 	})();
+</script>
 
+<script is:inline>
 	// Sliding underline that follows hovered nav link
 	(function () {
 		const nav = document.getElementById('desktop-nav');
@@ -322,24 +606,197 @@ const navLinks = [
 			underline.style.opacity = '0';
 		});
 	})();
+</script>
 
-	// Magnetic nav links
-	/* (function () {
-		document.querySelectorAll('.nav-link').forEach((link) => {
-			link.addEventListener('mousemove', (e) => {
-				const r = link.getBoundingClientRect();
-				const x = (e.clientX - r.left - r.width / 2) * 0.25;
-				const y = (e.clientY - r.top - r.height / 2) * 0.25;
-				link.style.transform = `translate(${x}px, ${y}px)`;
+<script is:inline>
+	// Dropdown cards: one shared panel, one menu visible at a time.
+	(function () {
+		const header = document.getElementById('site-header');
+		const nav = document.getElementById('desktop-nav');
+		const panel = document.getElementById('menu-panel');
+		if (!header || !nav || !panel) return;
+		const fine = window.matchMedia('(hover: hover) and (pointer: fine)');
+		const wide = window.matchMedia('(min-width: 768px)');
+		const items = Array.from(nav.querySelectorAll('.nav-link'));
+		const cards = Array.from(panel.querySelectorAll('.menu-card'));
+		let openKey = null;
+		let openTimer = null;
+		let closeTimer = null;
+		let hideTimer = null;
+
+		function cardFor(key) {
+			return cards.find((card) => card.dataset.menuCard === key);
+		}
+
+		function lightFacet(card, facet) {
+			if (!card) return;
+			card.querySelectorAll('.menu-logo img').forEach((img) => {
+				img.classList.toggle('lit', img.dataset.facet === facet);
+			});
+		}
+
+		function position() {
+			const r = header.getBoundingClientRect();
+			panel.style.top = `${r.bottom + 8}px`;
+		}
+
+		function setExpanded(key, open) {
+			const link = items.find((item) => item.dataset.menu === key);
+			if (link) link.setAttribute('aria-expanded', String(open));
+		}
+
+		function showPanel() {
+			panel.hidden = false;
+			void panel.offsetWidth;
+			panel.classList.add('is-open');
+		}
+
+		function hidePanel() {
+			panel.classList.remove('is-open');
+			clearTimeout(hideTimer);
+			hideTimer = setTimeout(() => {
+				if (!panel.classList.contains('is-open')) panel.hidden = true;
+			}, 220);
+		}
+
+		function openMenu(key) {
+			if (openKey === key) return;
+			if (openKey) {
+				cardFor(openKey).hidden = true;
+				setExpanded(openKey, false);
+			}
+			const card = cardFor(key);
+			if (!card) return;
+			card.hidden = false;
+			showPanel();
+			position();
+			setExpanded(key, true);
+			openKey = key;
+			const first = card.querySelector('.menu-items a');
+			lightFacet(card, first ? first.dataset.facet : '');
+		}
+
+		function closeMenu() {
+			if (openKey === null) return;
+			cardFor(openKey).hidden = true;
+			setExpanded(openKey, false);
+			openKey = null;
+			hidePanel();
+		}
+
+		function desktop() {
+			return wide.matches;
+		}
+
+		items.forEach((link, i) => {
+			const key = link.dataset.menu;
+			link.addEventListener('mouseenter', () => {
+				if (!fine.matches || !desktop()) return;
+				clearTimeout(closeTimer);
+				clearTimeout(openTimer);
+				openTimer = setTimeout(() => openMenu(key), 120);
 			});
 			link.addEventListener('mouseleave', () => {
-				link.style.transform = 'translate(0, 0)';
-				link.style.transition = 'transform 0.3s ease';
-				setTimeout(() => { link.style.transition = ''; }, 300);
+				if (!fine.matches || !desktop()) return;
+				clearTimeout(openTimer);
+				clearTimeout(closeTimer);
+				closeTimer = setTimeout(() => {
+					if (!panel.matches(':hover')) closeMenu();
+				}, 180);
+			});
+			link.addEventListener('click', (e) => {
+				if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+				e.preventDefault();
+				if (!desktop()) return;
+				if (openKey === key) closeMenu();
+				else openMenu(key);
+			});
+			link.addEventListener('keydown', (e) => {
+				if (e.key === 'Enter' || e.key === ' ') {
+					e.preventDefault();
+					if (!desktop()) return;
+					if (openKey === key) closeMenu();
+					else openMenu(key);
+				} else if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+					e.preventDefault();
+					const dir = e.key === 'ArrowRight' ? 1 : -1;
+					items[(i + dir + items.length) % items.length].focus();
+				} else if (e.key === 'Escape') {
+					closeMenu();
+					link.focus();
+				}
 			});
 		});
-	})();  */
 
+		panel.addEventListener('mouseenter', () => {
+			clearTimeout(closeTimer);
+		});
+		panel.addEventListener('mouseleave', () => {
+			if (!fine.matches || !desktop()) return;
+			clearTimeout(closeTimer);
+			closeTimer = setTimeout(closeMenu, 180);
+		});
+		panel.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape' && openKey) {
+				const link = items.find((item) => item.dataset.menu === openKey);
+				closeMenu();
+				if (link) link.focus();
+			}
+		});
+
+		// Facet lighting follows the hovered or focused item; the resting
+		// state is the first item of the open card.
+		panel.querySelectorAll('.menu-card').forEach((card) => {
+			const links = Array.from(card.querySelectorAll('.menu-items a'));
+			const first = links.length ? links[0].dataset.facet : '';
+			links.forEach((a) => {
+				a.addEventListener('mouseenter', () => lightFacet(card, a.dataset.facet));
+				a.addEventListener('focus', () => lightFacet(card, a.dataset.facet));
+			});
+			const list = card.querySelector('.menu-items');
+			if (list) {
+				list.addEventListener('mouseleave', () => lightFacet(card, first));
+			}
+			card.addEventListener('focusout', () => {
+				requestAnimationFrame(() => {
+					if (!card.contains(document.activeElement)) lightFacet(card, first);
+				});
+			});
+		});
+
+		// A followed link navigates on its own; the card just gets out of
+		// the way first.
+		panel.querySelectorAll('a[href]').forEach((a) => {
+			a.addEventListener('click', () => closeMenu());
+		});
+
+		document.addEventListener('click', (e) => {
+			if (openKey === null) return;
+			if (panel.contains(e.target) || nav.contains(e.target)) return;
+			closeMenu();
+		});
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape' && openKey !== null) {
+				const link = items.find((item) => item.dataset.menu === openKey);
+				closeMenu();
+				if (link && document.activeElement && !nav.contains(document.activeElement)) link.focus();
+			}
+		});
+
+		window.addEventListener('scroll', () => {
+			if (openKey !== null) position();
+		}, { passive: true });
+		window.addEventListener('resize', () => {
+			if (!desktop()) closeMenu();
+			else if (openKey !== null) position();
+		});
+		wide.addEventListener('change', () => {
+			if (!wide.matches) closeMenu();
+		});
+	})();
+</script>
+
+<script is:inline>
 	// Mobile menu
 	(function () {
 		const btn = document.getElementById('menu-toggle');
@@ -354,6 +811,19 @@ const navLinks = [
 		let closeTimer = null;
 		let afterClose = null;
 
+		// Lock body scroll without a layout shift: the disappearing scrollbar
+		// would otherwise jog the page sideways by its own width.
+		function lockScroll(on) {
+			if (on) {
+				const sw = window.innerWidth - document.documentElement.clientWidth;
+				document.body.style.overflow = 'hidden';
+				if (sw > 0) document.body.style.paddingRight = `${sw}px`;
+			} else {
+				document.body.style.overflow = '';
+				document.body.style.paddingRight = '';
+			}
+		}
+
 		// onClosed runs once the collapse has visually finished, so callers can
 		// chain a follow-up action onto the end of the animation instead of
 		// running it in parallel with it.
@@ -365,12 +835,19 @@ const navLinks = [
 				// the intent supersedes whatever it was going to trigger.
 				afterClose = null;
 				// Unhide first, then add .is-open a frame later so the browser
-				// has the collapsed state to animate away from — adding both at
+				// has the collapsed state to animate away from - adding both at
 				// once would skip the transition entirely.
 				menu.classList.remove('hidden');
 				requestAnimationFrame(() => requestAnimationFrame(() => {
 					menu.classList.add('is-open');
 				}));
+				lockScroll(true);
+				// A panel left open on desktop has no meaning here; shut it.
+				const panel = document.getElementById('menu-panel');
+				if (panel) panel.classList.remove('is-open');
+				document.querySelectorAll('#desktop-nav .nav-link').forEach((link) => {
+					link.setAttribute('aria-expanded', 'false');
+				});
 			} else {
 				menu.classList.remove('is-open');
 				afterClose = onClosed || null;
@@ -382,86 +859,73 @@ const navLinks = [
 					afterClose = null;
 					if (cb) cb();
 				}, reduced.matches ? 0 : DURATION + 40);
+				lockScroll(false);
 			}
 
 			burger.classList.toggle('hidden', open);
 			close.classList.toggle('hidden', !open);
 			btn.setAttribute('aria-expanded', String(open));
-			document.body.style.overflow = open ? 'hidden' : '';
 		}
 
 		// aria-expanded, not the `hidden` class, decides the next state: during
 		// the close animation `hidden` is still absent, so reading it would
 		// make a second tap close again instead of re-opening.
-		btn.addEventListener('click', () => setOpen(btn.getAttribute('aria-expanded') !== 'true'));
-		// One-shot acknowledgement that a jump landed. Deliberately restrained:
-		// a brief primary-tinted text-shadow on the heading, no loop, gone in
-		// under a second.
-		function cueArrival(section) {
-			if (reduced.matches) return;
-			const heading = section.querySelector('h2, h3');
-			if (!heading) return;
+		btn.addEventListener('click', () => {
+			const willOpen = btn.getAttribute('aria-expanded') !== 'true';
+			setOpen(willOpen);
+			if (willOpen) {
+				const first = menu.querySelector('.mobile-group-btn, a[href]');
+				if (first) first.focus();
+			}
+		});
 
-			let settle = null;
-			let done = false;
-			let moved = false;
+		// Accordion: one menu open at a time.
+		const groups = Array.from(menu.querySelectorAll('.mobile-group'));
+		groups.forEach((group) => {
+			const button = group.querySelector('.mobile-group-btn');
+			const section = group.querySelector('.mobile-group-panel');
+			if (!button || !section) return;
+			button.addEventListener('click', () => {
+				const willOpen = button.getAttribute('aria-expanded') !== 'true';
+				groups.forEach((other) => {
+					other.querySelector('.mobile-group-btn').setAttribute('aria-expanded', 'false');
+					other.querySelector('.mobile-group-panel').hidden = true;
+				});
+				if (willOpen) {
+					button.setAttribute('aria-expanded', 'true');
+					section.hidden = false;
+				}
+			});
+		});
 
-			const fire = () => {
-				if (done) return;
-				done = true;
-				window.removeEventListener('scrollend', fire);
-				window.removeEventListener('scroll', onScroll);
-				clearTimeout(settle);
-				// The animation is one-shot, so the class has to come off and go
-				// back on (past a reflow) to replay on a re-tap of the same link.
-				heading.classList.remove('section-land');
-				void heading.offsetWidth;
-				heading.classList.add('section-land');
-				heading.addEventListener('animationend', () => heading.classList.remove('section-land'), { once: true });
-			};
+		// Focus trap while open, Escape closes and hands focus back.
+		menu.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape') {
+				setOpen(false);
+				btn.focus();
+				return;
+			}
+			if (e.key !== 'Tab') return;
+			const focusables = Array.from(
+				menu.querySelectorAll('a[href], button:not([disabled])'),
+			).filter((el) => el.offsetParent !== null);
+			if (!focusables.length) return;
+			const first = focusables[0];
+			const last = focusables[focusables.length - 1];
+			if (e.shiftKey && document.activeElement === first) {
+				e.preventDefault();
+				last.focus();
+			} else if (!e.shiftKey && document.activeElement === last) {
+				e.preventDefault();
+				first.focus();
+			}
+		});
 
-			// scrollend is the precise signal, but it never fires when the target
-			// is already in place, and is not universal. So arrival is also
-			// detected as "no scroll event for a beat", which re-arms on every
-			// tick of an in-flight smooth scroll and can only settle once the
-			// page has genuinely stopped.
-			const onScroll = () => {
-				moved = true;
-				clearTimeout(settle);
-				settle = setTimeout(fire, 150);
-			};
-			window.addEventListener('scrollend', fire);
-			window.addEventListener('scroll', onScroll, { passive: true });
-			// Nothing scrolled at all: already in place, so the arrival is now.
-			setTimeout(() => { if (!moved) fire(); }, 260);
-		}
-
-		function goToSection(link) {
-			const href = link.getAttribute('href') || '';
-			if (!href.startsWith('#')) return;
-			const target = document.querySelector(href);
-			if (!target) return;
-
-			// Keep the URL in step with the desktop nav, which lands on the same
-			// hash natively. replaceState rather than assigning location.hash, so
-			// the jump stays under our control instead of becoming a navigation.
-			if (location.hash !== href) history.replaceState(null, '', href);
-
-			// scrollIntoView honours the global scroll-margin-top, so the section
-			// settles below the sticky header. 'auto' defers to the stylesheet,
-			// which only sets smooth when motion is allowed, so reduced motion
-			// jumps instead.
-			const instant = reduced.matches;
-			target.scrollIntoView({ behavior: instant ? 'auto' : 'smooth', block: 'start' });
-			if (!instant) cueArrival(target);
-		}
-
-		// Suppress the anchor default so the browser cannot start its own jump
-		// alongside the close, then scroll once the panel has fully retracted.
-		menu.querySelectorAll('.mobile-nav-link').forEach((link) => link.addEventListener('click', (e) => {
-			e.preventDefault();
-			setOpen(false, () => goToSection(link));
-		}));
+		// Page links close the sheet and navigate on their own; nothing
+		// here is a same-page hash, so there is no jump to choreograph.
+		menu.querySelectorAll('a[href]').forEach((link) => {
+			link.addEventListener('click', () => setOpen(false));
+		});
 		window.matchMedia('(min-width: 768px)').addEventListener('change', (e) => { if (e.matches) setOpen(false); });
 	})();
 </script>

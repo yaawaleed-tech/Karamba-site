@@ -1,0 +1,98 @@
+---
+/* Shared shell for not-yet-built pages. All copy arrives as props from
+   the page files (which read it from src/data/nav.ts), so text edits
+   never touch this component. */
+
+interface ChildLink {
+  label: string;
+  href: string;
+  description: string;
+  status?: string;
+}
+
+interface Props {
+  hubHref: string;
+  hubLabel: string;
+  title: string;
+  description: string;
+  status?: string;
+  sectionId?: string;
+  children?: ChildLink[];
+}
+
+const { hubHref, hubLabel, title, description, status, sectionId, children = [] } = Astro.props;
+---
+
+<section class="mx-auto max-w-6xl px-6 py-20" id={sectionId}>
+	<a
+		href={hubHref}
+		class="inline-block text-sm font-semibold transition-opacity hover:opacity-70"
+		style="color: var(--color-primary);"
+	>
+		← {hubLabel}
+	</a>
+
+	<h1 class="mt-4 max-w-2xl font-heading text-4xl font-bold leading-tight sm:text-5xl sm:leading-tight" style="color: var(--color-text);">
+		{title}
+	</h1>
+
+	<p class="mt-4 max-w-xl text-lg" style="color: var(--color-text-muted);">
+		{description}
+	</p>
+
+	{status && (
+		<p
+			class="mt-5 inline-block rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-widest"
+			style="background-color: var(--color-bg-subtle); color: var(--color-accent-strong);"
+		>
+			{status}
+		</p>
+	)}
+
+	<p class="mt-8 text-base" style="color: var(--color-text);">
+		This page is being built.
+	</p>
+
+	<a
+		href={hubHref}
+		class="mt-4 inline-block rounded-full px-6 py-3 text-sm font-semibold transition-transform hover:scale-105"
+		style="background-color: var(--color-primary); color: var(--color-primary-text);"
+	>
+		Back to {hubLabel}
+	</a>
+
+	{children.length > 0 && (
+		<div class="mt-12">
+			<h2 class="font-heading text-xl font-semibold" style="color: var(--color-text);">
+				Inside {title}
+			</h2>
+			<ul class="mt-5 grid gap-4 sm:grid-cols-2">
+				{children.map((child) => (
+					<li
+						class="rounded-2xl p-5"
+						style="background-color: var(--color-card-bg); border: 1px solid var(--color-border);"
+					>
+						<a
+							href={child.href}
+							class="font-heading text-base font-semibold transition-opacity hover:opacity-70"
+							style="color: var(--color-text);"
+						>
+							{child.label}
+						</a>
+						<p class="mt-1 text-sm" style="color: var(--color-text-muted);">
+							{child.description}
+						</p>
+						{child.status && (
+							<p
+								class="mt-2 inline-block text-xs font-semibold uppercase tracking-widest"
+								style="color: var(--color-accent-strong);"
+							>
+								{child.status}
+							</p>
+						)}
+					</li>
+				))}
+			</ul>
+		</div>
+	)}
+</section>
