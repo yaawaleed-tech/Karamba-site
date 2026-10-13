@@ -136,6 +136,16 @@ body {
   --one-system-final-scale: 2.4;
   --one-system-dx: -22vw;
   --phone-caption-dwell: 4200ms;
+
+  /* ---- Stacking cards: gap between cards, which is the scroll distance
+     each card sits stuck alone before the next one starts covering it.
+     Desktop 22svh, phones 14svh. The end spacer after the last card holds
+     the finished stack pinned briefly: 32svh desktop, 24svh phones. */
+  --stack-gap: 22svh;
+  --stack-end: 32svh;
+}
+@media (max-width: 719.98px) {
+  :root { --stack-gap: 14svh; --stack-end: 24svh; }
 }
 [data-theme='dark'] {
   --grain-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.9373 0 0 0 0 0.9176 0 0 0 0 0.8745 0.2126 0.7152 0.0722 0 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");

@@ -79,13 +79,6 @@ export const NAV_MENUS: NavMenu[] = [
     introButtonText: 'View all products',
     items: [
       {
-        name: 'School management',
-        description: 'Admissions, records and results',
-        href: '/products/school-management',
-        status: 'Planned',
-        facet: 'education',
-      },
-      {
         name: 'Broiler farm system',
         description: 'Flock counts and break-even prices',
         href: '/products/broiler-farm-system',

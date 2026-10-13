@@ -1,0 +1,435 @@
+---
+import SectionHeading from './SectionHeading.astro';
+import { NAV_MENUS } from '../data/nav';
+import type { FacetKey } from '../data/nav';
+import manifest from '../assets/brand/karamba-pieces/manifest.json';
+
+/* What We Build: five stacking service cards under a shared heading.
+   Copy lives here; links and facet keys come from src/data/nav.ts so
+   they stay in sync with the header, footer and pages. */
+
+const HEADING_STRONG = 'What we';
+const HEADING_SOFT = 'build.';
+const INTRO =
+  'Software, automation and digital tools, built around how your team already works.';
+
+interface Card {
+  number: string;
+  titleStrong: string;
+  titleSoft: string;
+  description: string;
+  tags: string[];
+  tilt: number;
+  href: string;
+  facet: FacetKey;
+}
+
+const servicesMenu = NAV_MENUS.find((m) => m.key === 'services')!;
+function itemFor(href: string) {
+  const item = servicesMenu.items.find((i) => i.href === href)!;
+  return { href: item.href, facet: item.facet };
+}
+
+const CARDS: Card[] = [
+  {
+    number: '01',
+    titleStrong: 'Custom',
+    titleSoft: 'software',
+    description: 'Web and mobile applications built around how your business actually runs.',
+    tags: ['Web apps', 'Mobile apps', 'APIs', 'Integrations'],
+    tilt: 6,
+    ...itemFor('/services/custom-software'),
+  },
+  {
+    number: '02',
+    titleStrong: 'Management',
+    titleSoft: 'systems',
+    description:
+      'Records, admissions, results, orders and stock in one system, replacing notebooks and scattered spreadsheets.',
+    tags: ['Records', 'Admissions', 'Results', 'Orders and stock'],
+    tilt: -5,
+    ...itemFor('/services/management-systems'),
+  },
+  {
+    number: '03',
+    titleStrong: 'Websites',
+    titleSoft: 'and branding',
+    description:
+      'A fast, clear website and a consistent identity that earn trust before the first conversation.',
+    tags: ['Company sites', 'Landing pages', 'Identity', 'Content'],
+    tilt: 4,
+    ...itemFor('/services/websites-and-branding'),
+  },
+  {
+    number: '04',
+    titleStrong: 'Automation',
+    titleSoft: 'and AI',
+    description: 'Workflows, reports and assistants that take repetitive work off your team.',
+    tags: ['Workflows', 'Reports', 'Assistants', 'Data entry'],
+    tilt: -6,
+    ...itemFor('/services/automation-and-ai'),
+  },
+  {
+    number: '05',
+    titleStrong: 'Cloud',
+    titleSoft: 'and support',
+    description:
+      'Hosting, monitoring, security updates and ongoing support, so your systems stay fast and available.',
+    tags: ['Hosting', 'Monitoring', 'Security', 'Maintenance'],
+    tilt: 5,
+    ...itemFor('/services/cloud-and-support'),
+  },
+];
+
+interface ManifestPiece {
+  k: string;
+  file: string;
+}
+
+/* One unprocessed file URL per logo piece, same pattern as the header:
+   byte-identical files, never re-encoded. */
+const pieceUrls = import.meta.glob(
+  '../assets/brand/karamba-pieces/*.webp',
+  { query: '?url', import: 'default', eager: true },
+) as Record<string, string>;
+function pieceUrl(file: string): string {
+  const hit = Object.entries(pieceUrls).find(([path]) => path.endsWith('/' + file));
+  return hit ? hit[1] : '';
+}
+function pieceFile(facet: string): string {
+  const piece = (manifest.pieces as ManifestPiece[]).find((p) => p.k === facet);
+  return piece ? pieceUrl(piece.file) : '';
+}
+---
+
+<!-- Full-bleed band: the section paints edge to edge, the container lives inside.
+     The background lives on a masked ::before (see style below) so the top
+     edge dissolves into the hero instead of cutting a hard line. -->
+<section id="services">
+	<div class="mx-auto max-w-6xl px-6 pt-20 pb-16 services-rise">
+		<SectionHeading strong={HEADING_STRONG} soft={HEADING_SOFT} intro={INTRO} />
+
+		<div class="stack">
+			{/* No per-card wrappers: every card is a direct child of .stack,
+			    so all five share .stack as their sticky containing block.
+			    Earlier cards stay stuck while later cards slide up over
+			    them. */}
+			{/* Gaps are separate spacer siblings, never card margins: a
+			    sticky card's margin box must fit inside .stack, so margins
+			    shove cards upward near the end. Spacers carry no content. */}
+			{CARDS.map((card, i) => (
+				<>
+				<article
+					class="stack-card"
+					style={`--i:${i}`}
+				>
+					<div class="card-body">
+						<div class="card-top">
+							<span class="card-number">{card.number}</span>
+							<span class="card-rule" aria-hidden="true"></span>
+						</div>
+						<h3 class="card-title">
+							<span class="t-strong">{card.titleStrong}</span>
+							<span class="t-soft">{card.titleSoft}</span>
+						</h3>
+						<ul class="card-tags">
+							{card.tags.map((tag) => (
+								<li>{tag}</li>
+							))}
+						</ul>
+						<p class="card-desc">{card.description}</p>
+						<a class="card-link" href={card.href}>
+							View service <span aria-hidden="true">→</span>
+						</a>
+					</div>
+					<img
+						class="card-piece"
+						src={pieceFile(card.facet)}
+						alt=""
+						aria-hidden="true"
+						loading="lazy"
+						style={`rotate:${card.tilt}deg`}
+					/>
+				</article>
+				{i < CARDS.length - 1 ? (
+					<div class="stack-spacer" aria-hidden="true"></div>
+				) : (
+					<div class="stack-spacer stack-spacer-end" aria-hidden="true"></div>
+				)}
+				</>
+			))}
+		</div>
+
+		<a class="view-all" href="/services">View all services</a>
+	</div>
+</section>
+
+<style>
+	/* ---- Pinned-hero overlap (moved unchanged from Services.astro) ----
+	   Overlap knob (--hero-overlap) lives on :root in global.css. The
+	   section rises over the pinned hero tail; its background sits on a
+	   masked layer that is transparent at the very top and opaque by
+	   160px, and the content starts below that fade. Outside this gate
+	   the section renders exactly as before: flat background, no overlap.
+	   Dark mode needs no colour change: the hero stage and this band share
+	   --color-bg-subtle, so the seam shows no line. */
+	@supports (animation-timeline: view()) {
+		@media (min-width: 720px) and (prefers-reduced-motion: no-preference) {
+			#services {
+				position: relative;
+				z-index: 1;
+				margin-top: calc(-1 * var(--hero-overlap));
+			}
+			#services::before {
+				content: '';
+				position: absolute;
+				inset: 0;
+				background-color: var(--color-bg-subtle);
+				-webkit-mask-image: linear-gradient(180deg, transparent 0, #000 160px);
+				mask-image: linear-gradient(180deg, transparent 0, #000 160px);
+			}
+			#services .services-rise {
+				position: relative;
+				padding-top: 10rem;
+				animation: services-in linear both;
+				animation-timeline: view();
+				animation-range: entry 0% entry 60%;
+			}
+			@keyframes services-in {
+				from { opacity: 0; transform: translateY(60px); }
+				to { opacity: 1; transform: none; }
+			}
+		}
+	}
+
+	/* Phone hero exit (moved unchanged from Services.astro): the next
+	   section rises over the pinned phone hero with the same seamless
+	   technique, using the phone overlap knob. */
+	@supports (animation-timeline: view()) {
+		@media (max-width: 719.98px) and (prefers-reduced-motion: no-preference) {
+			#services {
+				position: relative;
+				z-index: 1;
+				margin-top: calc(-1 * var(--hero-overlap-phone));
+			}
+			#services::before {
+				content: '';
+				position: absolute;
+				inset: 0;
+				background-color: var(--color-bg-subtle);
+				-webkit-mask-image: linear-gradient(180deg, transparent 0, #000 160px);
+				mask-image: linear-gradient(180deg, transparent 0, #000 160px);
+			}
+			#services .services-rise {
+				position: relative;
+				padding-top: 10rem;
+				animation: services-phone-in linear both;
+				animation-timeline: view();
+				animation-range: entry 0% entry 60%;
+			}
+			@keyframes services-phone-in {
+				from { opacity: 0; transform: translateY(60px); }
+				to { opacity: 1; transform: none; }
+			}
+		}
+	}
+
+	/* ---- Stacking cards ----
+	   Each card sticks below the compressed header, offset a little more
+	   per index so the covered cards peek out as the next slides over.
+	   Plain sticky everywhere; the shrink below is progressive
+	   enhancement for supporting desktop browsers. */
+	/* Plain block container: every card is a direct child, so all five
+	   share this box as their sticky containing block. Earlier cards stay
+	   stuck while later cards slide up over them. No overflow, contain or
+	   transform anywhere on this chain. */
+	.stack {
+		margin-top: 3rem;
+		display: block;
+	}
+	.stack-card {
+		position: sticky;
+		top: calc(var(--header-h-compact) + 16px + var(--i) * 14px);
+		z-index: calc(var(--i) + 1);
+		min-height: 62svh;
+		/* No margin: the card's margin box must equal its border box so
+		   nothing shoves stuck cards upward near the end of .stack. */
+		display: flex;
+		align-items: center;
+		gap: clamp(1.5rem, 4vw, 3rem);
+		border-radius: 28px;
+		padding: clamp(1.5rem, 4vw, 3rem);
+		background-color: color-mix(in srgb, var(--color-soft) calc(var(--i) * 22%), var(--color-card-bg));
+	}
+	/* Gaps are empty siblings with no margin, padding or border, so card
+	   margin boxes stay exactly border-sized. The end spacer after the
+	   last card lets it stay pinned a moment before the stack releases. */
+	.stack-spacer {
+		height: var(--stack-gap);
+	}
+	.stack-spacer-end {
+		height: var(--stack-end);
+	}
+	@media (max-width: 719.98px) {
+		.stack-card {
+			min-height: 52svh;
+		}
+	}
+
+	.card-body {
+		flex: 1 1 auto;
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+	}
+	.card-top {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+	}
+	.card-number {
+		font-size: 0.85rem;
+		font-weight: 600;
+		letter-spacing: 0.2em;
+		color: var(--color-text-muted);
+	}
+	.card-rule {
+		flex: 1 1 auto;
+		height: 1px;
+		background-color: var(--color-border);
+	}
+	.card-title {
+		margin: 1.25rem 0 0;
+		font-family: var(--font-heading);
+		font-weight: 600;
+		font-size: 2rem;
+		font-size: clamp(2rem, 1.4rem + 3vw, 3.25rem);
+		line-height: 1.05;
+	}
+	.t-strong {
+		color: var(--color-text);
+	}
+	.t-soft {
+		display: block;
+		color: var(--color-text-muted);
+	}
+	.card-tags {
+		list-style: none;
+		margin: 1.25rem 0 0;
+		padding: 0;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+	}
+	.card-tags li {
+		border: 1px solid var(--color-border);
+		border-radius: 999px;
+		padding: 0.3rem 0.8rem;
+		font-size: 0.8rem;
+		color: var(--color-text-muted);
+	}
+	.card-desc {
+		margin: 1.25rem 0 0;
+		max-width: 34ch;
+		line-height: 1.6;
+		color: var(--color-text-muted);
+	}
+	.card-link {
+		margin-top: auto;
+		padding-top: 1.5rem;
+		align-self: flex-start;
+		font-weight: 600;
+		color: var(--color-primary);
+		text-decoration: none;
+		transition: opacity 0.2s ease;
+	}
+	.card-link:hover {
+		opacity: 0.7;
+	}
+	.card-link::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+	}
+	.card-link:focus-visible {
+		outline: none;
+	}
+	.stack-card:has(.card-link:focus-visible) {
+		outline: 2px solid var(--color-accent-strong);
+		outline-offset: 6px;
+	}
+	.card-piece {
+		flex: none;
+		width: 28%;
+		height: auto;
+		align-self: center;
+	}
+
+	.view-all {
+		display: inline-block;
+		margin-top: 2.5rem;
+		font-weight: 600;
+		color: var(--color-primary);
+		text-decoration: none;
+		transition: opacity 0.2s ease;
+	}
+	.view-all:hover {
+		opacity: 0.7;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.card-link {
+			transition: none;
+		}
+	}
+</style>
+
+<script>
+	/* DEV-ONLY sticky debug readout (?stack=debug). import.meta.env.DEV is
+	   replaced with false at build time, so the minifier drops this whole
+	   block and nothing of it ships to production. */
+	if (import.meta.env.DEV && window.location.search.includes('stack=debug')) {
+		const cards = Array.from(document.querySelectorAll('.stack-card'));
+		const stack = document.querySelector('.stack');
+		const box = document.createElement('pre');
+		box.setAttribute('aria-hidden', 'true');
+		box.style.cssText =
+			'position:fixed;right:8px;top:8px;z-index:9999;margin:0;padding:8px;' +
+			'font:11px/1.5 monospace;white-space:pre;color:#fff;' +
+			'background:rgba(0,0,0,.75);pointer-events:none;';
+		document.body.appendChild(box);
+		function frame() {
+			// Inside the stack while any of it touches the viewport.
+			let inside = false;
+			if (stack) {
+				const srect = stack.getBoundingClientRect();
+				inside = srect.top < window.innerHeight && srect.bottom > 0;
+			}
+			const lines = cards.map((card, i) => {
+				const cs = getComputedStyle(card);
+				const rect = card.getBoundingClientRect();
+				const top = parseFloat(cs.top);
+				const stuck = Math.abs(rect.top - top) <= 1;
+				// Displaced: off its stuck top while the page is inside the
+				// stack. Stuck cards read stuck=true; anything else travelling
+				// or parked wrong reads displaced=true.
+				const displaced = inside && Math.abs(rect.top - top) > 1;
+				const next = cards[i + 1];
+				let covering = '-';
+				if (next) {
+					const nrect = next.getBoundingClientRect();
+					covering = nrect.top < rect.top + rect.height;
+				}
+				return (
+					`card${i} top=${cs.top} cardH=${Math.round(card.offsetHeight)} ` +
+					`rectTop=${Math.round(rect.top)} stuck=${stuck} ` +
+					`displaced=${displaced} covering=${covering}`
+				);
+			});
+			lines.push(`stackH=${stack ? Math.round(stack.offsetHeight) : 0}`);
+			box.textContent = lines.join('\n');
+			requestAnimationFrame(frame);
+		}
+		requestAnimationFrame(frame);
+	}
+</script>

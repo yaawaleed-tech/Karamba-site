@@ -1,0 +1,56 @@
+---
+/* Shared section heading. The strong line leads in text colour, the soft
+   line follows on its own line in muted colour. */
+
+interface Props {
+  strong: string;
+  soft: string;
+  eyebrow?: string;
+  intro?: string;
+}
+
+const { strong, soft, eyebrow, intro } = Astro.props;
+---
+
+<div class="section-heading">
+	{eyebrow && <p class="eyebrow">{eyebrow}</p>}
+	<h2 class="heading">
+		<span class="strong">{strong}</span>
+		<span class="soft">{soft}</span>
+	</h2>
+	{intro && <p class="intro">{intro}</p>}
+</div>
+
+<style>
+	.heading {
+		margin: 0;
+		font-family: var(--font-heading);
+		font-weight: 600;
+		font-size: 2.4rem;
+		font-size: clamp(2.4rem, 6vw, 5rem);
+		line-height: 1.05;
+		text-align: left;
+	}
+	.strong {
+		color: var(--color-text);
+	}
+	.soft {
+		display: block;
+		color: var(--color-text-muted);
+	}
+	.eyebrow {
+		margin: 0 0 0.75rem;
+		font-size: 0.8rem;
+		font-weight: 600;
+		letter-spacing: 0.2em;
+		text-transform: uppercase;
+		color: var(--color-accent-strong);
+	}
+	.intro {
+		margin: 1.25rem 0 0;
+		max-width: 42rem;
+		font-size: 1.125rem;
+		line-height: 1.6;
+		color: var(--color-text-muted);
+	}
+</style>
