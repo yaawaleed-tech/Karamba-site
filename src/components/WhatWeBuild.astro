@@ -261,6 +261,17 @@ function pieceFile(facet: string): string {
 		padding: clamp(1.5rem, 4vw, 3rem);
 		background-color: color-mix(in srgb, var(--color-soft) calc(var(--i) * 22%), var(--color-card-bg));
 	}
+	/* Dark mode only: hairline inset outline. Inset box-shadow paints
+	   inside the border box, so size, margins and sticky maths are
+	   untouched. */
+	:global([data-theme='dark']) .stack-card {
+		box-shadow: inset 0 0 0 1px var(--color-border);
+	}
+	@media (prefers-color-scheme: dark) {
+		:global(:root:not([data-theme='light'])) .stack-card {
+			box-shadow: inset 0 0 0 1px var(--color-border);
+		}
+	}
 	/* Gaps are empty siblings with no margin, padding or border, so card
 	   margin boxes stay exactly border-sized. The end spacer after the
 	   last card lets it stay pinned a moment before the stack releases. */
@@ -273,6 +284,10 @@ function pieceFile(facet: string): string {
 	@media (max-width: 719.98px) {
 		.stack-card {
 			min-height: 52svh;
+		}
+		/* Phone rhythm into the next band: 2.5rem instead of the base 4rem. */
+		#services .services-rise {
+			padding-bottom: 2.5rem;
 		}
 	}
 

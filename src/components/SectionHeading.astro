@@ -7,12 +7,13 @@ interface Props {
   soft: string;
   eyebrow?: string;
   intro?: string;
+  tone?: 'default' | 'inverse';
 }
 
-const { strong, soft, eyebrow, intro } = Astro.props;
+const { strong, soft, eyebrow, intro, tone = 'default' } = Astro.props;
 ---
 
-<div class="section-heading">
+<div class={`section-heading tone-${tone}`}>
 	{eyebrow && <p class="eyebrow">{eyebrow}</p>}
 	<h2 class="heading">
 		<span class="strong">{strong}</span>
@@ -34,9 +35,15 @@ const { strong, soft, eyebrow, intro } = Astro.props;
 	.strong {
 		color: var(--color-text);
 	}
+	.tone-inverse .strong {
+		color: var(--color-panel-text);
+	}
 	.soft {
 		display: block;
 		color: var(--color-text-muted);
+	}
+	.tone-inverse .soft {
+		color: var(--color-panel-muted);
 	}
 	.eyebrow {
 		margin: 0 0 0.75rem;
@@ -45,6 +52,12 @@ const { strong, soft, eyebrow, intro } = Astro.props;
 		letter-spacing: 0.2em;
 		text-transform: uppercase;
 		color: var(--color-accent-strong);
+	}
+	.tone-inverse .eyebrow {
+		color: var(--color-panel-accent);
+	}
+	.tone-inverse .intro {
+		color: var(--color-panel-muted);
 	}
 	.intro {
 		margin: 1.25rem 0 0;

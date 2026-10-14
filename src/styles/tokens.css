@@ -30,6 +30,12 @@
   --color-soft: var(--kt-mist);             /* mist blue surface */
   --color-clay: var(--kt-clay);             /* rare warm accent */
   --color-clay-text: #FFFFFF;               /* text on clay */
+  --color-panel: var(--kt-indigo);
+  --color-panel-text: var(--kt-cream);
+  --color-panel-muted: color-mix(in srgb, var(--kt-cream) 72%, transparent);
+  --color-panel-card: var(--kt-paper);
+  --color-panel-card-text: var(--kt-indigo);
+  --color-panel-accent: #26707F;
 }
 
 [data-theme='dark'] {
@@ -47,6 +53,12 @@
   --color-soft: #22345F;
   --color-clay: var(--kt-clay-light);
   --color-clay-text: #1B1008;
+  --color-panel: var(--kt-indigo);
+  --color-panel-text: var(--kt-cream);
+  --color-panel-muted: color-mix(in srgb, var(--kt-cream) 72%, transparent);
+  --color-panel-card: #22345F;
+  --color-panel-card-text: var(--kt-cream);
+  --color-panel-accent: var(--kt-teal-light);
 }
 
 /* Respect system preference when the visitor hasn't chosen a theme yet.
@@ -68,5 +80,11 @@
     --color-soft: #22345F;
     --color-clay: var(--kt-clay-light);
     --color-clay-text: #1B1008;
+    --color-panel: var(--kt-indigo);
+    --color-panel-text: var(--kt-cream);
+    --color-panel-muted: color-mix(in srgb, var(--kt-cream) 72%, transparent);
+    --color-panel-card: #22345F;
+    --color-panel-card-text: var(--kt-cream);
+    --color-panel-accent: var(--kt-teal-light);
   }
 }

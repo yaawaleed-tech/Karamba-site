@@ -1,0 +1,428 @@
+---
+import SectionHeading from './SectionHeading.astro';
+import manifest from '../assets/brand/karamba-pieces/manifest.json';
+
+/* How We Work: full-bleed indigo band, PACE rows with a scroll spotlight,
+   a drawn progress line and a mini logo that fills in. Copy lives here. */
+
+const EYEBROW = 'How we work';
+const HEADING_STRONG = 'Plan. Assemble.';
+const HEADING_SOFT = 'Check. Evolve.';
+const INTRO =
+  'Every project follows the same four steps, so you always know what happens next.';
+
+interface Step {
+  letter: string;
+  name: string;
+  description: string;
+}
+
+const STEPS: Step[] = [
+  {
+    letter: 'P',
+    name: 'Plan',
+    description:
+      'We map how your business runs today, define the scope and agree the order of work before anything is built.',
+  },
+  {
+    letter: 'A',
+    name: 'Assemble',
+    description:
+      'We build in staged releases and show you working software at every stage, so nothing is a surprise.',
+  },
+  {
+    letter: 'C',
+    name: 'Check',
+    description:
+      'We test with real users and real data, and review security and performance before launch.',
+  },
+  {
+    letter: 'E',
+    name: 'Evolve',
+    description:
+      'We monitor, support and improve the system as your needs change.',
+  },
+];
+
+interface ManifestPiece {
+  k: string;
+  file: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+const pieceUrls = import.meta.glob(
+  '../assets/brand/karamba-pieces/*.webp',
+  { query: '?url', import: 'default', eager: true },
+) as Record<string, string>;
+function pieceUrl(file: string): string {
+  const hit = Object.entries(pieceUrls).find(([path]) => path.endsWith('/' + file));
+  return hit ? hit[1] : '';
+}
+const pct = (v: number, base: number) => `${((v / base) * 100).toFixed(3)}%`;
+
+/* Mini-logo fill order: body pieces during Assemble, next during Check,
+   arrow rising during Evolve. Ranges are percent stops on the --steps
+   timeline, one animation per piece. */
+const FILL_ORDER = [
+  'core',
+  'education',
+  'commerce',
+  'logistics',
+  'automation',
+  'cloud',
+  'intelligence',
+] as const;
+function fillRange(facet: string): [number, number] {
+  if (facet === 'next') return [52, 62];
+  if (facet === 'arrow') return [68, 90];
+  const i = (FILL_ORDER as readonly string[]).indexOf(facet);
+  const a = 22 + Math.max(i, 0) * 3;
+  return [a, a + 12];
+}
+---
+
+<section id="how-we-work">
+	<div class="how-inner">
+		<div class="how-grid">
+			<div class="how-left">
+				<SectionHeading
+					tone="inverse"
+					eyebrow={EYEBROW}
+					strong={HEADING_STRONG}
+					soft={HEADING_SOFT}
+					intro={INTRO}
+				/>
+				<div class="how-logo" aria-hidden="true">
+					{(manifest.pieces as ManifestPiece[]).map((p) => {
+						const [a, b] = fillRange(p.k);
+						return (
+							<img
+								class={p.k === 'arrow' ? 'mpiece mpiece-arrow' : 'mpiece'}
+								src={pieceUrl(p.file)}
+								alt=""
+								loading="lazy"
+								data-facet={p.k}
+								style={`left:${pct(p.x, 656)};top:${pct(p.y, 684)};width:${pct(p.w, 656)};height:${pct(p.h, 684)};--a:${a}%;--b:${b}%`}
+							/>
+						);
+					})}
+				</div>
+			</div>
+			<div class="how-right">
+				<div class="progress" aria-hidden="true">
+					<div class="progress-fill"></div>
+				</div>
+				<ol class="rows">
+					{STEPS.map((step, i) => (
+						<li class="row" style={`view-timeline-name:--row-${i}`}>
+							<span class="row-dot" aria-hidden="true" style={`animation-timeline:--row-${i}`}></span>
+							<span class="letter" aria-hidden="true">
+								<span class="letter-outline">{step.letter}</span>
+								<span class="letter-fill">{step.letter}</span>
+							</span>
+							<div class="row-body">
+								<h3 class="row-name">{step.name}</h3>
+								<p class="row-desc">{step.description}</p>
+							</div>
+						</li>
+					))}
+				</ol>
+			</div>
+		</div>
+	</div>
+</section>
+
+<script>
+	/* DEV-ONLY readout (?how=debug). import.meta.env.DEV is replaced with
+	   false at build time, so the minifier drops this whole block and
+	   nothing of it ships to production. */
+	if (import.meta.env.DEV && window.location.search.includes('how=debug')) {
+		const grid = document.querySelector('.how-grid');
+		const rows = Array.from(document.querySelectorAll('.how-row, .row'));
+		const fill = document.querySelector('.progress-fill');
+		const pieces = Array.from(document.querySelectorAll('.mpiece'));
+		const fills = Array.from(document.querySelectorAll('.letter-fill'));
+		const arrow = pieces.find((p) => p.getAttribute('data-facet') === 'arrow');
+		const box = document.createElement('pre');
+		box.setAttribute('aria-hidden', 'true');
+		box.style.cssText =
+			'position:fixed;right:8px;top:8px;z-index:9999;margin:0;padding:8px;' +
+			'font:11px/1.5 monospace;white-space:pre;color:#fff;' +
+			'background:rgba(0,0,0,.75);pointer-events:none;';
+		document.body.appendChild(box);
+		function frame() {
+			const lines = [];
+			if (grid) {
+				const r = grid.getBoundingClientRect();
+				const total = window.innerHeight + r.height;
+				const p = Math.max(0, Math.min(1, (window.innerHeight - r.top) / total));
+				lines.push(
+					`gridH=${Math.round(r.height)} progress=${(p * 100).toFixed(1)}%`
+				);
+			}
+			rows.forEach((row, i) => {
+				lines.push(`row${i} opacity=${getComputedStyle(row).opacity}`);
+			});
+			fills.forEach((f, i) => {
+				lines.push(`fill${i} opacity=${getComputedStyle(f).opacity}`);
+			});
+			if (arrow) {
+				const acs = getComputedStyle(arrow);
+				lines.push(`arrow opacity=${acs.opacity} transform=${acs.transform}`);
+			}
+			if (fill) {
+				lines.push(`fill transform=${getComputedStyle(fill).transform}`);
+			}
+			pieces.forEach((piece) => {
+				const key = piece.getAttribute('data-facet') || '?';
+				lines.push(`piece ${key} opacity=${getComputedStyle(piece).opacity}`);
+			});
+			box.textContent = lines.join('\n');
+			requestAnimationFrame(frame);
+		}
+		requestAnimationFrame(frame);
+	}
+</script>
+
+<style>
+	/* Dim floor for the spotlight. Panel-muted at this opacity over the
+	   panel still clears 4.5:1 for body text (computed 4.76), so dimmed
+	   rows stay legible the whole way through. */
+	#how-we-work {
+		--dim: 0.78;
+		background-color: var(--color-panel);
+		color: var(--color-panel-text);
+		border-top-left-radius: 50% 56px;
+		border-top-right-radius: 50% 56px;
+		margin-top: 6rem;
+	}
+	@media (max-width: 719.98px) {
+		#how-we-work {
+			border-top-left-radius: 50% 48px;
+			border-top-right-radius: 50% 48px;
+			margin-top: 3.5rem;
+		}
+	}
+	.how-inner {
+		max-width: 1240px;
+		margin-inline: auto;
+		padding-inline: 24px;
+		padding-block: clamp(4rem, 10svh, 7rem);
+	}
+	@media (max-width: 719.98px) {
+		.how-inner {
+			padding-inline: 20px;
+		}
+	}
+	.how-grid {
+		display: grid;
+		gap: 3rem;
+	}
+	@media (min-width: 900px) {
+		.how-grid {
+			grid-template-columns: 38fr 62fr;
+			gap: 5rem;
+		}
+		.how-left {
+			position: sticky;
+			top: calc(var(--header-h-compact) + 32px);
+			align-self: start;
+		}
+		/* Keep the stuck column inside the viewport: the heading scales
+		   with the shorter viewport axis too. Scoped to .heading via
+		   :global because the element belongs to SectionHeading. */
+		.how-left :global(.heading) {
+			font-size: 2.2rem;
+			font-size: clamp(2.2rem, min(5vw, 8.5svh), 4.4rem);
+		}
+	}
+
+	.how-logo {
+		position: relative;
+		width: 240px;
+		width: min(240px, 22svh);
+		max-width: 100%;
+		aspect-ratio: 656 / 684;
+		margin-top: 1.5rem;
+	}
+	@media (max-width: 899.98px) {
+		.how-logo {
+			display: none;
+		}
+	}
+	.mpiece {
+		position: absolute;
+	}
+
+	.how-right {
+		position: relative;
+		min-width: 0;
+	}
+	.progress {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		width: 1px;
+		background-color: color-mix(in srgb, var(--color-panel-text) 22%, transparent);
+	}
+	.progress-fill {
+		position: absolute;
+		inset: 0;
+		background-color: var(--color-panel-accent);
+		transform-origin: top;
+	}
+	.rows {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+	}
+	.row {
+		position: relative;
+		display: grid;
+		grid-template-columns: 7.5rem minmax(0, 1fr);
+		padding-block: clamp(1.6rem, 4svh, 2.6rem);
+		border-top: 1px solid color-mix(in srgb, var(--color-panel-text) 22%, transparent);
+	}
+	.row:last-child {
+		border-bottom: 1px solid color-mix(in srgb, var(--color-panel-text) 22%, transparent);
+	}
+	@media (max-width: 899.98px) {
+		.row {
+			grid-template-columns: 4.5rem minmax(0, 1fr);
+			padding-left: 1.25rem;
+		}
+	}
+	.row-dot {
+		position: absolute;
+		top: 0;
+		left: -5px;
+		width: 10px;
+		height: 10px;
+		border-radius: 50%;
+		border: 1.5px solid var(--color-panel-accent);
+		background-color: var(--color-panel-accent);
+	}
+	.letter {
+		display: grid;
+		font-family: var(--font-heading);
+		font-weight: 600;
+		font-size: 4.5rem;
+		font-size: clamp(4.5rem, 9vw, 8rem);
+		line-height: 1;
+		color: transparent;
+	}
+	@media (max-width: 899.98px) {
+		.letter {
+			font-size: 4rem;
+		}
+	}
+	.letter-outline,
+	.letter-fill {
+		grid-area: 1 / 1;
+	}
+	.letter-outline {
+		color: transparent;
+		-webkit-text-stroke: 1.5px var(--color-panel-accent);
+	}
+	.letter-fill {
+		color: var(--color-panel-accent);
+	}
+	.row-body {
+		min-width: 0;
+	}
+	.row-name {
+		margin: 0;
+		font-family: var(--font-heading);
+		font-weight: 600;
+		font-size: 1.6rem;
+		font-size: clamp(1.6rem, 3vw, 2.4rem);
+		line-height: 1.2;
+		color: var(--color-panel-text);
+	}
+	.row-desc {
+		margin: 0.75rem 0 0;
+		max-width: 44ch;
+		font-size: 1.05rem;
+		line-height: 1.6;
+		color: var(--color-panel-muted);
+	}
+
+	/* Scroll effects: spotlight rows, filling letters, lit dots, drawn
+	   progress and the filling mini logo. Transform and opacity only, no
+	   JavaScript, no pinning. Outside the gate everything below keeps its
+	   base values, so all content is simply visible with no hidden states. */
+	@supports (animation-timeline: view()) {
+		@media (prefers-reduced-motion: no-preference) {
+			.how-grid {
+				view-timeline: --steps block;
+			}
+			/* Tall rows only inside the gate: outside it (Firefox, older
+			   iOS, reduced motion) rows stay compact so no empty gaps. */
+			.row {
+				min-height: var(--how-step-height);
+				align-content: center;
+			}
+			.row {
+				animation: row-spot linear both;
+				animation-timeline: view();
+				animation-range: cover 0% cover 100%;
+			}
+			@keyframes row-spot {
+				0% { opacity: var(--dim); }
+				38%, 62% { opacity: 1; }
+				100% { opacity: var(--dim); }
+			}
+			.letter-fill {
+				animation: letter-fill linear both;
+				animation-timeline: view();
+				animation-range: cover 0% cover 100%;
+			}
+			@keyframes letter-fill {
+				0%, 18% { opacity: 0; }
+				50%, 100% { opacity: 1; }
+			}
+			.row-dot {
+				animation: dot-fill linear both;
+				animation-range: cover 22% cover 40%;
+			}
+			@keyframes dot-fill {
+				0% { opacity: 0.25; background-color: transparent; }
+				100% { opacity: 1; background-color: var(--color-panel-accent); }
+			}
+			.progress-fill {
+				animation: progress-draw linear both;
+				animation-timeline: --steps;
+				animation-range: contain 8% contain 92%;
+			}
+			@keyframes progress-draw {
+				0% { transform: scaleY(0); }
+				100% { transform: scaleY(1); }
+			}
+			.mpiece {
+				animation: piece-fill linear both;
+				animation-timeline: --steps;
+				animation-range: contain var(--a) contain var(--b);
+			}
+			@keyframes piece-fill {
+				0% { opacity: 0.18; }
+				100% { opacity: 1; }
+			}
+			/* Name only: timeline, range, duration, timing and fill inherit
+			   from .mpiece above. Using the shorthand here would reset
+			   them to auto/normal and strand the arrow at its end state,
+			   which is exactly the ghost bug this replaces. */
+			.mpiece-arrow {
+				animation-name: arrow-rise;
+			}
+			@keyframes arrow-rise {
+				0% { opacity: 0.18; transform: translate(0, 0); }
+				100% { opacity: 1; transform: translate(6%, -6%); }
+			}
+		}
+	}
+</style>

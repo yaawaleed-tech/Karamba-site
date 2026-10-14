@@ -1,0 +1,199 @@
+---
+import SectionHeading from './SectionHeading.astro';
+import {
+  CONTACT_WHATSAPP_DISPLAY,
+  CONTACT_WHATSAPP_NUMBER,
+} from '../data/contact';
+
+/* Closing call to action: headline, primary pill opening the quote
+   dialog, and a quiet WhatsApp link. All copy lives here. */
+
+const HEADING_STRONG = 'What does your team';
+const HEADING_SOFT = 'repeat every day?';
+const LINE =
+  'Tell us. If software can take it off your plate, we will say so. If it cannot, we will say that too.';
+const WHATSAPP_HREF =
+  `https://wa.me/${CONTACT_WHATSAPP_NUMBER}?text=${encodeURIComponent('Hello Karamba, I would like to talk about a project.')}`;
+
+const pieceUrls = import.meta.glob(
+  '../assets/brand/karamba-pieces/*.webp',
+  { query: '?url', import: 'default', eager: true },
+) as Record<string, string>;
+function pieceUrl(file: string): string {
+  const hit = Object.entries(pieceUrls).find(([path]) => path.endsWith('/' + file));
+  return hit ? hit[1] : '';
+}
+---
+
+<section id="closing-cta">
+	<div class="cta-wrap">
+		<div class="cta-main">
+			<SectionHeading strong={HEADING_STRONG} soft={HEADING_SOFT} />
+			<p class="cta-line">{LINE}</p>
+			<div class="cta-actions">
+				<a
+					href="/quote"
+					data-quote
+					class="cta-shimmer rounded-full px-7 py-3.5 text-sm font-semibold"
+					style="background-color: var(--color-primary); color: var(--color-primary-text);"
+				>
+					<span>Get a quote</span>
+				</a>
+				<a
+					href={WHATSAPP_HREF}
+					target="_blank"
+					rel="noopener"
+					class="cta-wa"
+				>
+					Message us on WhatsApp
+				</a>
+			</div>
+		</div>
+			<img
+				class="cta-piece"
+				src={pieceUrl('arrow.webp')}
+				alt=""
+				aria-hidden="true"
+				loading="lazy"
+			/>
+		</div>
+</section>
+
+<style>
+	/* Full-bleed band: square edges, content vertically centred. The
+	   footer follows directly with no gap. overflow: clip (not hidden)
+	   crops the arrow without trapping anything. */
+	#closing-cta {
+		position: relative;
+		overflow: clip;
+		margin: 0;
+		min-height: 70svh;
+		display: flex;
+		align-items: center;
+		background-color: var(--color-soft);
+	}
+	:global([data-theme='dark']) #closing-cta {
+		background-color: var(--color-bg-subtle);
+		border-top: 1px solid var(--color-border);
+	}
+	@media (prefers-color-scheme: dark) {
+		:global(:root:not([data-theme='light'])) #closing-cta {
+			background-color: var(--color-bg-subtle);
+			border-top: 1px solid var(--color-border);
+		}
+	}
+	.cta-wrap {
+		width: 100%;
+		max-width: 1240px;
+		margin-inline: auto;
+		padding-inline: 24px;
+		padding-block: clamp(3rem, 8svh, 5rem);
+	}
+	@media (max-width: 719.98px) {
+		.cta-wrap {
+			padding-inline: 20px;
+		}
+	}
+	.cta-main {
+		position: relative;
+		z-index: 1;
+		max-width: 40rem;
+	}
+	.cta-line {
+		margin: 1.25rem 0 0;
+		max-width: 38rem;
+		font-size: 1.125rem;
+		line-height: 1.6;
+		color: var(--color-text-muted);
+	}
+	.cta-actions {
+		margin-top: 2rem;
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 1rem 1.5rem;
+	}
+	.cta-wa {
+		display: inline-flex;
+		align-items: center;
+		min-height: 44px;
+		padding: 0.6rem 0;
+		font-weight: 600;
+		color: var(--color-primary);
+		text-decoration: none;
+		transition: opacity 0.2s ease;
+	}
+	.cta-wa:hover {
+		opacity: 0.7;
+	}
+	.cta-shimmer:focus-visible,
+	.cta-wa:focus-visible {
+		outline: 2px solid var(--color-accent-strong);
+		outline-offset: 3px;
+	}
+
+	/* Primary pill shimmer, same look as the header button. */
+	.cta-shimmer {
+		position: relative;
+		overflow: hidden;
+		display: inline-block;
+		transition: transform 0.25s ease, box-shadow 0.25s ease;
+	}
+	.cta-shimmer::after {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: -60%;
+		width: 40%;
+		height: 100%;
+		background: linear-gradient(120deg, transparent, rgba(255,255,255,0.45), transparent);
+		transform: skewX(-20deg);
+		transition: left 0.6s ease;
+	}
+	@media (hover: hover) and (pointer: fine) {
+		.cta-shimmer:hover {
+			transform: scale(1.05);
+			box-shadow: 0 8px 24px -6px color-mix(in srgb, var(--color-primary) 55%, transparent);
+		}
+		.cta-shimmer:hover::after {
+			left: 130%;
+		}
+	}
+	@media (hover: none) {
+		.cta-shimmer::after {
+			transition: none;
+			animation: cta-shimmer-sweep 5s ease-in-out infinite;
+		}
+		.cta-shimmer:active { transform: scale(0.96); }
+	}
+	@keyframes cta-shimmer-sweep {
+		0%, 76% { left: -60%; }
+		100% { left: 130%; }
+	}
+
+	/* Arrow piece, cropped by the panel edge on desktop only. */
+	.cta-piece {
+		position: absolute;
+		top: 50%;
+		right: -6%;
+		width: 34%;
+		height: auto;
+		transform: translateY(-50%) rotate(-6deg);
+		pointer-events: none;
+	}
+	@media (max-width: 899.98px) {
+		.cta-piece {
+			display: none;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.cta-shimmer,
+		.cta-wa {
+			transition: none;
+		}
+		.cta-shimmer::after {
+			animation: none;
+		}
+	}
+</style>
