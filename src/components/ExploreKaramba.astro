@@ -1,0 +1,362 @@
+---
+import SectionHeading from './SectionHeading.astro';
+import { NAV_MENUS } from '../data/nav';
+import type { FacetKey } from '../data/nav';
+import manifest from '../assets/brand/karamba-pieces/manifest.json';
+
+/* Explore Karamba: sitemap-style overview of the four menus. Everything
+   renders from nav.ts in header order; no menu copy lives here. The
+   section carries aria-label because SectionHeading is shared and its h2
+   has no id hook to point labelledby at. */
+
+const MENUS = NAV_MENUS;
+
+/* Which logo pieces belong to each menu. All nine facets appear exactly
+   once across the four rows. */
+const MENU_PIECES: Record<string, FacetKey[]> = {
+  services: ['core', 'education', 'commerce', 'intelligence', 'cloud'],
+  products: ['automation', 'logistics'],
+  work: ['arrow'],
+  company: ['next'],
+};
+
+interface ManifestPiece {
+  k: string;
+  file: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  ax: number;
+  ay: number;
+}
+
+const pieceUrls = import.meta.glob(
+  '../assets/brand/karamba-pieces/*.webp',
+  { query: '?url', import: 'default', eager: true },
+) as Record<string, string>;
+function pieceUrl(file: string): string {
+  const hit = Object.entries(pieceUrls).find(([path]) => path.endsWith('/' + file));
+  return hit ? hit[1] : '';
+}
+const pct = (v: number, base: number) => `${((v / base) * 100).toFixed(3)}%`;
+
+/* Logo centre in canvas units, same as the hero mark. */
+const CX = 328;
+const CY = 342;
+function menusForFacet(facet: string): string[] {
+  return Object.entries(MENU_PIECES)
+    .filter(([, keys]) => (keys as readonly string[]).includes(facet))
+    .map(([menu]) => menu);
+}
+function unit(ax: number, ay: number) {
+  const dx = ax - CX;
+  const dy = ay - CY;
+  const n = Math.hypot(dx, dy) || 1;
+  return { x: (dx / n).toFixed(3), y: (dy / n).toFixed(3) };
+}
+---
+
+<section id="explore" aria-label="Explore Karamba">
+	<div class="explore-inner">
+		<div class="explore-grid">
+			<div class="explore-main">
+				<SectionHeading
+					eyebrow="Explore"
+					strong="Explore"
+					soft="Karamba."
+					intro="What we offer, what we are building, what we have built, and who we are."
+				/>
+				<ul class="explore-rows">
+					{MENUS.map((menu, i) => (
+						<li class="row" data-menu={menu.key}>
+							<span class="row-num" aria-hidden="true">0{i + 1}</span>
+							<div class="row-main">
+								<h3 class="row-title">
+									<a class="row-link" href={menu.hubHref}>{menu.label}</a>
+								</h3>
+								<p class="row-intro">{menu.introText}</p>
+								<ul class="row-pills">
+									{menu.items.map((item) => (
+										<li>
+											<a class="pill" href={item.href}>
+												{item.name}
+												{item.status && <span class="pill-status">{item.status}</span>}
+											</a>
+										</li>
+									))}
+								</ul>
+							</div>
+							<span class="row-arrow" aria-hidden="true">→</span>
+						</li>
+					))}
+				</ul>
+			</div>
+			<div class="explore-side" aria-hidden="true">
+				<div class="explore-logo">
+					{(manifest.pieces as ManifestPiece[]).map((p) => {
+						const v = unit(p.ax, p.ay);
+						return (
+							<img
+								class="pc"
+								data-menus={menusForFacet(p.k).join(' ')}
+								src={pieceUrl(p.file)}
+								alt=""
+								loading="lazy"
+								draggable="false"
+								style={`left:${pct(p.x, 656)};top:${pct(p.y, 684)};width:${pct(p.w, 656)};height:${pct(p.h, 684)};--ux:${v.x};--uy:${v.y}`}
+							/>
+						);
+					})}
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+
+<style>
+	.explore-inner {
+		max-width: 1240px;
+		margin-inline: auto;
+		padding-inline: 24px;
+		padding-block: 7rem;
+	}
+	@media (max-width: 719.98px) {
+		.explore-inner {
+			padding-inline: 20px;
+			padding-block: 4rem;
+		}
+	}
+	.explore-grid {
+		display: grid;
+		gap: 3rem;
+		margin-top: 3rem;
+	}
+	@media (min-width: 900px) {
+		.explore-grid {
+			grid-template-columns: minmax(0, 62fr) minmax(0, 38fr);
+			gap: 5rem;
+		}
+	}
+	.explore-main {
+		min-width: 0;
+	}
+
+	.explore-rows {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+	.row {
+		position: relative;
+		display: grid;
+		grid-template-columns: 3rem minmax(0, 1fr) auto;
+		gap: 1.5rem;
+		align-items: start;
+		min-height: clamp(190px, 25svh, 280px);
+		margin-inline: -12px;
+		padding-inline: 12px;
+		padding-block: clamp(1.8rem, 4.5svh, 3rem);
+	}
+	/* Hover wash lives on ::before so the 20px radius never touches the
+	   hairlines. pointer-events none so the stretched link keeps every
+	   click; pills already sit above it on z-index 1. */
+	.row::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		border-radius: 20px;
+		background-color: transparent;
+		transition: background-color 0.22s ease;
+		pointer-events: none;
+		z-index: -1;
+	}
+	/* Hairlines are drawn, not bordered, so their ends stay square. */
+	.row::after {
+		content: '';
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: 0;
+		height: 1px;
+		background-color: color-mix(in srgb, var(--color-text) 18%, transparent);
+		pointer-events: none;
+	}
+	.row:last-child {
+		border-bottom: 1px solid color-mix(in srgb, var(--color-text) 18%, transparent);
+	}
+	@media (max-width: 899.98px) {
+		.row {
+			grid-template-columns: 2.5rem minmax(0, 1fr) auto;
+			gap: 1rem;
+		}
+	}
+	.row-num {
+		padding-top: 1rem;
+		font-family: var(--font-body);
+		font-size: 0.85rem;
+		letter-spacing: 0.15em;
+		color: var(--color-text-muted);
+	}
+	.row-main {
+		min-width: 0;
+	}
+	.row-title {
+		margin: 0;
+		font-family: var(--font-heading);
+		font-weight: 600;
+		font-size: 2.8rem;
+		font-size: clamp(2.8rem, 7.4vw, 7rem);
+		line-height: 1;
+		transition: transform 0.22s ease;
+	}
+	@media (max-width: 899.98px) {
+		.row-title {
+			font-size: 2.4rem;
+			font-size: clamp(2.4rem, 11vw, 4rem);
+		}
+	}
+	.row-link {
+		color: var(--color-text);
+		text-decoration: none;
+	}
+	.row-link::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+	}
+	.row-link:focus-visible {
+		outline: none;
+	}
+	.row-link:focus-visible::after {
+		outline: 2px solid var(--color-accent-strong);
+		outline-offset: 4px;
+	}
+	.row-intro {
+		margin: 1rem 0 0;
+		max-width: 46ch;
+		font-size: 1.1rem;
+		line-height: 1.55;
+		color: var(--color-text-muted);
+	}
+	.row-pills {
+		list-style: none;
+		margin: 1.25rem 0 0;
+		padding: 0;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+	}
+	.pill {
+		position: relative;
+		z-index: 1;
+		display: inline-block;
+		border: 1px solid var(--color-border);
+		border-radius: 999px;
+		padding: 0.3rem 0.8rem;
+		font-size: 0.8rem;
+		color: var(--color-text-muted);
+		text-decoration: none;
+	}
+	.pill-status {
+		margin-left: 0.45em;
+		font-size: 0.68rem;
+		font-weight: 600;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--color-accent-strong);
+	}
+	.pill:focus-visible {
+		outline: 2px solid var(--color-accent-strong);
+		outline-offset: 2px;
+	}
+	@media (max-width: 899.98px) {
+		.pill {
+			display: inline-flex;
+			align-items: center;
+			min-height: 44px;
+			padding: 0.65rem 1rem;
+		}
+	}
+	.row-arrow {
+		align-self: center;
+		display: inline-block;
+		font-size: 2rem;
+		line-height: 1;
+		color: var(--color-text-muted);
+		transition: transform 0.22s ease;
+	}
+	@media (hover: hover) and (pointer: fine) {
+		.row:hover::before {
+			background-color: color-mix(in srgb, var(--color-soft) 45%, transparent);
+		}
+		.row:hover .row-title {
+			transform: translateX(10px);
+		}
+		.row:hover .row-arrow {
+			transform: translateX(10px);
+			color: var(--color-text);
+		}
+	}
+
+	/* Sticky mini logo, desktop only. The grid is far taller than the
+	   logo, so it stays parked while the rows scroll past. */
+	.explore-side {
+		min-width: 0;
+	}
+	@media (max-width: 899.98px) {
+		.explore-side {
+			display: none;
+		}
+	}
+	.explore-logo {
+		position: relative;
+		width: min(420px, 44svh);
+		max-width: 100%;
+		aspect-ratio: 656 / 684;
+	}
+	@media (min-width: 900px) {
+		.explore-logo {
+			position: sticky;
+			top: calc(var(--header-h-compact) + 40px);
+			align-self: start;
+		}
+	}
+	.explore-logo .pc {
+		position: absolute;
+		opacity: 0.9;
+		transition:
+			opacity 0.25s ease,
+			transform 0.25s ease;
+	}
+	/* Row-to-piece lighting, hover-capable pointers only. Without :has
+	   support these rules drop away and the logo simply stays at .9. */
+	@media (hover: hover) and (pointer: fine) {
+		.explore:has(.row:is(:hover, :focus-within)) .pc {
+			opacity: 0.18;
+		}
+		.explore:has(.row[data-menu="services"]:is(:hover, :focus-within)) .pc[data-menus~="services"],
+		.explore:has(.row[data-menu="products"]:is(:hover, :focus-within)) .pc[data-menus~="products"],
+		.explore:has(.row[data-menu="work"]:is(:hover, :focus-within)) .pc[data-menus~="work"],
+		.explore:has(.row[data-menu="company"]:is(:hover, :focus-within)) .pc[data-menus~="company"] {
+			opacity: 1;
+			transform: translate(calc(var(--ux) * 5%), calc(var(--uy) * 5%));
+		}
+	}
+
+	/* Scroll reveal: each row rides its own view() timeline. Outside the
+	   gate everything is simply visible, with no hidden states. */
+	@supports (animation-timeline: view()) {
+		@media (prefers-reduced-motion: no-preference) {
+			.row {
+				animation: row-in linear both;
+				animation-timeline: view();
+				animation-range: entry 0% entry 45%;
+			}
+			@keyframes row-in {
+				from { transform: translateY(36px); opacity: 0; }
+				to { transform: none; opacity: 1; }
+			}
+		}
+	}
+</style>

@@ -25,7 +25,7 @@ function pieceUrl(file: string): string {
 }
 ---
 
-<section id="closing-cta">
+<section id="closing-cta" class="closing-section">
 	<div class="cta-wrap">
 		<div class="cta-main">
 			<SectionHeading strong={HEADING_STRONG} soft={HEADING_SOFT} />
@@ -64,13 +64,45 @@ function pieceUrl(file: string): string {
 	   footer follows directly with no gap. overflow: clip (not hidden)
 	   crops the arrow without trapping anything. */
 	#closing-cta {
+		/* 
+		  Container knobs for ClosingCta:
+		  --closing-container: 1240px (default) use for inner container max-width.
+		  --closing-pad-x: 24px (default) use for horizontal padding.
+		  Setting --closing-container to none and --closing-pad-x to 48px makes
+		  the content start near the left edge of the screen.
+		  Default behaviour keeps the same left edge as the other sections.
+		*/
 		position: relative;
 		overflow: clip;
 		margin: 0;
-		min-height: 70svh;
+		min-height: clamp(380px, 56svh, 560px);
 		display: flex;
 		align-items: center;
 		background-color: var(--color-soft);
+		--closing-container: 1240px;
+		--closing-pad-x: 24px;
+	}
+	/* SectionHeading size knob: the shared component now reads
+	   --section-heading-size and falls back to its own clamp when the
+	   variable is unset, so every other section is untouched.
+	   Set only at min-width 900px, so phones and tablets keep the
+	   shared default. The .heading/.strong/.soft elements are rendered
+	   by SectionHeading and carry that component's scope attribute,
+	   so they are addressed with :global() to escape this scope.
+	   No max-width or width exists on the heading or its wrapper
+	   (.section-heading has none) that could force a wrap. */
+	@media (min-width: 900px) {
+		#closing-cta {
+			--section-heading-size: clamp(2.2rem, min(4.4vw, 7.5svh), 4rem);
+		}
+		#closing-cta :global(.heading) {
+			white-space: nowrap;
+		}
+		#closing-cta :global(.heading) :global(.strong),
+		#closing-cta :global(.heading) :global(.soft) {
+			display: block;
+			white-space: nowrap;
+		}
 	}
 	:global([data-theme='dark']) #closing-cta {
 		background-color: var(--color-bg-subtle);
@@ -84,12 +116,20 @@ function pieceUrl(file: string): string {
 	}
 	.cta-wrap {
 		width: 100%;
-		max-width: 1240px;
+		max-width: var(--closing-container);
 		margin-inline: auto;
-		padding-inline: 24px;
+		padding-inline: var(--closing-pad-x);
 		padding-block: clamp(3rem, 8svh, 5rem);
 	}
-	@media (max-width: 719.98px) {
+	@media (min-width: 900px) {
+		.cta-wrap {
+			display: grid;
+			grid-template-columns: minmax(1, 62%) minmax(1, 38%);
+			gap: 0;
+			padding-block: 5rem;
+		}
+	}
+	@media (max-width: 899.98px) {
 		.cta-wrap {
 			padding-inline: 20px;
 		}
@@ -97,11 +137,10 @@ function pieceUrl(file: string): string {
 	.cta-main {
 		position: relative;
 		z-index: 1;
-		max-width: 40rem;
 	}
 	.cta-line {
 		margin: 1.25rem 0 0;
-		max-width: 38rem;
+		max-width: 46ch;
 		font-size: 1.125rem;
 		line-height: 1.6;
 		color: var(--color-text-muted);
@@ -171,14 +210,15 @@ function pieceUrl(file: string): string {
 		100% { left: 130%; }
 	}
 
-	/* Arrow piece, cropped by the panel edge on desktop only. */
-	.cta-piece {
+	/* Arrow piece, anchored to the bottom-right of the band, rotated -6deg,
+   partly cropped by the viewport's right edge (overflow: clip on the band). */
+.cta-piece {
 		position: absolute;
-		top: 50%;
-		right: -6%;
-		width: 34%;
+		bottom: 0;
+		right: 0;
+		width: clamp(260px, 24vw, 420px);
 		height: auto;
-		transform: translateY(-50%) rotate(-6deg);
+		transform: rotate(-6deg);
 		pointer-events: none;
 	}
 	@media (max-width: 899.98px) {

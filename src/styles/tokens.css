@@ -35,7 +35,7 @@
   --color-panel-muted: color-mix(in srgb, var(--kt-cream) 72%, transparent);
   --color-panel-card: var(--kt-paper);
   --color-panel-card-text: var(--kt-indigo);
-  --color-panel-accent: #26707F;
+  --color-panel-accent: var(--kt-teal-light);
 }
 
 [data-theme='dark'] {

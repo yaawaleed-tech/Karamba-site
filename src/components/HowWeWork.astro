@@ -84,6 +84,7 @@ function fillRange(facet: string): [number, number] {
 }
 ---
 
+<div class="how-seam">
 <section id="how-we-work">
 	<div class="how-inner">
 		<div class="how-grid">
@@ -134,6 +135,7 @@ function fillRange(facet: string): [number, number] {
 		</div>
 	</div>
 </section>
+</div>
 
 <script>
 	/* DEV-ONLY readout (?how=debug). import.meta.env.DEV is replaced with
@@ -191,19 +193,30 @@ function fillRange(facet: string): [number, number] {
 	/* Dim floor for the spotlight. Panel-muted at this opacity over the
 	   panel still clears 4.5:1 for body text (computed 4.76), so dimmed
 	   rows stay legible the whole way through. */
+	/* Seam wrapper: same background as the bottom of WhatWeBuild, so the
+	   band's top arc rises out of the section above with no visible line.
+	   Full-bleed block, no border, flush against WhatWeBuild. The band's
+	   old top margin lives here as padding instead. */
+	.how-seam {
+		background-color: var(--color-bg-subtle);
+		padding-top: 6rem;
+	}
+	@media (max-width: 719.98px) {
+		.how-seam {
+			padding-top: 3.5rem;
+		}
+	}
 	#how-we-work {
 		--dim: 0.78;
 		background-color: var(--color-panel);
 		color: var(--color-panel-text);
 		border-top-left-radius: 50% 56px;
 		border-top-right-radius: 50% 56px;
-		margin-top: 6rem;
 	}
 	@media (max-width: 719.98px) {
 		#how-we-work {
 			border-top-left-radius: 50% 48px;
 			border-top-right-radius: 50% 48px;
-			margin-top: 3.5rem;
 		}
 	}
 	.how-inner {

@@ -107,7 +107,7 @@ export const NAV_MENUS: NavMenu[] = [
     key: 'company',
     label: 'Company',
     hubHref: '/company',
-    introText: 'A software engineer and a team, building from Kano.',
+    introText: 'Karamba Technologies is a software company based in Kano.',
     introButtonText: 'About Karamba',
     items: [
       {

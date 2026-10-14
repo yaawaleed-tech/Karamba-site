@@ -28,7 +28,7 @@ const { strong, soft, eyebrow, intro, tone = 'default' } = Astro.props;
 		font-family: var(--font-heading);
 		font-weight: 600;
 		font-size: 2.4rem;
-		font-size: clamp(2.4rem, 6vw, 5rem);
+		font-size: var(--section-heading-size, clamp(2.4rem, 6vw, 5rem));
 		line-height: 1.05;
 		text-align: left;
 	}
