@@ -49,49 +49,62 @@ function pieceFile(facet: string): string {
 		scene="services-hub.svg"
 		tone="paper"
 	/>
-	<section aria-label="All services">
-		<div class="hub-inner">
-			<ul class="hub-rows rv-s">
-				{SERVICES.map((service, i) => (
-					<li class="hub-row" style={`--i:${i}`}>
-						<span class="hub-num figures" aria-hidden="true">0{i + 1}</span>
-						<div class="hub-main">
-							<h2 class="hub-name">
-								<a class="hub-link" href={`/services/${service.slug}`}>
-									<span class="u-link">{service.name}</span>
-								</a>
-							</h2>
-							<p class="hub-outcome">{service.outcome}</p>
-						</div>
-						<img
-							class="hub-piece"
-							src={pieceFile(service.facet)}
-							alt=""
-							aria-hidden="true"
-							loading="lazy"
-						/>
-						<span class="hub-arrow" aria-hidden="true">→</span>
-					</li>
-				))}
-			</ul>
+	<section class="hub-experience" aria-label="All services">
+		<nav class="hub-index" aria-label="Service list">
+			{SERVICES.map((service, i) => <a href={`#${service.slug}`}><span class="figures">0{i + 1}</span>{service.name}</a>)}
+		</nav>
+		<div class="hub-cards">
+			{SERVICES.map((service, i) => (
+				<article class="hub-card rv" id={service.slug}>
+					<div><p class="eyebrow"><span aria-hidden="true"></span>0{i + 1} / Services</p>
+						<h2><span>{service.strong}</span> {service.soft}.</h2><p>{service.outcome}</p>
+						<a class="hub-view" href={`/services/${service.slug}`}>View service <span aria-hidden="true">↗</span></a>
+					</div>
+					<img src={pieceFile(service.facet)} alt="" aria-hidden="true" loading="lazy" />
+				</article>
+			))}
 		</div>
 	</section>
+	<section class="hub-connect"><p class="eyebrow"><span aria-hidden="true"></span>How the pieces meet</p><h2><span>One question.</span> A useful next step.</h2><p>Start with the work that needs attention. The right service depends on what you need it to do.</p></section>
 	<ClosingCta />
 	<Footer />
 </Layout>
 
 <style>
-	.hub-inner {
+	.hub-experience {
 		max-width: var(--container-inner);
 		margin-inline: auto;
-		padding-inline: 24px;
-		padding-block: var(--space-section);
+		padding: var(--space-section) 24px;
+		display: grid;
+		grid-template-columns: 12rem minmax(0, 1fr);
+		gap: 3rem;
 	}
 	@media (max-width: 899.98px) {
-		.hub-inner {
-			padding-inline: 20px;
+		.hub-experience {
+			display:block;
+			padding-inline:20px;
 		}
 	}
+	.hub-index { position:sticky; top:6rem; align-self:start; display:grid; gap:.3rem; }
+	.hub-index a { display:flex; gap:.75rem; align-items:center; min-height:44px; color:var(--color-text-muted); text-decoration:none; }
+	.hub-index a:hover, .hub-index a:focus-visible { color:var(--color-text); }
+	.hub-index .figures { color:var(--color-clay-ink); font-size:.75rem; }
+	.hub-cards { display:grid; gap:1rem; }
+	.hub-card { min-height:21rem; display:grid; grid-template-columns:1fr 9rem; gap:2rem; align-items:center; padding:clamp(1.5rem,4vw,3rem); border:1px solid var(--color-line); border-radius:1.5rem; background:var(--color-surface-soft); }
+	.hub-card h2 { margin:.6rem 0 1rem; font:600 var(--fs-h2)/1.05 var(--font-heading); }
+	.hub-card h2 span { color:var(--color-text-muted); font-weight:400; }
+	.hub-card > div > p:not(.eyebrow) { max-width:38ch; color:var(--color-text-muted); line-height:1.6; }
+	.hub-card img { width:100%; }
+	.eyebrow { font:500 .72rem/1.2 var(--font-mono); letter-spacing:.12em; text-transform:uppercase; color:var(--color-text-muted); }
+	.eyebrow span { display:inline-block; width:2.5rem; height:2px; margin-right:.6rem; vertical-align:middle; background:var(--color-clay-ink); }
+	.hub-view { display:inline-flex; gap:.75rem; align-items:center; margin-top:1rem; color:var(--color-text); font-weight:600; }
+	.hub-view span { color:var(--color-clay-ink); }
+	.hub-connect { max-width:var(--container-inner); margin-inline:auto; padding:var(--space-section) 24px; border-top:1px solid var(--color-line); }
+	.hub-connect h2 { margin:.6rem 0 1rem; font:600 var(--fs-h2)/1.05 var(--font-heading); }
+	.hub-connect h2 span { color:var(--color-text-muted); font-weight:400; }
+	.hub-connect > p:last-child { max-width:42ch; color:var(--color-text-muted); line-height:1.7; }
+	@media (max-width:899px) { .hub-index { position:static; display:flex; overflow:auto; gap:1rem; margin-bottom:2rem; } .hub-index a { white-space:nowrap; } .hub-card { min-height:18rem; grid-template-columns:1fr 5rem; } .hub-experience, .hub-connect { padding-inline:20px; } }
+	/*
 	.hub-rows {
 		list-style: none;
 		margin: 0;
@@ -208,4 +221,5 @@ function pieceFile(facet: string): string {
 			transition: none;
 		}
 	}
+	*/
 </style>

@@ -2,19 +2,10 @@
 import Layout from '../../layouts/Layout.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
-import PageHero from '../../components/page/PageHero.astro';
-import WebAnatomy from '../../components/page/WebAnatomy.astro';
-import ContentSection from '../../components/page/ContentSection.astro';
-import Faq from '../../components/page/Faq.astro';
-import RelatedLinks from '../../components/page/RelatedLinks.astro';
-import ClosingCta from '../../components/ClosingCta.astro';
-import { COMMON_FAQ, serviceBySlug } from '../../data/services';
-
-/* Websites and branding: its own page, composed here rather than through
-   the generic service template. */
+import ServicePage from '../../components/page/ServicePage.astro';
+import { serviceBySlug } from '../../data/services';
 
 const entry = serviceBySlug('websites-and-branding');
-
 const trail = [
   { name: 'Home', url: '/' },
   { name: 'Services', url: '/services' },
@@ -24,57 +15,15 @@ const jsonLd = JSON.stringify({
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
   itemListElement: trail.map((crumb, i) => ({
-    '@type': 'ListItem',
-    position: i + 1,
-    name: crumb.name,
+    '@type': 'ListItem', position: i + 1, name: crumb.name,
     item: new URL(crumb.url, Astro.site).toString(),
   })),
 });
 ---
 
 <Layout title={entry.name} description={entry.metaDescription}>
-	<Header />
-	<PageHero
-		breadcrumb={[
-			{ label: 'Home', href: '/' },
-			{ label: 'Services', href: '/services' },
-			{ label: entry.name },
-		]}
-		eyebrow="Services"
-		strong="Websites"
-		soft="and branding."
-		intro={entry.outcome}
-		primaryLabel="Get a quote"
-		primaryHref="/quote"
-		scene="websites-and-branding.svg"
-		animated
-		tone="mist"
-	/>
-
-	<WebAnatomy />
-
-	<!-- NEXT CHUNK: the three page-specific sections go here, between the
-	     pinned anatomy and the questions: what the work covers, what we do
-	     not do, and how we price it. -->
-
-	<ContentSection strong="Common" soft="questions.">
-		<Faq items={COMMON_FAQ} />
-	</ContentSection>
-
-	<ContentSection strong="See also." soft="">
-		<RelatedLinks
-			current={entry.slug}
-			slugs={['custom-software', 'management-systems']}
-		/>
-	</ContentSection>
-
-	<ClosingCta
-		strong={entry.closing.strong}
-		soft={entry.closing.soft}
-		line={entry.closing.line}
-		buttonLabel={entry.closing.button}
-		tone={entry.closing.tone}
-	/>
-	<script type="application/ld+json" set:html={jsonLd} />
-	<Footer />
+  <Header />
+  <ServicePage entry={entry} />
+  <script type="application/ld+json" set:html={jsonLd} />
+  <Footer />
 </Layout>
