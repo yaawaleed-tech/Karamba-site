@@ -30,6 +30,10 @@
   --color-soft: var(--kt-mist);             /* mist blue surface */
   --color-clay: var(--kt-clay);             /* rare warm accent */
   --color-clay-text: #FFFFFF;               /* text on clay */
+  /* Clay for large text, numerals and graphics. #AE5A38 clears 3:1 on
+     the page background (4.05:1; base clay only reaches 3.22:1). Never
+     for small body text on light backgrounds. */
+  --color-clay-ink: #AE5A38;
   --color-panel: var(--kt-indigo);
   --color-panel-text: var(--kt-cream);
   --color-panel-muted: color-mix(in srgb, var(--kt-cream) 72%, transparent);
@@ -53,6 +57,7 @@
   --color-soft: #22345F;
   --color-clay: var(--kt-clay-light);
   --color-clay-text: #1B1008;
+  --color-clay-ink: var(--kt-clay-light);
   --color-panel: var(--kt-indigo);
   --color-panel-text: var(--kt-cream);
   --color-panel-muted: color-mix(in srgb, var(--kt-cream) 72%, transparent);
@@ -80,6 +85,7 @@
     --color-soft: #22345F;
     --color-clay: var(--kt-clay-light);
     --color-clay-text: #1B1008;
+    --color-clay-ink: var(--kt-clay-light);
     --color-panel: var(--kt-indigo);
     --color-panel-text: var(--kt-cream);
     --color-panel-muted: color-mix(in srgb, var(--kt-cream) 72%, transparent);

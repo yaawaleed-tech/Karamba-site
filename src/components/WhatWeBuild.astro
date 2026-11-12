@@ -54,8 +54,7 @@ const CARDS: Card[] = [
     number: '03',
     titleStrong: 'Websites',
     titleSoft: 'and branding',
-    description:
-      'A fast, clear website and a consistent identity that earn trust before the first conversation.',
+    description: 'A site and identity that make people trust you before you say a word.',
     tags: ['Company sites', 'Landing pages', 'Identity', 'Content'],
     tilt: 4,
     ...itemFor('/services/websites-and-branding'),
@@ -107,7 +106,9 @@ function pieceFile(facet: string): string {
      edge dissolves into the hero instead of cutting a hard line. -->
 <section id="services">
 	<div class="mx-auto max-w-6xl px-6 pt-20 pb-16 services-rise">
-		<SectionHeading strong={HEADING_STRONG} soft={HEADING_SOFT} intro={INTRO} />
+		<div class="rv">
+			<SectionHeading strong={HEADING_STRONG} soft={HEADING_SOFT} intro={INTRO} />
+		</div>
 
 		<div class="stack">
 			{/* No per-card wrappers: every card is a direct child of .stack,
@@ -125,7 +126,7 @@ function pieceFile(facet: string): string {
 				>
 					<div class="card-body">
 						<div class="card-top">
-							<span class="card-number">{card.number}</span>
+							<span class="card-number figures">{card.number}</span>
 							<span class="card-rule" aria-hidden="true"></span>
 						</div>
 						<h3 class="card-title">
@@ -160,7 +161,9 @@ function pieceFile(facet: string): string {
 			))}
 		</div>
 
-		<a class="view-all" href="/services">View all services</a>
+		<div class="rv">
+			<a class="view-all" href="/services">View all services</a>
+		</div>
 	</div>
 </section>
 
@@ -306,7 +309,7 @@ function pieceFile(facet: string): string {
 		font-size: 0.85rem;
 		font-weight: 600;
 		letter-spacing: 0.2em;
-		color: var(--color-text-muted);
+		color: var(--color-clay-ink);
 	}
 	.card-rule {
 		flex: 1 1 auto;

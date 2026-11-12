@@ -17,7 +17,9 @@ interface Step {
   description: string;
 }
 
-const STEPS: Step[] = [
+/* Exported for the service page process strip, which reuses the same
+   steps instead of retyping them. Adding export changes nothing rendered. */
+export const STEPS: Step[] = [
   {
     letter: 'P',
     name: 'Plan',

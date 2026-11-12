@@ -1,0 +1,188 @@
+---
+/* SceneArt: renders one of the service scene SVGs inline. The files are
+   imported with ?raw and injected with set:html inside a wrapper that
+   defines the --sc-* colour variables from tokens, so the artwork follows
+   the theme. The artwork itself is never altered.
+
+   With animated, scenes that group their shapes into .sc-part /
+   .sc-par (style --i and --d) get two layers of motion on two different
+   elements, so no property is ever animated twice on one element:
+     .sc-part  load-in: a one-time time-based animation.
+     .sc-par   scroll depth: driven by the ROOT scroll timeline, not by a
+               view() timeline. A view() timeline is bound to its subject's
+               box, and an SVG <g> has no CSS principal box to measure, so
+               it never became active. scroll() is bound to the scroller,
+               which is a real HTML box, so it always resolves.
+     svg       hover: a gentle whole-scene nudge, the only free level
+               left, because .sc-part and .sc-par are both busy. */
+
+interface Props {
+  /** File name inside src/assets/scenes, for example "custom-software.svg". */
+  scene: string;
+  /** Load-in and scroll depth for scenes grouped into .sc-part / .sc-par. */
+  animated?: boolean;
+}
+
+const { scene, animated = false } = Astro.props;
+
+const sceneFiles = import.meta.glob(
+  '../../assets/scenes/*.svg',
+  { query: '?raw', import: 'default', eager: true },
+) as Record<string, string>;
+
+function sceneMarkup(name: string): string {
+  const hit = Object.entries(sceneFiles).find(([path]) => path.endsWith('/' + name));
+  return hit ? hit[1] : '';
+}
+---
+
+<div class:list={['scene-art', animated && 'scene-anim']} aria-hidden="true" set:html={sceneMarkup(scene)} />
+
+<style>
+	.scene-art {
+		--sc-ink: var(--color-text);
+		--sc-paper: var(--color-card-bg);
+		--sc-mist: var(--color-soft);
+		--sc-mist2: color-mix(in srgb, var(--color-soft) 55%, var(--color-card-bg));
+		--sc-teal: var(--color-accent);
+		--sc-teal-strong: var(--color-accent-strong);
+		--sc-clay: var(--color-clay);
+	}
+	/* The injected markup comes from another file, so it carries no scope
+	   attribute of this component; :global() reaches it. */
+	.scene-art :global(svg) {
+		display: block;
+		width: 100%;
+		height: auto;
+		max-width: 100%;
+	}
+
+	.scene-anim {
+		/* Motion knobs.
+		   --scene-scroll-distance: how much of the page scroll the depth
+		     effect spans. The parts finish their travel here.
+		   --scene-travel: translateY per unit of --d, in SVG user units.
+		     On screen the SVG scales by its CSS width / 640, so at a 437px
+		     scene column one user unit is about 0.68px.
+		   --scene-tilt: rotation per (--d - 0.8) in degrees. */
+		--scene-scroll-distance: 520px;
+		--scene-travel: 44px;
+		--scene-tilt: 1.5deg;
+	}
+	@media (min-width: 900px) {
+		.scene-anim {
+			--scene-travel: 96px;
+			--scene-tilt: 3deg;
+		}
+	}
+
+	/* ---- Load-in: one-time, time-based, transform and opacity only.
+	   Seven parts at 85ms apart plus a 120ms hold finish at about 1.4s.
+	   transform-box: fill-box makes the transform origin the part's own
+	   box rather than the SVG's. ---- */
+	.scene-anim :global(.sc-part) {
+		transform-box: fill-box;
+		transform-origin: center;
+		animation: sc-load-in 620ms cubic-bezier(0.22, 0.68, 0.24, 1) both;
+		animation-delay: calc(var(--i, 0) * 85ms + 120ms);
+	}
+	@keyframes sc-load-in {
+		from {
+			opacity: 0;
+			transform: translateY(22px) scale(0.94);
+		}
+		to {
+			opacity: 1;
+			transform: none;
+		}
+	}
+
+	/* ---- Scroll depth: the inner .sc-par rides the root scroll timeline.
+	   Deeper parts travel further, tilt a little and grow a little, so the
+	   scene reads as layers rather than one flat picture. Both properties
+	   pivot around the part's own centre. ---- */
+	.scene-anim :global(.sc-par) {
+		transform-box: fill-box;
+		transform-origin: center;
+	}
+	@supports (animation-timeline: scroll()) {
+		@media (prefers-reduced-motion: no-preference) {
+			.scene-anim :global(.sc-par) {
+				animation: sc-depth linear both;
+				animation-timeline: scroll(root block);
+				animation-range: 0px var(--scene-scroll-distance);
+			}
+			@keyframes sc-depth {
+				from {
+					transform: none;
+				}
+				to {
+					transform:
+						translateY(calc(var(--d, 1) * var(--scene-travel) * -1))
+						rotate(calc((var(--d, 1) - 0.8) * var(--scene-tilt)))
+						scale(calc(1 + (var(--d, 1) - 0.8) * 0.05));
+				}
+			}
+		}
+	}
+
+	/* ---- Hover: the svg element carries no other transform, so the
+	   whole-scene nudge here cannot collide with the two layers above. ---- */
+	@media (hover: hover) and (pointer: fine) {
+		.scene-anim :global(svg) {
+			transition: transform 0.35s ease;
+		}
+		.scene-anim:hover :global(svg) {
+			transform: translateX(6px);
+		}
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.scene-anim :global(.sc-part),
+		.scene-anim :global(.sc-par) {
+			animation: none;
+		}
+		.scene-anim :global(svg) {
+			transition: none;
+		}
+	}
+</style>
+
+<script>
+	/* DEV-ONLY scene readout (?scene=debug). import.meta.env.DEV is
+	   replaced with false at build time, so the minifier drops this whole
+	   block and nothing of it ships to production. */
+	if (import.meta.env.DEV && window.location.search.includes('scene=debug')) {
+		const w = window as unknown as { __sceneDebug?: boolean };
+		if (!w.__sceneDebug) {
+			w.__sceneDebug = true;
+			const box = document.createElement('pre');
+			box.setAttribute('aria-hidden', 'true');
+			box.style.cssText =
+				'position:fixed;left:8px;top:8px;z-index:9999;margin:0;padding:8px;' +
+				'font:11px/1.5 monospace;white-space:pre;color:#fff;' +
+				'background:rgba(0,0,0,.75);pointer-events:none;';
+			document.body.appendChild(box);
+			const distance = 520;
+			function frame() {
+				const pars = Array.from(
+					document.querySelectorAll('.scene-anim .sc-par'),
+				).slice(0, 3);
+				const progress = Math.min(
+					100,
+					Math.max(0, (window.scrollY / distance) * 100),
+				);
+				box.textContent =
+					`scroll(root) supported=${window.CSS.supports('animation-timeline: scroll()')}\n` +
+					`scrollY=${Math.round(window.scrollY)} progress=${progress.toFixed(1)}%\n` +
+					pars
+						.map(
+							(el, i) =>
+								`par${i} d=${(el as HTMLElement).style.getPropertyValue('--d')} ${getComputedStyle(el).transform}`,
+						)
+						.join('\n');
+				requestAnimationFrame(frame);
+			}
+			requestAnimationFrame(frame);
+		}
+	}
+</script>

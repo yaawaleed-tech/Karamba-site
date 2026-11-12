@@ -109,6 +109,35 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 			})();
 		</script>
 
+		<!-- Scroll-reveal fallback for browsers without scroll-driven
+		     animation (Firefox, older iOS). Runs only when view()
+		     timelines are unsupported and reduced motion is off: it adds
+		     .js-rv to <html>, then an IntersectionObserver adds .is-in to
+		     each reveal element once. Without JavaScript, or with reduced
+		     motion, the class is never added and nothing is hidden. -->
+		<script is:inline>
+			(function () {
+				if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+				if (window.CSS && CSS.supports('animation-timeline: view()')) return;
+				var d = document.documentElement;
+				d.classList.add('js-rv');
+				var els = d.querySelectorAll('.rv,.rv-s>*,.rv-line,.rv-scene,.rv-zoom');
+				if (!els.length) return;
+				if (!('IntersectionObserver' in window)) {
+					els.forEach(function (el) { el.classList.add('is-in'); });
+					return;
+				}
+				var io = new IntersectionObserver(function (entries) {
+					entries.forEach(function (entry) {
+						if (!entry.isIntersecting) return;
+						entry.target.classList.add('is-in');
+						io.unobserve(entry.target);
+					});
+				}, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+				els.forEach(function (el) { io.observe(el); });
+			})();
+		</script>
+
 		<!-- 3D cursor tilt for .tilt-card (Services cards, Product mockup).
 		     Page-wide and after <slot /> so one copy serves every component and
 		     every card already exists when the query runs. Being a bundled

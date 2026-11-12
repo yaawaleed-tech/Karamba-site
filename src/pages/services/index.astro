@@ -2,30 +2,210 @@
 import Layout from '../../layouts/Layout.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
-import PagePlaceholder from '../../components/PagePlaceholder.astro';
-import { NAV_MENUS } from '../../data/nav';
+import ClosingCta from '../../components/ClosingCta.astro';
+import PageHero from '../../components/page/PageHero.astro';
+import { SERVICES } from '../../data/services';
+import manifest from '../../assets/brand/karamba-pieces/manifest.json';
 
-const MENU_KEY = 'services';
+/* Services hub: hero, then one large row per service in nav order, then
+   the default closing section. Rows carry no pills; their data is partly
+   unconfirmed. Everything renders from src/data/services.ts. */
 
-const menu = NAV_MENUS.find((m) => m.key === MENU_KEY)!;
+const TITLE = 'Services';
+const INTRO =
+  'Software, automation and digital tools, built around how your team already works.';
 
-const TITLE = menu.label;
-const DESCRIPTION = menu.introText;
+interface ManifestPiece {
+  k: string;
+  file: string;
+}
+
+/* One unprocessed file URL per logo piece, same pattern as the home
+   cards: byte-identical files, never re-encoded. */
+const pieceUrls = import.meta.glob(
+  '../../assets/brand/karamba-pieces/*.webp',
+  { query: '?url', import: 'default', eager: true },
+) as Record<string, string>;
+function pieceUrl(file: string): string {
+  const hit = Object.entries(pieceUrls).find(([path]) => path.endsWith('/' + file));
+  return hit ? hit[1] : '';
+}
+function pieceFile(facet: string): string {
+  const piece = (manifest.pieces as ManifestPiece[]).find((p) => p.k === facet);
+  return piece ? pieceUrl(piece.file) : '';
+}
 ---
 
-<Layout title={TITLE} description={DESCRIPTION}>
+<Layout title={TITLE} description={INTRO}>
 	<Header />
-	<PagePlaceholder
-		hubHref="/"
-		hubLabel="Home"
-		title={TITLE}
-		description={DESCRIPTION}
-		children={menu.items.map((item) => ({
-			label: item.name,
-			href: item.href,
-			description: item.description,
-			status: item.status,
-		}))}
+	<PageHero
+		breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Services' }]}
+		eyebrow="Services"
+		strong="What we"
+		soft="build."
+		intro={INTRO}
+		primaryLabel="Get a quote"
+		primaryHref="/quote"
+		scene="services-hub.svg"
+		tone="paper"
 	/>
+	<section aria-label="All services">
+		<div class="hub-inner">
+			<ul class="hub-rows rv-s">
+				{SERVICES.map((service, i) => (
+					<li class="hub-row" style={`--i:${i}`}>
+						<span class="hub-num figures" aria-hidden="true">0{i + 1}</span>
+						<div class="hub-main">
+							<h2 class="hub-name">
+								<a class="hub-link" href={`/services/${service.slug}`}>
+									<span class="u-link">{service.name}</span>
+								</a>
+							</h2>
+							<p class="hub-outcome">{service.outcome}</p>
+						</div>
+						<img
+							class="hub-piece"
+							src={pieceFile(service.facet)}
+							alt=""
+							aria-hidden="true"
+							loading="lazy"
+						/>
+						<span class="hub-arrow" aria-hidden="true">→</span>
+					</li>
+				))}
+			</ul>
+		</div>
+	</section>
+	<ClosingCta />
 	<Footer />
 </Layout>
+
+<style>
+	.hub-inner {
+		max-width: var(--container-inner);
+		margin-inline: auto;
+		padding-inline: 24px;
+		padding-block: var(--space-section);
+	}
+	@media (max-width: 899.98px) {
+		.hub-inner {
+			padding-inline: 20px;
+		}
+	}
+	.hub-rows {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+	.hub-row {
+		position: relative;
+		display: grid;
+		grid-template-columns: 3rem minmax(0, 1fr) auto;
+		gap: 1.5rem;
+		align-items: center;
+		padding-block: clamp(1.8rem, 4.5svh, 3rem);
+	}
+	@media (min-width: 900px) {
+		.hub-row {
+			grid-template-columns: 3rem minmax(0, 1fr) auto auto;
+		}
+	}
+	/* Hairlines are drawn, not bordered, so their ends stay square. */
+	.hub-row::after {
+		content: '';
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: 0;
+		height: 1px;
+		background-color: color-mix(in srgb, var(--color-text) 18%, transparent);
+		pointer-events: none;
+	}
+	.hub-row:last-child {
+		border-bottom: 1px solid color-mix(in srgb, var(--color-text) 18%, transparent);
+	}
+	.hub-num {
+		min-width: 2.5rem;
+		font-size: 1.25rem;
+		font-weight: 500;
+		letter-spacing: 0.2em;
+		color: var(--color-clay-ink);
+	}
+	.hub-main {
+		min-width: 0;
+	}
+	.hub-name {
+		margin: 0;
+		font-family: var(--font-heading);
+		font-weight: 600;
+		font-size: clamp(1.5rem, 3vw, 2.4rem);
+		line-height: 1.05;
+		transition: transform 0.22s ease;
+	}
+	.hub-link {
+		color: var(--color-text);
+		text-decoration: none;
+	}
+	.hub-link::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+	}
+	.hub-link:focus-visible {
+		outline: none;
+	}
+	.hub-link:focus-visible::after {
+		outline: 2px solid var(--color-accent-strong);
+		outline-offset: 4px;
+	}
+	.hub-outcome {
+		margin: 0.75rem 0 0;
+		max-width: 52ch;
+		line-height: 1.55;
+		color: var(--color-text-muted);
+	}
+	.hub-piece {
+		width: 120px;
+		height: auto;
+	}
+	@media (max-width: 899.98px) {
+		.hub-row {
+			grid-template-columns: 2.5rem minmax(0, 1fr) auto;
+			gap: 1rem;
+		}
+		.hub-piece {
+			display: none;
+		}
+	}
+	.hub-arrow {
+		display: inline-block;
+		font-size: 2rem;
+		line-height: 1;
+		color: var(--color-text-muted);
+		transition: transform 0.22s ease;
+	}
+	@media (hover: hover) and (pointer: fine) {
+		.hub-row:hover .hub-name {
+			transform: translateX(10px);
+		}
+		.hub-row:hover .hub-arrow {
+			transform: translateX(10px);
+			color: var(--color-clay-ink);
+		}
+	}
+	.hub-row:focus-within .hub-arrow {
+		color: var(--color-clay-ink);
+	}
+	/* The stretched link owns ::after, so the name text carries the clay
+	   underline in a span; row hover and link focus draw it. */
+	.hub-row:hover .u-link::after,
+	.hub-link:focus-visible .u-link::after {
+		transform: scaleX(1);
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.hub-name,
+		.hub-arrow {
+			transition: none;
+		}
+	}
+</style>

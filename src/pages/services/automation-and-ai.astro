@@ -2,27 +2,31 @@
 import Layout from '../../layouts/Layout.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
-import PagePlaceholder from '../../components/PagePlaceholder.astro';
-import { NAV_MENUS } from '../../data/nav';
+import ServicePage from '../../components/page/ServicePage.astro';
+import { serviceBySlug } from '../../data/services';
 
-const MENU_KEY = 'services';
-const ITEM_HREF = '/services/automation-and-ai';
+const entry = serviceBySlug('automation-and-ai');
 
-const menu = NAV_MENUS.find((m) => m.key === MENU_KEY)!;
-const item = menu.items.find((i) => i.href === ITEM_HREF)!;
-
-const TITLE = item.name;
-const DESCRIPTION = item.description;
+const trail = [
+  { name: 'Home', url: '/' },
+  { name: 'Services', url: '/services' },
+  { name: entry.name, url: `/services/${entry.slug}` },
+];
+const jsonLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: trail.map((crumb, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: crumb.name,
+    item: new URL(crumb.url, Astro.site).toString(),
+  })),
+});
 ---
 
-<Layout title={TITLE} description={DESCRIPTION}>
+<Layout title={entry.name} description={entry.metaDescription}>
 	<Header />
-	<PagePlaceholder
-		hubHref={menu.hubHref}
-		hubLabel={menu.label}
-		title={TITLE}
-		description={DESCRIPTION}
-		status={item.status}
-	/>
+	<ServicePage entry={entry} />
+	<script type="application/ld+json" set:html={jsonLd} />
 	<Footer />
 </Layout>

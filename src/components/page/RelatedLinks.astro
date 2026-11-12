@@ -1,0 +1,170 @@
+---
+import { SERVICES, serviceBySlug } from '../../data/services';
+import manifest from '../../assets/brand/karamba-pieces/manifest.json';
+
+/* RelatedLinks: full-row links to two sibling services. The whole row is
+   clickable through a stretched link; the piece image is decorative. When
+   no slugs are given, the next two services in order are used, wrapping. */
+
+interface ManifestPiece {
+  k: string;
+  file: string;
+}
+
+interface Props {
+  current: string;
+  slugs?: string[];
+}
+
+const { current, slugs } = Astro.props;
+
+function defaults(): string[] {
+  const i = SERVICES.findIndex((s) => s.slug === current);
+  const at = (n: number) => SERVICES[(i + n) % SERVICES.length].slug;
+  return [at(1), at(2)];
+}
+
+const entries = (slugs ?? defaults()).map((slug) => serviceBySlug(slug));
+
+/* One unprocessed file URL per logo piece, same pattern as the home
+   cards: byte-identical files, never re-encoded. */
+const pieceUrls = import.meta.glob(
+  '../../assets/brand/karamba-pieces/*.webp',
+  { query: '?url', import: 'default', eager: true },
+) as Record<string, string>;
+function pieceUrl(file: string): string {
+  const hit = Object.entries(pieceUrls).find(([path]) => path.endsWith('/' + file));
+  return hit ? hit[1] : '';
+}
+function pieceFile(facet: string): string {
+  const piece = (manifest.pieces as ManifestPiece[]).find((p) => p.k === facet);
+  return piece ? pieceUrl(piece.file) : '';
+}
+---
+
+<ul class="rel-list rv-s">
+	{entries.map((entry, i) => (
+		<li class="rel-row" style={`--i:${i}`}>
+			<img
+				class="rel-piece"
+				src={pieceFile(entry.facet)}
+				alt=""
+				aria-hidden="true"
+				loading="lazy"
+			/>
+			<div class="rel-main">
+				<h3 class="rel-name">
+					<a class="rel-link" href={`/services/${entry.slug}`}><span class="u-link">{entry.name}</span></a>
+				</h3>
+				<p class="rel-outcome">{entry.outcome}</p>
+			</div>
+			<span class="rel-arrow" aria-hidden="true">→</span>
+		</li>
+	))}
+</ul>
+
+<style>
+	.rel-list {
+		list-style: none;
+		margin: 2.5rem 0 0;
+		padding: 0;
+	}
+	.rel-row {
+		position: relative;
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr) auto;
+		gap: 1.5rem;
+		align-items: center;
+		padding-block: 1.5rem;
+	}
+	/* Hairlines are drawn, not bordered, so their ends stay square. */
+	.rel-row::after {
+		content: '';
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: 0;
+		height: 1px;
+		background-color: color-mix(in srgb, var(--color-text) 18%, transparent);
+		pointer-events: none;
+	}
+	.rel-row:last-child {
+		border-bottom: 1px solid color-mix(in srgb, var(--color-text) 18%, transparent);
+	}
+	.rel-piece {
+		width: 56px;
+		height: auto;
+	}
+	.rel-main {
+		min-width: 0;
+	}
+	.rel-name {
+		margin: 0;
+		font-family: var(--font-heading);
+		font-weight: 600;
+		font-size: clamp(1.4rem, 2.6vw, 2.2rem);
+		line-height: 1.15;
+		transition: transform 0.22s ease;
+	}
+	.rel-link {
+		color: var(--color-text);
+		text-decoration: none;
+	}
+	.rel-link::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+	}
+	.rel-link:focus-visible {
+		outline: none;
+	}
+	.rel-link:focus-visible::after {
+		outline: 2px solid var(--color-accent-strong);
+		outline-offset: 4px;
+	}
+	.rel-outcome {
+		margin: 0.5rem 0 0;
+		max-width: 52ch;
+		line-height: 1.55;
+		color: var(--color-text-muted);
+	}
+	.rel-arrow {
+		display: inline-block;
+		font-size: 1.75rem;
+		line-height: 1;
+		color: var(--color-text-muted);
+		transition: transform 0.22s ease;
+	}
+	@media (hover: hover) and (pointer: fine) {
+		.rel-row:hover .rel-name {
+			transform: translateX(8px);
+		}
+		.rel-row:hover .rel-arrow {
+			transform: translateX(8px);
+			color: var(--color-clay-ink);
+		}
+	}
+	.rel-row:focus-within .rel-arrow {
+		color: var(--color-clay-ink);
+	}
+	/* The stretched link owns ::after, so the name text carries the clay
+	   underline in a span; row hover and link focus draw it. */
+	.rel-row:hover .u-link::after,
+	.rel-link:focus-visible .u-link::after {
+		transform: scaleX(1);
+	}
+	@media (max-width: 899.98px) {
+		.rel-row {
+			gap: 1rem;
+		}
+		.rel-piece {
+			width: 48px;
+		}
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.rel-name,
+		.rel-arrow {
+			transition: none;
+		}
+	}
+</style>

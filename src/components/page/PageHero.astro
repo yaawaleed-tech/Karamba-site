@@ -1,0 +1,322 @@
+---
+import SectionHeading from '../SectionHeading.astro';
+import SceneArt from './SceneArt.astro';
+
+/* PageHero: hero-style band for service pages and hubs. Full-bleed with
+   straight edges; text on the left, the service scene on the right. The
+   title renders through SectionHeading as an h1, sized by the shared
+   --section-heading-size hook so the clamp stays in one place. Static,
+   no animation. */
+
+export interface Crumb {
+  label: string;
+  /** Omitted for the current page, which renders as text with aria-current. */
+  href?: string;
+}
+
+type HeroTone = 'mist' | 'indigo' | 'paper';
+
+interface Props {
+  breadcrumb: Crumb[];
+  eyebrow: string;
+  strong: string;
+  soft: string;
+  intro: string;
+  primaryLabel: string;
+  primaryHref: string;
+  secondaryLabel?: string;
+  secondaryHref?: string;
+  scene: string;
+  tone?: HeroTone;
+  /** Passed to SceneArt; only scenes grouped into .sc-part animate. */
+  animated?: boolean;
+}
+
+const {
+  breadcrumb,
+  eyebrow,
+  strong,
+  soft,
+  intro,
+  primaryLabel,
+  primaryHref,
+  secondaryLabel,
+  secondaryHref,
+  scene,
+  tone = 'mist',
+  animated = false,
+} = Astro.props;
+---
+
+<section class={`ph-band tone-${tone}`}>
+	<div class="ph-inner">
+		<div class="ph-text rv-s">
+			<nav class="ph-crumbs" style="--i:0" aria-label="Breadcrumb">
+				<ol>
+					{breadcrumb.map((crumb) => (
+						<li>
+							{crumb.href ? (
+								<a href={crumb.href}>{crumb.label}</a>
+							) : (
+								<span aria-current="page">{crumb.label}</span>
+							)}
+						</li>
+					))}
+				</ol>
+			</nav>
+			<p class="ph-eyebrow eyebrow-bar rv-line" style="--i:1">{eyebrow}</p>
+			<div style="--i:2">
+				<SectionHeading
+					as="h1"
+					tone={tone === 'indigo' ? 'inverse' : 'default'}
+					strong={strong}
+					soft={soft}
+				/>
+			</div>
+			<p class="ph-intro" style="--i:3">{intro}</p>
+			<div class="ph-actions" style="--i:4">
+				<a
+					href={primaryHref}
+					data-quote={primaryHref === '/quote' ? '' : undefined}
+					class="ph-primary"
+				>
+					{primaryLabel}
+				</a>
+				{secondaryLabel && secondaryHref && (
+					<a href={secondaryHref} class="ph-quiet u-link">
+						{secondaryLabel}
+					</a>
+				)}
+			</div>
+		</div>
+		<div class="ph-scene rv-scene">
+			<div class="rv-drift">
+				<SceneArt scene={scene} animated={animated} />
+			</div>
+		</div>
+	</div>
+</section>
+
+<style>
+	.ph-band {
+		position: relative;
+		overflow: clip;
+		margin: 0;
+	}
+	.tone-mist {
+		background-color: var(--color-soft);
+	}
+	:global([data-theme='dark']) .tone-mist {
+		background-color: var(--color-bg-subtle);
+		border-top: 1px solid var(--color-border);
+	}
+	@media (prefers-color-scheme: dark) {
+		:global(:root:not([data-theme='light'])) .tone-mist {
+			background-color: var(--color-bg-subtle);
+			border-top: 1px solid var(--color-border);
+		}
+	}
+	.tone-indigo {
+		background-color: var(--color-panel);
+	}
+	:global([data-theme='dark']) .tone-indigo {
+		background-color: var(--color-panel);
+	}
+	@media (prefers-color-scheme: dark) {
+		:global(:root:not([data-theme='light'])) .tone-indigo {
+			background-color: var(--color-panel);
+		}
+	}
+	.tone-paper {
+		background-color: var(--color-bg);
+		border-bottom: 1px solid var(--color-border);
+	}
+	.ph-inner {
+		width: 100%;
+		max-width: var(--container-inner);
+		margin-inline: auto;
+		padding-inline: 24px;
+		padding-block: 2.5rem;
+	}
+	@media (max-width: 899.98px) {
+		.ph-inner {
+			padding-inline: 20px;
+		}
+	}
+	/* Title size hook for the shared component. Inherited down to the
+	   h1; every section without this variable keeps its own clamp. */
+	.ph-band {
+		--section-heading-size: var(--fs-h1);
+	}
+	@media (min-width: 900px) {
+		.ph-band {
+			min-height: clamp(320px, 44svh, 460px);
+			display: flex;
+			align-items: center;
+		}
+		.ph-inner {
+			display: grid;
+			grid-template-columns: minmax(0, 55fr) minmax(0, 45fr);
+			gap: clamp(2rem, 4vw, 4rem);
+			align-items: center;
+			padding-block: 4rem;
+		}
+	}
+	.ph-text {
+		min-width: 0;
+	}
+	.ph-crumbs ol {
+		list-style: none;
+		margin: 0 0 1rem;
+		padding: 0;
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		font-size: 0.85rem;
+		color: var(--color-text-muted);
+	}
+	.ph-crumbs li {
+		display: inline-flex;
+		align-items: center;
+	}
+	.ph-crumbs li + li::before {
+		content: '/';
+		margin-inline: 0.6rem;
+		color: var(--color-text-muted);
+	}
+	.ph-crumbs a {
+		display: inline-flex;
+		align-items: center;
+		min-height: 44px;
+		color: inherit;
+		text-decoration: none;
+	}
+	.ph-crumbs a:hover {
+		color: var(--color-text);
+		text-decoration: underline;
+	}
+	.ph-crumbs a:focus-visible {
+		outline: 2px solid var(--color-accent-strong);
+		outline-offset: 2px;
+	}
+	.ph-crumbs [aria-current] {
+		color: var(--color-text);
+	}
+	.tone-indigo .ph-crumbs ol,
+	.tone-indigo .ph-crumbs li + li::before {
+		color: var(--color-panel-muted);
+	}
+	.tone-indigo .ph-crumbs a:hover,
+	.tone-indigo .ph-crumbs [aria-current] {
+		color: var(--color-panel-text);
+	}
+	.tone-indigo .ph-crumbs a:focus-visible {
+		outline-color: var(--color-panel-accent);
+	}
+	.ph-eyebrow {
+		margin: 0 0 0.75rem;
+		font-size: 0.8rem;
+		font-weight: 600;
+		letter-spacing: 0.2em;
+		text-transform: uppercase;
+		color: var(--color-accent-strong);
+	}
+	.tone-indigo .ph-eyebrow {
+		color: var(--color-panel-accent);
+	}
+	.ph-intro {
+		margin: 1.25rem 0 0;
+		max-width: 52ch;
+		font-size: var(--fs-lead);
+		line-height: 1.6;
+		color: var(--color-text-muted);
+	}
+	.tone-indigo .ph-intro {
+		color: var(--color-panel-muted);
+	}
+	.ph-actions {
+		margin-top: 2rem;
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 1rem 1.5rem;
+	}
+	.ph-primary {
+		display: inline-flex;
+		align-items: center;
+		min-height: 48px;
+		border-radius: 999px;
+		padding: 0.875rem 1.75rem;
+		font-size: 0.875rem;
+		font-weight: 600;
+		background-color: var(--color-primary);
+		color: var(--color-primary-text);
+		text-decoration: none;
+		transition: transform 0.25s ease;
+	}
+	@media (hover: hover) and (pointer: fine) {
+		.ph-primary:hover {
+			transform: scale(1.05);
+		}
+	}
+	.ph-primary:focus-visible {
+		outline: 2px solid var(--color-accent-strong);
+		outline-offset: 3px;
+	}
+	/* Inverse pill: cream background with indigo text, readable on the
+	   indigo band in both themes (panel tokens do not switch). */
+	.tone-indigo .ph-primary {
+		background-color: var(--color-panel-text);
+		color: var(--color-panel);
+	}
+	.tone-indigo .ph-primary:focus-visible {
+		outline-color: var(--color-panel-accent);
+	}
+	.ph-quiet {
+		display: inline-flex;
+		align-items: center;
+		min-height: 44px;
+		padding: 0.6rem 0;
+		font-weight: 600;
+		color: var(--color-primary);
+		text-decoration: none;
+		transition: opacity 0.2s ease;
+	}
+	.ph-quiet:hover {
+		opacity: 0.7;
+	}
+	.ph-quiet:focus-visible {
+		outline: 2px solid var(--color-accent-strong);
+		outline-offset: 3px;
+	}
+	.tone-indigo .ph-quiet {
+		color: var(--color-panel-accent);
+	}
+	.tone-indigo .ph-quiet:focus-visible {
+		outline-color: var(--color-panel-accent);
+	}
+	.ph-scene {
+		min-width: 0;
+	}
+	@media (min-width: 900px) {
+		.ph-scene {
+			width: clamp(260px, 32vw, 460px);
+			max-width: 100%;
+			justify-self: center;
+			align-self: center;
+		}
+	}
+	@media (max-width: 899.98px) {
+		.ph-scene {
+			max-width: 340px;
+			margin: 2.5rem auto 0;
+		}
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.ph-primary,
+		.ph-quiet,
+		.ph-crumbs a {
+			transition: none;
+		}
+	}
+</style>

@@ -8,17 +8,26 @@ interface Props {
   eyebrow?: string;
   intro?: string;
   tone?: 'default' | 'inverse';
+  /** Heading level. Every existing use stays an h2; page heroes pass h1. */
+  as?: 'h1' | 'h2';
 }
 
-const { strong, soft, eyebrow, intro, tone = 'default' } = Astro.props;
+const { strong, soft, eyebrow, intro, tone = 'default', as = 'h2' } = Astro.props;
 ---
 
 <div class={`section-heading tone-${tone}`}>
-	{eyebrow && <p class="eyebrow">{eyebrow}</p>}
-	<h2 class="heading">
-		<span class="strong">{strong}</span>
-		<span class="soft">{soft}</span>
-	</h2>
+	{eyebrow && <p class="eyebrow eyebrow-bar">{eyebrow}</p>}
+	{as === 'h1' ? (
+		<h1 class="heading">
+			<span class="strong">{strong}</span>
+			<span class="soft">{soft}</span>
+		</h1>
+	) : (
+		<h2 class="heading">
+			<span class="strong">{strong}</span>
+			<span class="soft">{soft}</span>
+		</h2>
+	)}
 	{intro && <p class="intro">{intro}</p>}
 </div>
 

@@ -1,0 +1,64 @@
+---
+/* RuledList: hairline-separated rows with straight full-width lines drawn
+   with ::after, the same technique as the home overview rows. */
+
+interface Item {
+  title: string;
+  text?: string;
+}
+
+interface Props {
+  items: Item[];
+}
+
+const { items } = Astro.props;
+---
+
+<ul class="rl-list rv-s">
+	{items.map((item, i) => (
+		<li class="rl-row rv-line" style={`--i:${i}`}>
+			<h3 class="rl-title">{item.title}</h3>
+			{item.text && <p class="rl-text">{item.text}</p>}
+		</li>
+	))}
+</ul>
+
+<style>
+	.rl-list {
+		list-style: none;
+		margin: 2.5rem 0 0;
+		padding: 0;
+	}
+	.rl-row {
+		position: relative;
+		padding-block: clamp(0.9rem, 2svh, 1.4rem);
+	}
+	/* Hairlines are drawn, not bordered, so their ends stay square. */
+	.rl-row::after {
+		content: '';
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: 0;
+		height: 1px;
+		background-color: color-mix(in srgb, var(--color-text) 18%, transparent);
+		pointer-events: none;
+	}
+	.rl-row:last-child {
+		border-bottom: 1px solid color-mix(in srgb, var(--color-text) 18%, transparent);
+	}
+	.rl-title {
+		margin: 0;
+		font-family: var(--font-heading);
+		font-weight: 600;
+		font-size: var(--fs-h3);
+		line-height: 1.15;
+		color: var(--color-text);
+	}
+	.rl-text {
+		margin: 0.5rem 0 0;
+		max-width: 62ch;
+		line-height: 1.6;
+		color: var(--color-text-muted);
+	}
+</style>

@@ -2,27 +2,79 @@
 import Layout from '../../layouts/Layout.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
-import PagePlaceholder from '../../components/PagePlaceholder.astro';
-import { NAV_MENUS } from '../../data/nav';
+import PageHero from '../../components/page/PageHero.astro';
+import WebAnatomy from '../../components/page/WebAnatomy.astro';
+import ContentSection from '../../components/page/ContentSection.astro';
+import Faq from '../../components/page/Faq.astro';
+import RelatedLinks from '../../components/page/RelatedLinks.astro';
+import ClosingCta from '../../components/ClosingCta.astro';
+import { COMMON_FAQ, serviceBySlug } from '../../data/services';
 
-const MENU_KEY = 'services';
-const ITEM_HREF = '/services/websites-and-branding';
+/* Websites and branding: its own page, composed here rather than through
+   the generic service template. */
 
-const menu = NAV_MENUS.find((m) => m.key === MENU_KEY)!;
-const item = menu.items.find((i) => i.href === ITEM_HREF)!;
+const entry = serviceBySlug('websites-and-branding');
 
-const TITLE = item.name;
-const DESCRIPTION = item.description;
+const trail = [
+  { name: 'Home', url: '/' },
+  { name: 'Services', url: '/services' },
+  { name: entry.name, url: `/services/${entry.slug}` },
+];
+const jsonLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: trail.map((crumb, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: crumb.name,
+    item: new URL(crumb.url, Astro.site).toString(),
+  })),
+});
 ---
 
-<Layout title={TITLE} description={DESCRIPTION}>
+<Layout title={entry.name} description={entry.metaDescription}>
 	<Header />
-	<PagePlaceholder
-		hubHref={menu.hubHref}
-		hubLabel={menu.label}
-		title={TITLE}
-		description={DESCRIPTION}
-		status={item.status}
+	<PageHero
+		breadcrumb={[
+			{ label: 'Home', href: '/' },
+			{ label: 'Services', href: '/services' },
+			{ label: entry.name },
+		]}
+		eyebrow="Services"
+		strong="Websites"
+		soft="and branding."
+		intro={entry.outcome}
+		primaryLabel="Get a quote"
+		primaryHref="/quote"
+		scene="websites-and-branding.svg"
+		animated
+		tone="mist"
 	/>
+
+	<WebAnatomy />
+
+	<!-- NEXT CHUNK: the three page-specific sections go here, between the
+	     pinned anatomy and the questions: what the work covers, what we do
+	     not do, and how we price it. -->
+
+	<ContentSection strong="Common" soft="questions.">
+		<Faq items={COMMON_FAQ} />
+	</ContentSection>
+
+	<ContentSection strong="See also." soft="">
+		<RelatedLinks
+			current={entry.slug}
+			slugs={['custom-software', 'management-systems']}
+		/>
+	</ContentSection>
+
+	<ClosingCta
+		strong={entry.closing.strong}
+		soft={entry.closing.soft}
+		line={entry.closing.line}
+		buttonLabel={entry.closing.button}
+		tone={entry.closing.tone}
+	/>
+	<script type="application/ld+json" set:html={jsonLd} />
 	<Footer />
 </Layout>

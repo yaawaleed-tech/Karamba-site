@@ -1,0 +1,70 @@
+---
+import PageHero from './PageHero.astro';
+import ContentSection from './ContentSection.astro';
+import RuledList from './RuledList.astro';
+import AudiencePills from './AudiencePills.astro';
+import Faq from './Faq.astro';
+import RelatedLinks from './RelatedLinks.astro';
+import ClosingCta from '../ClosingCta.astro';
+import { COMMON_FAQ, MOBILE_APPS_FAQ, type ServiceEntry } from '../../data/services';
+
+/* ServicePage: the fallback template for the service pages that do not
+   have their own page yet. It renders only what every service can fill
+   honestly: hero, the optional cover block, questions, related links and
+   the closing section. The promises band and the process strip were
+   removed here because they repeated on every page; both components still
+   exist for pages that use them on purpose. */
+
+interface Props {
+  entry: ServiceEntry;
+}
+
+const { entry } = Astro.props;
+
+const hasCover = entry.included.length > 0 || entry.audience.length > 0;
+const faqItems =
+  entry.slug === 'custom-software' ? [MOBILE_APPS_FAQ, ...COMMON_FAQ] : COMMON_FAQ;
+---
+
+<PageHero
+	breadcrumb={[
+		{ label: 'Home', href: '/' },
+		{ label: 'Services', href: '/services' },
+		{ label: entry.name },
+	]}
+	eyebrow="Services"
+	strong={entry.strong}
+	soft={entry.soft}
+	intro={entry.outcome}
+	primaryLabel="Get a quote"
+	primaryHref="/quote"
+	secondaryLabel="How we work"
+	secondaryHref="/company#how-we-work"
+	scene={entry.scene}
+	tone="mist"
+/>
+
+{hasCover && (
+	<ContentSection strong="What we" soft="cover.">
+		{entry.audience.length > 0 && <AudiencePills items={entry.audience} />}
+		{entry.included.length > 0 && (
+			<RuledList items={entry.included.map((title) => ({ title }))} />
+		)}
+	</ContentSection>
+)}
+
+<ContentSection strong="Common" soft="questions.">
+	<Faq items={faqItems} />
+</ContentSection>
+
+<ContentSection strong="See also." soft="">
+	<RelatedLinks current={entry.slug} />
+</ContentSection>
+
+<ClosingCta
+	strong={entry.closing.strong}
+	soft={entry.closing.soft}
+	line={entry.closing.line}
+	buttonLabel={entry.closing.button}
+	tone={entry.closing.tone}
+/>

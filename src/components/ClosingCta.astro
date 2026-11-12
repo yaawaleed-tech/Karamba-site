@@ -6,12 +6,30 @@ import {
 } from '../data/contact';
 
 /* Closing call to action: headline, primary pill opening the quote
-   dialog, and a quiet WhatsApp link. All copy lives here. */
+   dialog, and a quiet WhatsApp link. All copy lives here. The optional
+   props below default to today's text and tone, so the home page renders
+   exactly as before; service pages pass their own closing copy. */
 
 const HEADING_STRONG = 'What does your team';
 const HEADING_SOFT = 'repeat every day?';
 const LINE =
   'Tell us. If software can take it off your plate, we will say so. If it cannot, we will say that too.';
+
+interface Props {
+  strong?: string;
+  soft?: string;
+  line?: string;
+  buttonLabel?: string;
+  tone?: 'mist' | 'indigo' | 'paper';
+}
+
+const {
+  strong = HEADING_STRONG,
+  soft = HEADING_SOFT,
+  line = LINE,
+  buttonLabel = 'Get a quote',
+  tone = 'mist',
+} = Astro.props;
 const WHATSAPP_HREF =
   `https://wa.me/${CONTACT_WHATSAPP_NUMBER}?text=${encodeURIComponent('Hello Karamba, I would like to talk about a project.')}`;
 
@@ -25,11 +43,15 @@ function pieceUrl(file: string): string {
 }
 ---
 
-<section id="closing-cta" class="closing-section">
+<section id="closing-cta" class={tone === 'mist' ? 'closing-section' : `closing-section tone-${tone}`}>
 	<div class="cta-wrap">
-		<div class="cta-main">
-			<SectionHeading strong={HEADING_STRONG} soft={HEADING_SOFT} />
-			<p class="cta-line">{LINE}</p>
+		<div class="cta-main rv">
+			<SectionHeading
+				tone={tone === 'indigo' ? 'inverse' : 'default'}
+				strong={strong}
+				soft={soft}
+			/>
+			<p class="cta-line">{line}</p>
 			<div class="cta-actions">
 				<a
 					href="/quote"
@@ -37,7 +59,7 @@ function pieceUrl(file: string): string {
 					class="cta-shimmer rounded-full px-7 py-3.5 text-sm font-semibold"
 					style="background-color: var(--color-primary); color: var(--color-primary-text);"
 				>
-					<span>Get a quote</span>
+					<span>{buttonLabel}</span>
 				</a>
 				<a
 					href={WHATSAPP_HREF}
@@ -132,6 +154,52 @@ function pieceUrl(file: string): string {
 	@media (max-width: 899.98px) {
 		.cta-wrap {
 			padding-inline: 20px;
+		}
+	}
+	/* Tone variants for service pages. The default mist tone is the rules
+	   above, so the home page is unchanged. Indigo uses the panel tokens
+	   for text and an inverse pill: cream background with indigo text,
+	   readable in both themes. Paper keeps the page background with a
+	   1px top hairline. */
+	#closing-cta.tone-indigo {
+		background-color: var(--color-panel);
+	}
+	:global([data-theme='dark']) #closing-cta.tone-indigo {
+		background-color: var(--color-panel);
+		border-top: none;
+	}
+	@media (prefers-color-scheme: dark) {
+		:global(:root:not([data-theme='light'])) #closing-cta.tone-indigo {
+			background-color: var(--color-panel);
+			border-top: none;
+		}
+	}
+	.tone-indigo .cta-line {
+		color: var(--color-panel-muted);
+	}
+	/* The pill carries inline colours from the default tone, so the
+	   inverse variant needs !important to beat them. */
+	.tone-indigo .cta-shimmer {
+		background-color: var(--color-panel-text) !important;
+		color: var(--color-panel) !important;
+	}
+	.tone-indigo .cta-wa {
+		color: var(--color-panel-accent);
+	}
+	.tone-indigo .cta-shimmer:focus-visible,
+	.tone-indigo .cta-wa:focus-visible {
+		outline-color: var(--color-panel-accent);
+	}
+	#closing-cta.tone-paper {
+		background-color: var(--color-bg);
+		border-top: 1px solid var(--color-border);
+	}
+	:global([data-theme='dark']) #closing-cta.tone-paper {
+		background-color: var(--color-bg);
+	}
+	@media (prefers-color-scheme: dark) {
+		:global(:root:not([data-theme='light'])) #closing-cta.tone-paper {
+			background-color: var(--color-bg);
 		}
 	}
 	.cta-main {
