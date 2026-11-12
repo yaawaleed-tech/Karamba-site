@@ -21,7 +21,8 @@ const related = entry.slug === 'websites-and-branding' ? ['custom-software', 'ma
 <PageHero
   breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Services', href: '/services' }, { label: entry.name }]}
   eyebrow="Services" strong={entry.strong} soft={entry.soft} intro={entry.outcome}
-  primaryLabel="Get a quote" primaryHref={`/quote?topic=${encodeURIComponent(entry.name)}`}
+  primaryLabel="Get a quote" primaryHref="/quote"
+  quoteTopic={entry.name}
   secondaryLabel="How we work" secondaryHref="/#how-we-work" scene={entry.scene} animated tone="mist"
 />
 

@@ -283,6 +283,8 @@ const pct = (v: number, base: number) => `${((v / base) * 100).toFixed(3)}%`;
       if (dialog.open) return;
       opener = openerEl && openerEl.isConnected ? openerEl : null;
       dialog.showModal();
+      const topicField = dialog.querySelector('[data-quote-topic-field]');
+      if (topicField) topicField.value = opener?.getAttribute('data-quote-topic') || '';
       requestAnimationFrame(() => {
         requestAnimationFrame(() => dialog.classList.add('is-open'));
       });

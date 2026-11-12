@@ -26,6 +26,7 @@ interface Props {
   primaryHref: string;
   secondaryLabel?: string;
   secondaryHref?: string;
+  quoteTopic?: string;
   scene: string;
   tone?: HeroTone;
   /** Passed to SceneArt; only scenes grouped into .sc-part animate. */
@@ -42,6 +43,7 @@ const {
   primaryHref,
   secondaryLabel,
   secondaryHref,
+  quoteTopic,
   scene,
   tone = 'mist',
   animated = false,
@@ -78,6 +80,7 @@ const {
 				<a
 					href={primaryHref}
 					data-quote={primaryHref === '/quote' ? '' : undefined}
+					data-quote-topic={quoteTopic}
 					class="ph-primary"
 				>
 					{primaryLabel}
