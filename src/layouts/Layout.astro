@@ -44,6 +44,21 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 				document.documentElement.setAttribute('data-theme', theme);
 			})();
 		</script>
+		<script is:inline>
+			(function () {
+				const params = new URLSearchParams(location.search);
+				const saved = sessionStorage.getItem('kt-fx');
+				const forced = params.get('fx');
+				const connection = navigator.connection;
+				const lite = forced === 'lite' || (!forced && (saved === 'lite' ||
+					(window.matchMedia('(prefers-reduced-motion: reduce)').matches) ||
+					connection?.saveData || navigator.deviceMemory <= 2 ||
+					(navigator.hardwareConcurrency <= 4 && matchMedia('(pointer: coarse)').matches)));
+				const mode = forced === 'full' ? 'full' : lite ? 'lite' : 'full';
+				if (forced === 'lite' || forced === 'full') sessionStorage.setItem('kt-fx', mode);
+				document.documentElement.dataset.fx = mode;
+			})();
+		</script>
 
 		<!-- Preload only the above-the-fold hero fonts -->
 		<link rel="preload" href={Fraunces600} as="font" type="font/woff2" crossorigin />

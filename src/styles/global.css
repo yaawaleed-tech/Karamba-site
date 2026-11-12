@@ -273,6 +273,12 @@ h1, h2, h3, h4, h5, h6 {
     transform: none;
     animation: none;
   }
+
+  html[data-fx='lite'] .rv {
+  	animation: none !important;
+  	opacity: 1 !important;
+  	transform: none !important;
+  }
   .section-land { animation: none; }
 }
 
