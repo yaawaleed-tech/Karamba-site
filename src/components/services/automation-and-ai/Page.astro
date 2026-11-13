@@ -1,0 +1,6 @@
+---
+import ServiceExperience from '../ServiceExperience.astro';
+import { serviceBySlug } from '../../../data/services';
+const entry = serviceBySlug('automation-and-ai');
+---
+<ServiceExperience entry={entry} patterns={['aa-flow','aa-checklist','aa-approval','aa-conversation','aa-banner','aa-stack']} titles={['A task| finds its path.','Repeated work| becomes visible.','People| stay in the loop.','Example:| a short conversation.','Room for| the important work.','Examples:| tasks to hand over.']} />

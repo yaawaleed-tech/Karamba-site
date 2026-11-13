@@ -1,0 +1,6 @@
+---
+import ServiceExperience from '../ServiceExperience.astro';
+import { serviceBySlug } from '../../../data/services';
+const entry = serviceBySlug('websites-and-branding');
+---
+<ServiceExperience entry={entry} darkPattern="web-path" patterns={['web-anatomy','web-frames','web-board','web-path','web-reveal','web-banner','web-cards']} titles={['Anatomy| of a website.','One site| on every screen.','Example:| a brand board.','From first look| to first message.','Clutter| becomes clear.','A considered| first impression.','Structure,| words, build.']} />

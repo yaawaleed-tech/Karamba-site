@@ -6,6 +6,7 @@ import ClosingCta from '../../components/ClosingCta.astro';
 import PageHero from '../../components/page/PageHero.astro';
 import { SERVICES } from '../../data/services';
 import manifest from '../../assets/brand/karamba-pieces/manifest.json';
+import Photo from '../../components/Photo.astro';
 
 /* Services hub: hero, then one large row per service in nav order, then
    the default closing section. Rows carry no pills; their data is partly
@@ -65,6 +66,14 @@ function pieceFile(facet: string): string {
 			))}
 		</div>
 	</section>
+	<section class="hub-banner" data-section="hub-banner" data-pattern="hub-editorial-banner">
+		<Photo slug="hub" slot="banner" />
+	</section>
+	<section class="hub-comparison" data-section="hub-comparison" data-pattern="hub-ruled-comparison">
+		<p class="eyebrow"><span aria-hidden="true"></span>At a glance</p>
+		<h2><span>Five ways</span> to make work clearer.</h2>
+		<ul>{SERVICES.map((service) => <li><b>{service.name}</b><span>{service.outcome}</span></li>)}</ul>
+	</section>
 	<section class="hub-connect"><p class="eyebrow"><span aria-hidden="true"></span>How the pieces meet</p><h2><span>One question.</span> A useful next step.</h2><p>Start with the work that needs attention. The right service depends on what you need it to do.</p></section>
 	<ClosingCta />
 	<Footer />
@@ -103,6 +112,10 @@ function pieceFile(facet: string): string {
 	.hub-connect h2 { margin:.6rem 0 1rem; font:600 var(--fs-h2)/1.05 var(--font-heading); }
 	.hub-connect h2 span { color:var(--color-text-muted); font-weight:400; }
 	.hub-connect > p:last-child { max-width:42ch; color:var(--color-text-muted); line-height:1.7; }
+	.hub-banner { max-width:var(--container-inner); margin:auto; padding:0 24px var(--space-section); }
+	.hub-comparison { max-width:var(--container-inner); margin:auto; padding:var(--space-section) 24px; background:var(--color-panel); color:var(--color-panel-text); }
+	.hub-comparison h2 { font:600 var(--fs-h2)/1.1 var(--font-heading); }.hub-comparison h2 span { color:var(--color-panel-muted); font-weight:400; }
+	.hub-comparison ul { list-style:none; padding:0; margin:2rem 0 0; }.hub-comparison li { display:grid; grid-template-columns:14rem 1fr; gap:1rem; padding:1rem 0; border-top:1px solid var(--color-panel-muted); }.hub-comparison li span { color:var(--color-panel-muted); }
 	@media (max-width:899px) { .hub-index { position:static; display:flex; overflow:auto; gap:1rem; margin-bottom:2rem; } .hub-index a { white-space:nowrap; } .hub-card { min-height:18rem; grid-template-columns:1fr 5rem; } .hub-experience, .hub-connect { padding-inline:20px; } }
 	/*
 	.hub-rows {

@@ -1,0 +1,44 @@
+---
+import { imageryFor, type ImageSlot } from '../data/imagery';
+
+interface Props {
+  slug: string;
+  slot: ImageSlot;
+  eager?: boolean;
+}
+const { slug, slot, eager = false } = Astro.props;
+const spec = imageryFor(slug, slot);
+const files = import.meta.glob('../assets/photos/**/*.{jpg,jpeg,png,webp,avif}', {
+  query: '?url',
+  import: 'default',
+  eager: true,
+}) as Record<string, string>;
+const base = `../assets/photos/${slug}/${slot}`;
+const source = Object.entries(files).find(([path]) => path.startsWith(base + '.'))?.[1];
+---
+
+{source ? (
+  <picture class={`photo photo-${slot}`} style={`--focal:${spec.focalPoint}`}>
+    <img src={source} alt={spec.alt} width={spec.width} height={spec.height}
+      loading={eager ? 'eager' : 'lazy'} decoding="async" data-slot={`${slug}/${slot}`} />
+  </picture>
+) : (
+  <div class={`photo photo-placeholder photo-${slot}`} data-slot={`${slug}/${slot}`} role="img" aria-label={spec.alt || undefined}>
+    <span class="placeholder-shape placeholder-a"></span><span class="placeholder-shape placeholder-b"></span>
+    {import.meta.env.DEV && <small>Image slot: {slug}/{slot}</small>}
+  </div>
+)}
+
+<style>
+  .photo { position:relative; display:block; overflow:hidden; min-height:8rem; border:1px solid var(--color-line); border-radius:1.25rem; background:linear-gradient(135deg,var(--color-soft),var(--color-card-bg)); }
+  .photo img { display:block; width:100%; height:100%; object-fit:cover; object-position:var(--focal); }
+  .photo-placeholder { aspect-ratio:var(--ratio, 1); }
+  .photo-banner { --ratio:21 / 9; }
+  .photo-inset { --ratio:4 / 5; }
+  .photo-detail { --ratio:1; }
+  .photo::after { content:''; position:absolute; inset:0; background:color-mix(in srgb,var(--color-accent) 9%,transparent); pointer-events:none; }
+  .placeholder-shape { position:absolute; border:1px solid color-mix(in srgb,var(--color-text) 25%,transparent); }
+  .placeholder-a { width:52%; aspect-ratio:1; left:14%; top:17%; border-radius:48% 52% 38% 62%; background:color-mix(in srgb,var(--color-mist, var(--color-soft)) 45%,transparent); transform:rotate(-12deg); }
+  .placeholder-b { width:38%; aspect-ratio:1; right:12%; bottom:10%; border-radius:50%; background:color-mix(in srgb,var(--color-accent) 25%,transparent); }
+  .photo small { position:absolute; z-index:1; left:.75rem; bottom:.65rem; color:var(--color-text-muted); font: .65rem var(--font-mono); }
+</style>

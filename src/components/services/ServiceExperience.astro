@@ -1,0 +1,95 @@
+---
+import PageHero from '../page/PageHero.astro';
+import Faq from '../page/Faq.astro';
+import RelatedLinks from '../page/RelatedLinks.astro';
+import ClosingCta from '../ClosingCta.astro';
+import Photo from '../Photo.astro';
+import { COMMON_FAQ, MOBILE_APPS_FAQ, type ServiceEntry } from '../../data/services';
+
+interface Props {
+  entry: ServiceEntry;
+  patterns: string[];
+  titles: string[];
+  darkPattern?: string;
+}
+const { entry, patterns, titles, darkPattern } = Astro.props;
+const faq = entry.slug === 'custom-software' ? [MOBILE_APPS_FAQ, ...COMMON_FAQ] : COMMON_FAQ;
+const descriptions = [
+  'Illustration: a clear first view gives the work a place to begin.',
+  'Illustration: the parts stay visible so a person can make a good next decision.',
+  'Illustration: useful information moves closer to the person who needs it.',
+  'Illustration: the shape can change as the need becomes clearer.',
+  'Illustration: a calm handover leaves room for questions after launch.',
+  'Illustration: a small, well-defined first step is easier to inspect.',
+  'Illustration: a visitor should know what to do next.',
+];
+---
+
+<PageHero breadcrumb={[{ label: 'Home', href: '/' }, { label: 'Services', href: '/services' }, { label: entry.name }]}
+  eyebrow="Services" strong={entry.strong} soft={entry.soft} intro={entry.outcome}
+  primaryLabel="Get a quote" primaryHref="/quote" quoteTopic={entry.name}
+  secondaryLabel="How we work" secondaryHref="/#how-we-work" scene={entry.scene} animated tone="mist" />
+
+<main class={`experience experience-${entry.slug}`}>
+  {patterns.map((pattern, i) => (
+    <section class:list={['experience-section', `pattern-${i + 1}`, darkPattern === pattern && 'full-bleed-indigo']} data-section={`${entry.slug}-${i + 1}`} data-pattern={pattern} aria-labelledby={`${entry.slug}-section-${i + 1}`}>
+      <div class="section-inner">
+        <div class="section-copy"><p class="eyebrow"><span aria-hidden="true"></span>{String(i + 1).padStart(2, '0')} / Illustration</p>
+          <h2 id={`${entry.slug}-section-${i + 1}`}><span>{titles[i].split('|')[0]}</span>{titles[i].split('|')[1]}</h2>
+          <p>{descriptions[i]}</p>
+        </div>
+        {i === 0 && <div class="visual visual-stage"><div class="stage-node">01</div><div class="stage-node">02</div><div class="stage-node">03</div></div>}
+        {i === 1 && <div class="visual visual-rail"><i></i><i></i><i></i></div>}
+        {i === 2 && <Photo slug={entry.slug} slot="inset" />}
+        {i === 3 && <div class="visual visual-grid"><b>VIEW</b><b>CHECK</b><b>CHANGE</b><b>SHARE</b></div>}
+        {i === 4 && <Photo slug={entry.slug} slot="detail" />}
+        {i === 5 && <Photo slug={entry.slug} slot="banner" />}
+        {i === 6 && <div class="visual visual-stack"><span>Structure</span><span>Words</span><span>Build</span></div>}
+      </div>
+    </section>
+  ))}
+  <section class="experience-section questions-section" data-section={`${entry.slug}-questions`} data-pattern="questions" aria-labelledby={`${entry.slug}-questions-title`}>
+    <div class="section-inner"><div class="section-copy"><p class="eyebrow"><span aria-hidden="true"></span>Questions</p><h2 id={`${entry.slug}-questions-title`}><span>Before we</span> start.</h2></div><Faq items={faq} /></div>
+  </section>
+  <section class="experience-section related-section" data-section={`${entry.slug}-related`} data-pattern="related" aria-labelledby={`${entry.slug}-related-title`}>
+    <div class="section-inner"><div class="section-copy"><p class="eyebrow"><span aria-hidden="true"></span>Continue exploring</p><h2 id={`${entry.slug}-related-title`}><span>See</span> also.</h2></div><RelatedLinks current={entry.slug} /></div>
+  </section>
+</main>
+<ClosingCta strong={entry.closing.strong} soft={entry.closing.soft} line={entry.closing.line} buttonLabel={entry.closing.button} tone={entry.closing.tone} />
+<script type="application/ld+json" set:html={JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: new URL('/', Astro.site).toString() },
+    { '@type': 'ListItem', position: 2, name: 'Services', item: new URL('/services/', Astro.site).toString() },
+    { '@type': 'ListItem', position: 3, name: entry.name, item: new URL(`/services/${entry.slug}/`, Astro.site).toString() },
+  ],
+})} />
+<script type="application/ld+json" set:html={JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq.map((item) => ({ '@type': 'Question', name: item.q, acceptedAnswer: { '@type': 'Answer', text: item.a } })) })} />
+
+<style>
+  .experience-section { padding:clamp(4.5rem,10vw,9rem) 24px; border-top:1px solid var(--color-line); }
+  .section-inner { max-width:var(--container-inner); margin:auto; display:grid; grid-template-columns:minmax(0,.8fr) minmax(0,1fr); gap:clamp(2rem,8vw,8rem); align-items:center; }
+  .section-copy h2 { margin:.7rem 0 1rem; font:600 var(--fs-h2)/1.08 var(--font-heading); }
+  .section-copy h2 span { color:var(--color-text-muted); font-weight:400; }
+  .section-copy > p:last-child { max-width:38ch; color:var(--color-text-muted); line-height:1.7; }
+  .eyebrow { font:.7rem var(--font-mono); letter-spacing:.12em; text-transform:uppercase; color:var(--color-text-muted); }
+  .eyebrow span { display:inline-block; width:2.5rem; height:2px; margin-right:.6rem; vertical-align:middle; background:var(--color-clay-ink); }
+  .visual { min-height:15rem; position:relative; border:1px solid var(--color-line); border-radius:1.5rem; background:var(--color-card-bg); }
+  .visual-stage { display:flex; justify-content:space-evenly; align-items:center; }
+  .stage-node { display:grid; place-items:center; width:4.5rem; aspect-ratio:1; border-radius:50%; color:var(--color-clay-ink); border:1px solid var(--color-clay-ink); font:1rem var(--font-mono); }
+  .visual-rail { display:flex; align-items:center; justify-content:space-around; }
+  .visual-rail::before { content:''; position:absolute; left:10%; right:10%; height:1px; background:var(--color-accent); }
+  .visual-rail i { z-index:1; width:.8rem; aspect-ratio:1; border-radius:50%; background:var(--color-clay-ink); }
+  .visual-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:1px; overflow:hidden; }
+  .visual-grid b { display:grid; place-items:center; min-height:7rem; font:.7rem var(--font-mono); color:var(--color-text-muted); background:var(--color-soft); }
+  .visual-stack { display:grid; gap:.7rem; padding:2rem; }
+  .visual-stack span { padding:1rem 1.2rem; border:1px solid var(--color-line); border-radius:.8rem; background:var(--color-soft); }
+  .visual-stack span:nth-child(2) { transform:translateX(1.5rem); }.visual-stack span:nth-child(3) { transform:translateX(3rem); }
+  .full-bleed-indigo { background:var(--color-panel); color:var(--color-panel-text); }.full-bleed-indigo .eyebrow,.full-bleed-indigo .section-copy > p:last-child { color:var(--color-panel-muted); }.full-bleed-indigo .section-copy h2 span { color:var(--color-panel-muted); }
+  .questions-section .section-inner,.related-section .section-inner { align-items:start; }
+  @media (max-width:899px) { .experience-section { padding-inline:20px; }.section-inner { display:block; }.visual,.section-inner > .photo { margin-top:2rem; }.visual { min-height:12rem; } }
+  @media (prefers-reduced-motion:no-preference) { .experience-section { animation:section-in linear both; animation-timeline:view(); animation-range:entry 5% cover 25%; } .visual > * { animation:float-in .7s both; animation-delay:calc(var(--i, 0) * .1s); } }
+  @keyframes section-in { from { opacity:.25; transform:translateY(1.5rem); } to { opacity:1; transform:none; } } @keyframes float-in { from { opacity:0; transform:translateY(1rem); } to { opacity:1; transform:none; } }
+  html[data-fx='lite'] .experience-section { animation:none; }
+</style>

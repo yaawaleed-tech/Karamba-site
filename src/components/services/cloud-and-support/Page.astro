@@ -1,0 +1,6 @@
+---
+import ServiceExperience from '../ServiceExperience.astro';
+import { serviceBySlug } from '../../../data/services';
+const entry = serviceBySlug('cloud-and-support');
+---
+<ServiceExperience entry={entry} darkPattern="cloud-heartbeat" patterns={['cloud-layers','cloud-heartbeat','cloud-path','cloud-status','cloud-arch','cloud-handover']} titles={['Layers| with a purpose.','A steady| line to follow.','Detect,| respond, resolve.','A status| you can read.','A useful| place to start.','Support| after launch.']} />
