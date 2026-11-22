@@ -1,0 +1,55 @@
+/* Page-scoped scroll reveal for the custom-software redesign (Chunk 1c).
+   Hidden states only exist under html.cs-js, which the inline script in
+   CustomSoftwarePage.astro sets immediately; without JS everything is
+   visible. Under data-fx="lite" or prefers-reduced-motion nothing moves. */
+
+html.cs-js .cs-rise,
+html.cs-js .cs-fade,
+html.cs-js .cs-scale-in {
+	opacity: 0;
+	transform: translateY(32px);
+	transition: opacity 800ms cubic-bezier(.2, .7, .2, 1), transform 800ms cubic-bezier(.2, .7, .2, 1);
+}
+
+html.cs-js .cs-fade {
+	transform: none;
+	transition: opacity 800ms cubic-bezier(.2, .7, .2, 1);
+}
+
+html.cs-js .cs-scale-in {
+	transform: scale(.96);
+}
+
+html.cs-js .cs-rise.is-in,
+html.cs-js .cs-fade.is-in,
+html.cs-js .cs-scale-in.is-in {
+	opacity: 1;
+	transform: none;
+}
+
+/* Stagger steps: 90ms per step, applied while the element transitions in. */
+html.cs-js .cs-rise-d1 { transition-delay: 90ms; }
+html.cs-js .cs-rise-d2 { transition-delay: 180ms; }
+html.cs-js .cs-rise-d3 { transition-delay: 270ms; }
+html.cs-js .cs-rise-d4 { transition-delay: 360ms; }
+
+/* No motion: lite mode and reduced motion show everything immediately. */
+html.cs-js[data-fx='lite'] .cs-rise,
+html.cs-js[data-fx='lite'] .cs-fade,
+html.cs-js[data-fx='lite'] .cs-scale-in {
+	opacity: 1;
+	transform: none;
+	transition: none;
+	transition-delay: 0ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	html.cs-js .cs-rise,
+	html.cs-js .cs-fade,
+	html.cs-js .cs-scale-in {
+		opacity: 1;
+		transform: none;
+		transition: none;
+		transition-delay: 0ms;
+	}
+}

@@ -1,0 +1,49 @@
+/* Shared panel tokens for the custom-software redesign.
+   --cs-panel-* stays dark (Hero, Capability cards, Closing).
+   --cs-soft-* is the light surface used by Process, Architecture and
+   Handover. Both sets flip to the dark look under [data-theme='dark']. */
+:root {
+	--cs-panel-bg: linear-gradient(135deg, #1B2A4E, #2B4070);
+	--cs-panel-border: rgba(239, 234, 223, 0.14);
+	--cs-panel-text: #EFEADF;
+	--cs-panel-muted: rgba(239, 234, 223, 0.78);
+	--cs-panel-accent: #8FD0CF;
+	--cs-panel-inset: none;
+
+	--cs-soft-bg: color-mix(in srgb, var(--kt-mist) 22%, var(--color-card-bg));
+	--cs-soft-border: color-mix(in srgb, var(--kt-indigo) 16%, transparent);
+	--cs-soft-text: var(--kt-indigo);
+	--cs-soft-muted: var(--color-text-muted);
+	--cs-soft-accent: var(--color-accent-strong);
+	--cs-soft-tile: color-mix(in srgb, var(--color-card-bg) 70%, transparent);
+	--cs-soft-tile-border: color-mix(in srgb, var(--kt-indigo) 12%, transparent);
+	--cs-soft-line: color-mix(in srgb, var(--kt-indigo) 55%, transparent);
+	--cs-soft-fill: color-mix(in srgb, var(--kt-mist) 55%, transparent);
+	--cs-soft-step-1: color-mix(in srgb, var(--kt-mist) 10%, var(--color-card-bg));
+	--cs-soft-step-2: color-mix(in srgb, var(--kt-mist) 22%, var(--color-card-bg));
+	--cs-soft-step-3: color-mix(in srgb, var(--kt-mist) 34%, var(--color-card-bg));
+	--cs-soft-step-4: color-mix(in srgb, var(--kt-mist) 46%, var(--color-card-bg));
+}
+
+[data-theme='dark'] {
+	--cs-panel-bg: linear-gradient(135deg, #22345F, #2E4579);
+	--cs-panel-border: rgba(143, 208, 207, 0.28);
+	--cs-panel-text: #EFEADF;
+	--cs-panel-muted: rgba(239, 234, 223, 0.78);
+	--cs-panel-accent: #8FD0CF;
+	--cs-panel-inset: inset 0 1px 0 rgba(239, 234, 223, 0.08);
+
+	--cs-soft-bg: linear-gradient(135deg, #22345F, #2E4579);
+	--cs-soft-border: rgba(143, 208, 207, 0.28);
+	--cs-soft-text: #EFEADF;
+	--cs-soft-muted: rgba(239, 234, 223, 0.78);
+	--cs-soft-accent: #8FD0CF;
+	--cs-soft-tile: color-mix(in srgb, var(--kt-cream) 6%, transparent);
+	--cs-soft-tile-border: color-mix(in srgb, var(--kt-cream) 18%, transparent);
+	--cs-soft-line: color-mix(in srgb, var(--kt-teal-light) 75%, transparent);
+	--cs-soft-fill: color-mix(in srgb, var(--kt-cream) 16%, transparent);
+	--cs-soft-step-1: #1F3158;
+	--cs-soft-step-2: #22345F;
+	--cs-soft-step-3: #263A68;
+	--cs-soft-step-4: #2A4070;
+}

@@ -38,7 +38,7 @@ export const SERVICES: ServiceEntry[] = [
     strong: 'Custom',
     soft: 'software',
     facet: 'core',
-    scene: 'custom-software.svg',
+    scene: '',
     outcome: 'Web and mobile applications built around how your business actually runs.',
     included: ['Web applications', 'Mobile applications'],
     audience: [],

@@ -1,0 +1,219 @@
+---
+import manifest from '../../../assets/brand/karamba-pieces/manifest.json';
+import { serviceBySlug } from '../../../data/services';
+
+/* Other services: one card per sibling service. Names, outcomes, links and
+   brand pieces all come from the shared data, so nothing is invented here. */
+interface ManifestPiece { k: string; file: string }
+
+const pieceUrls = import.meta.glob(
+  '../../../assets/brand/karamba-pieces/*.webp',
+  { query: '?url', import: 'default', eager: true },
+) as Record<string, string>;
+function pieceUrl(file: string): string {
+  const hit = Object.entries(pieceUrls).find(([path]) => path.endsWith('/' + file));
+  return hit ? hit[1] : '';
+}
+function pieceFile(facet: string): string {
+  const piece = (manifest.pieces as ManifestPiece[]).find((p) => p.k === facet);
+  return piece ? pieceUrl(piece.file) : '';
+}
+
+const cards = [
+  serviceBySlug('management-systems'),
+  serviceBySlug('websites-and-branding'),
+  serviceBySlug('automation-and-ai'),
+  serviceBySlug('cloud-and-support'),
+];
+const tones = ['tone-mist', 'tone-teal', 'tone-clay', 'tone-paper'];
+const staggers = ['cs-rise-d1', 'cs-rise-d2', 'cs-rise-d3', 'cs-rise-d4'];
+---
+
+<section id="cs-explore" class="cs-ex" aria-labelledby="cs-explore-title">
+	<div class="cs-ex-intro">
+		<p class="cs-eyebrow cs-rise">Other services</p>
+		<h2 id="cs-explore-title" class="cs-rise cs-rise-d1">More ways we can help.</h2>
+	</div>
+
+	<div class="cs-ex-grid">
+		{cards.map((entry, i) => (
+			<a
+				class={`cs-ex-card cs-rise ${staggers[i]} ${tones[i]}`}
+				href={`/services/${entry.slug}`}
+			>
+				<img
+					class="cs-ex-piece"
+					src={pieceFile(entry.facet)}
+					alt=""
+					aria-hidden="true"
+					loading="lazy"
+				/>
+				<h3 class="cs-ex-name">{entry.name}</h3>
+				<p class="cs-ex-outcome">{entry.outcome}</p>
+				<span class="cs-ex-arrow">
+					View service
+					<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
+				</span>
+			</a>
+		))}
+	</div>
+</section>
+
+<style>
+	.cs-ex {
+		scroll-margin-top: var(--header-h, 76px);
+		padding-block: clamp(2.75rem, 4.5vw, 4rem);
+	}
+
+	.cs-ex-intro {
+		max-width: var(--container-inner);
+		margin-inline: auto;
+		padding: 0 24px;
+	}
+
+	.cs-eyebrow {
+		margin: 0 0 1rem;
+		color: var(--kt-teal);
+		font: 500 .75rem/1.2 var(--font-mono);
+		letter-spacing: .14em;
+		text-transform: uppercase;
+	}
+	.cs-eyebrow::before {
+		display: inline-block;
+		width: 2rem;
+		height: 2px;
+		margin-right: .65rem;
+		vertical-align: middle;
+		background: var(--kt-clay);
+		content: '';
+	}
+
+	.cs-ex h2 {
+		margin: 0;
+		color: var(--color-text);
+		font: 600 clamp(2rem, 4.5vw, 3rem)/1.08 var(--font-heading);
+		letter-spacing: -.03em;
+	}
+
+	/* Card grid --------------------------------------------------------- */
+	.cs-ex-grid {
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: 1.5rem;
+		max-width: var(--container-inner);
+		margin: 2.5rem auto 0;
+		padding: 0 24px;
+	}
+
+	.cs-ex-card {
+		--ex-tint: color-mix(in srgb, var(--kt-mist) 35%, var(--color-card-bg));
+		--ex-border: color-mix(in srgb, var(--kt-mist) 30%, transparent);
+		--ex-link: color-mix(in srgb, var(--color-accent-strong) 85%, var(--color-text));
+		display: flex;
+		flex-direction: column;
+		min-width: 0;
+		padding: 1.5rem;
+		border: 1px solid var(--ex-border);
+		border-radius: 1.25rem;
+		background: var(--ex-tint);
+		color: var(--color-text);
+		text-decoration: none;
+		transition: transform 250ms ease, border-color 250ms ease;
+	}
+	.cs-ex-card.tone-teal {
+		--ex-tint: color-mix(in srgb, var(--kt-teal) 14%, var(--color-card-bg));
+		--ex-border: color-mix(in srgb, var(--kt-teal) 30%, transparent);
+	}
+	.cs-ex-card.tone-clay {
+		--ex-tint: color-mix(in srgb, var(--kt-clay) 10%, var(--color-card-bg));
+		--ex-border: color-mix(in srgb, var(--kt-clay) 30%, transparent);
+	}
+	.cs-ex-card.tone-paper {
+		--ex-tint: var(--color-card-bg);
+		--ex-border: color-mix(in srgb, var(--kt-mist) 45%, transparent);
+	}
+
+	:global([data-theme='dark']) .cs-ex-card {
+		--ex-tint: color-mix(in srgb, var(--color-text) 6%, var(--color-bg));
+		--ex-border: color-mix(in srgb, var(--color-text) 22%, transparent);
+		--ex-link: var(--kt-teal-light);
+	}
+	:global([data-theme='dark']) .cs-ex-card.tone-teal {
+		--ex-tint: color-mix(in srgb, var(--kt-teal-light) 12%, color-mix(in srgb, var(--color-text) 6%, var(--color-bg)));
+		--ex-border: color-mix(in srgb, var(--kt-teal-light) 22%, transparent);
+	}
+	:global([data-theme='dark']) .cs-ex-card.tone-clay {
+		--ex-tint: color-mix(in srgb, var(--kt-clay-light) 10%, color-mix(in srgb, var(--color-text) 6%, var(--color-bg)));
+		--ex-border: color-mix(in srgb, var(--kt-clay-light) 22%, transparent);
+	}
+	:global([data-theme='dark']) .cs-ex-card.tone-paper {
+		--ex-border: color-mix(in srgb, var(--kt-mist) 22%, transparent);
+	}
+
+	.cs-ex-piece {
+		width: 72px;
+		height: 72px;
+		object-fit: contain;
+		margin-bottom: 1.25rem;
+		transition: transform 250ms ease;
+	}
+
+	.cs-ex-name {
+		margin: 0 0 .75rem;
+		color: var(--color-text);
+		font: 600 clamp(1.2rem, 1.5vw, 1.4rem)/1.2 var(--font-heading);
+		letter-spacing: -.01em;
+	}
+
+	.cs-ex-outcome {
+		margin: 0;
+		color: var(--color-text-muted);
+		font: 400 .92rem/1.6 var(--font-body);
+	}
+
+	.cs-ex-arrow {
+		display: inline-flex;
+		align-items: center;
+		gap: .4rem;
+		margin-top: auto;
+		padding-top: 1.5rem;
+		color: var(--ex-link);
+		font: 500 .72rem/1.2 var(--font-mono);
+		letter-spacing: .08em;
+		text-transform: uppercase;
+	}
+	.cs-ex-arrow svg { width: 1rem; height: 1rem; transition: transform 250ms ease; }
+
+	@media (hover: hover) and (pointer: fine) {
+		.cs-ex-card:hover,
+		:global(html.cs-js) .cs-ex-card:hover {
+			transform: translateY(-4px);
+			border-color: color-mix(in srgb, var(--color-accent) 60%, transparent);
+		}
+		.cs-ex-card:hover .cs-ex-piece { transform: rotate(6deg) scale(1.05); }
+		.cs-ex-card:hover .cs-ex-arrow svg { transform: translateX(3px); }
+	}
+
+	/* Gentle wave: cards 2 and 4 sit lower. */
+	@media (min-width: 900px) {
+		.cs-ex-card:nth-child(2),
+		.cs-ex-card:nth-child(4) { margin-top: 2.5rem; }
+	}
+	@media (min-width: 600px) and (max-width: 899px) {
+		.cs-ex-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+		.cs-ex-card:nth-child(2),
+		.cs-ex-card:nth-child(4) { margin-top: 2.5rem; }
+	}
+	@media (max-width: 599px) {
+		.cs-ex-grid { grid-template-columns: minmax(0, 1fr); }
+		.cs-ex-intro, .cs-ex-grid { padding-inline: 20px; }
+	}
+	:global(html[data-fx='lite']) .cs-ex-card,
+	:global(html[data-fx='lite']) .cs-ex-piece,
+	:global(html[data-fx='lite']) .cs-ex-arrow svg { transition: none; }
+	@media (hover: none) {
+		.cs-ex-card:hover { transform: none; }
+		.cs-ex-card:hover .cs-ex-piece { transform: none; }
+		.cs-ex-card:hover .cs-ex-arrow svg { transform: none; }
+	}
+</style>

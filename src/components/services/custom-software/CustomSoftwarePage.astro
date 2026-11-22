@@ -1,0 +1,46 @@
+---
+import './reveal.css';
+import './panel.css';
+import Hero from './Hero.astro';
+import Capabilities from './Capabilities.astro';
+import Process from './Process.astro';
+import Architecture from './Architecture.astro';
+import UseCases from './UseCases.astro';
+import Handover from './Handover.astro';
+import Closing from './Closing.astro';
+import Explore from './Explore.astro';
+---
+
+<Hero />
+<main class="cs-page">
+	<Capabilities />
+	<Process />
+	<Architecture />
+	<UseCases />
+	<Handover />
+	<Closing />
+	<Explore />
+</main>
+
+<script is:inline>
+	(function () {
+		var root = document.documentElement;
+		root.classList.add('cs-js');
+		var targets = document.querySelectorAll('.cs-rise, .cs-fade, .cs-scale-in');
+		var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		var lite = root.getAttribute('data-fx') === 'lite';
+		if (reduced || lite || !('IntersectionObserver' in window)) {
+			for (var i = 0; i < targets.length; i++) targets[i].classList.add('is-in');
+			return;
+		}
+		var io = new IntersectionObserver(function (entries) {
+			for (var j = 0; j < entries.length; j++) {
+				if (entries[j].isIntersecting) {
+					entries[j].target.classList.add('is-in');
+					io.unobserve(entries[j].target);
+				}
+			}
+		}, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+		for (var k = 0; k < targets.length; k++) io.observe(targets[k]);
+	})();
+</script>
