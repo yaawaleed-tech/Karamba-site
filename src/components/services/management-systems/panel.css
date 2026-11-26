@@ -1,0 +1,78 @@
+/* Standalone panel tokens for the management-systems hero.
+   --ms-panel-* stays dark, --ms-soft-* is the reserved light surface.
+   Both sets flip to the dark look under [data-theme='dark'].
+   The panel accent leans on the existing teal tokens. Clay is used only
+   for the attention dot and the tiny eyebrow highlight. */
+:root {
+	--ms-panel-bg: linear-gradient(135deg, var(--kt-ink-deep), var(--kt-indigo));
+	--ms-panel-border: rgba(239, 234, 223, 0.14);
+	--ms-panel-text: var(--kt-cream);
+	--ms-panel-muted: rgba(239, 234, 223, 0.78);
+	--ms-panel-accent: var(--kt-teal-light);
+	--ms-panel-inset: none;
+
+	--ms-soft-bg: color-mix(in srgb, var(--kt-mist) 22%, var(--color-card-bg));
+	--ms-soft-border: color-mix(in srgb, var(--kt-indigo) 16%, transparent);
+	--ms-soft-text: var(--kt-indigo);
+	--ms-soft-muted: var(--color-text-muted);
+	--ms-soft-accent: var(--color-accent-strong);
+	--ms-soft-tile: color-mix(in srgb, var(--color-card-bg) 70%, transparent);
+	--ms-soft-tile-border: color-mix(in srgb, var(--kt-indigo) 12%, transparent);
+	--ms-soft-line: color-mix(in srgb, var(--kt-indigo) 55%, transparent);
+	--ms-soft-fill: color-mix(in srgb, var(--kt-mist) 55%, transparent);
+	--ms-soft-step-1: color-mix(in srgb, var(--kt-mist) 10%, var(--color-card-bg));
+	--ms-soft-step-2: color-mix(in srgb, var(--kt-mist) 22%, var(--color-card-bg));
+	--ms-soft-step-3: color-mix(in srgb, var(--kt-mist) 34%, var(--color-card-bg));
+	--ms-soft-step-4: color-mix(in srgb, var(--kt-mist) 46%, var(--color-card-bg));
+
+	/* Scene tokens, all derived from the raw brand palette. */
+	--ms-slip-fill: var(--kt-cream);
+	--ms-slip-line: color-mix(in srgb, var(--kt-indigo) 34%, transparent);
+	--ms-slot-line: color-mix(in srgb, var(--kt-cream) 30%, transparent);
+	--ms-bar-fill: var(--kt-teal-light);
+	--ms-tick: var(--kt-teal-light);
+	--ms-attn: var(--kt-clay-light);
+}
+
+[data-theme='dark'] {
+	--ms-panel-bg: linear-gradient(135deg, #22345F, #2E4579);
+	--ms-panel-border: rgba(143, 208, 207, 0.28);
+	--ms-panel-text: var(--kt-cream);
+	--ms-panel-muted: rgba(239, 234, 223, 0.78);
+	--ms-panel-accent: var(--kt-teal-light);
+	--ms-panel-inset: inset 0 1px 0 rgba(239, 234, 223, 0.08);
+
+	--ms-soft-bg: linear-gradient(135deg, #22345F, #2E4579);
+	--ms-soft-border: rgba(143, 208, 207, 0.28);
+	--ms-soft-text: var(--kt-cream);
+	--ms-soft-muted: rgba(239, 234, 223, 0.78);
+	--ms-soft-accent: var(--kt-teal-light);
+	--ms-soft-tile: color-mix(in srgb, var(--kt-cream) 6%, transparent);
+	--ms-soft-tile-border: color-mix(in srgb, var(--kt-cream) 18%, transparent);
+	--ms-soft-line: color-mix(in srgb, var(--kt-teal-light) 75%, transparent);
+	--ms-soft-fill: color-mix(in srgb, var(--kt-cream) 16%, transparent);
+	--ms-soft-step-1: #1F3158;
+	--ms-soft-step-2: #22345F;
+	--ms-soft-step-3: #263A68;
+	--ms-soft-step-4: #2A4070;
+
+	--ms-slip-fill: var(--kt-cream);
+	--ms-slip-line: color-mix(in srgb, var(--kt-indigo) 34%, transparent);
+	--ms-slot-line: color-mix(in srgb, var(--kt-cream) 34%, transparent);
+	--ms-bar-fill: var(--kt-teal-light);
+	--ms-tick: var(--kt-teal-light);
+	--ms-attn: var(--kt-clay-light);
+}
+
+/* Segmented control tokens for the industries section. */
+:root {
+	--ms-tab-track: color-mix(in srgb, var(--kt-indigo) 8%, var(--kt-cream));
+	--ms-tab-thumb: var(--kt-indigo);
+	--ms-tab-thumb-text: var(--kt-cream);
+}
+
+[data-theme='dark'] {
+	--ms-tab-track: color-mix(in srgb, var(--kt-cream) 8%, var(--kt-ink-deep));
+	--ms-tab-thumb: var(--kt-teal-light);
+	--ms-tab-thumb-text: var(--kt-ink-deep);
+}

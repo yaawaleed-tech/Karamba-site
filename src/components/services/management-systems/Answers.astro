@@ -1,0 +1,204 @@
+---
+const faq = [
+  {
+    tag: 'Cost',
+    q: 'How much will it cost?',
+    a: 'We do not publish a price list. Every project is quoted according to what you need. Tell us how your organisation works and we will reply with a quote.',
+  },
+  {
+    tag: 'Timeline',
+    q: 'How long will it take?',
+    a: 'The timeline depends on the shape of the project. We aim to deliver within weeks, and we will give you a realistic estimate once we understand what you need.',
+  },
+  {
+    tag: 'Your data',
+    q: 'Who owns the system and the data?',
+    a: 'This depends on what is being built and how you want it to run. It is discussed and agreed with you before work begins, and we will explain the options plainly.',
+  },
+  {
+    tag: 'Connection',
+    q: 'Will it work with an unreliable connection?',
+    a: 'Our farm system lets staff record without a connection and synchronises when they are back online. Whether another system needs the same depends on where and how your team works, and we design for it from the start.',
+  },
+  {
+    tag: 'Support',
+    q: 'Is support available after launch?',
+    a: 'Yes. Support after launch is available, and we agree what it covers with you before the project starts.',
+  },
+];
+---
+
+<section id="ms-answers" class="ms-ans" aria-labelledby="ms-answers-title">
+	<div class="ms-ans-inner">
+		<div class="ms-ans-head ms-rise">
+			<p class="ms-ans-eyebrow">Straight answers</p>
+			<h2 id="ms-answers-title"><span class="ms-ans-strong">Plain answers</span><span class="ms-ans-soft">to fair questions.</span></h2>
+			<p class="ms-ans-intro">These are the questions we are asked first. If yours is not here, message us and we will answer it directly.</p>
+		</div>
+
+		<ul class="ms-ans-list" role="list">
+			{faq.map((item, i) => (
+				<li class:list={['ms-ans-row', 'ms-rise', i > 0 && `ms-rise-d${Math.min(i, 4)}`]}>
+					<span class="ms-ans-rule" aria-hidden="true"></span>
+					<p class="ms-ans-tag">{item.tag}</p>
+					<h3 class="ms-ans-q">{item.q}</h3>
+					<p class="ms-ans-a">{item.a}</p>
+				</li>
+			))}
+		</ul>
+	</div>
+</section>
+
+<script type="application/ld+json" set:html={JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq.map((item) => ({ '@type': 'Question', name: item.q, acceptedAnswer: { '@type': 'Answer', text: item.a } })) })} />
+
+<style>
+	.ms-ans {
+		scroll-margin-top: var(--header-h, 76px);
+		width: 100%;
+		padding-block: clamp(3rem, 6vw, 5rem);
+		background: var(--color-bg);
+		color: var(--ms-soft-text);
+	}
+
+	.ms-ans-inner {
+		width: min(calc(100% - 48px), var(--container-inner));
+		margin-inline: auto;
+	}
+
+	.ms-ans-head { max-width: 44rem; }
+
+	.ms-ans-eyebrow {
+		margin: 0 0 1rem;
+		color: var(--ms-soft-accent);
+		font: 500 .75rem/1.2 var(--font-mono);
+		letter-spacing: .14em;
+		text-transform: uppercase;
+	}
+	.ms-ans-eyebrow::before {
+		display: inline-block;
+		width: 2rem;
+		height: 2px;
+		margin-right: .65rem;
+		vertical-align: middle;
+		background: var(--kt-clay);
+		content: '';
+	}
+
+	.ms-ans h2 {
+		margin: 0;
+		font: 600 clamp(2rem, 4.5vw, 3rem)/1.08 var(--font-heading);
+		letter-spacing: -.03em;
+	}
+	.ms-ans-strong, .ms-ans-soft { display: block; }
+	.ms-ans-soft { color: var(--ms-soft-muted); font-weight: 400; }
+
+	.ms-ans-intro {
+		margin: 1.5rem 0 0;
+		color: var(--ms-soft-muted);
+		font: 400 var(--fs-lead)/1.6 var(--font-body);
+	}
+
+	.ms-ans-list {
+		list-style: none;
+		margin: clamp(2rem, 4vw, 3rem) 0 0;
+		padding: 0;
+	}
+
+	.ms-ans-row {
+		position: relative;
+		display: grid;
+		min-width: 0;
+	}
+
+	.ms-ans-rule {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		height: 1px;
+		background: var(--ms-soft-border);
+		transform-origin: left center;
+	}
+
+	.ms-ans-row:last-child { border-bottom: 1px solid var(--ms-soft-border); }
+
+	.ms-ans-tag {
+		grid-area: tag;
+		margin: 0;
+		color: var(--ms-soft-accent);
+		font: 500 .72rem/1.2 var(--font-mono);
+		letter-spacing: .14em;
+		text-transform: uppercase;
+	}
+
+	.ms-ans-q {
+		grid-area: question;
+		margin: 0;
+		color: var(--ms-soft-text);
+		font: 600 clamp(1.35rem, 2.2vw, 1.75rem)/1.2 var(--font-heading);
+	}
+
+	.ms-ans-a {
+		grid-area: answer;
+		margin: 0;
+		color: var(--ms-soft-muted);
+		font: 400 1.0625rem/1.65 var(--font-body);
+	}
+
+	@media (min-width: 1000px) {
+		.ms-ans-row {
+			grid-template-columns: 9rem minmax(0, .9fr) minmax(0, 1.1fr);
+			grid-template-areas: 'tag question answer';
+			column-gap: 2rem;
+			padding-block: 2rem;
+			align-items: baseline;
+		}
+	}
+
+	@media (min-width: 640px) and (max-width: 999px) {
+		.ms-ans-row {
+			grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+			grid-template-areas: 'tag answer' 'question answer';
+			column-gap: 2rem;
+			row-gap: .5rem;
+			padding-block: 1.75rem;
+			align-items: start;
+		}
+		.ms-ans-a { align-self: start; }
+	}
+
+	@media (max-width: 639px) {
+		.ms-ans-inner { width: calc(100% - 40px); }
+		.ms-ans-row {
+			grid-template-columns: minmax(0, 1fr);
+			grid-template-areas: 'tag' 'question' 'answer';
+			row-gap: .5rem;
+			padding-block: 1.5rem;
+		}
+		.ms-ans-a { margin-top: .25rem; }
+	}
+
+	/* Row entrance. Hidden states only exist with the page script. */
+	html.ms-js .ms-ans-rule { transform: scaleX(0); transition: transform .6s ease-out; }
+	html.ms-js .ms-ans-row.is-in .ms-ans-rule { transform: scaleX(1); }
+	html.ms-js .ms-ans-tag,
+	html.ms-js .ms-ans-q,
+	html.ms-js .ms-ans-a { transform: translateY(12px); transition: opacity .5s ease-out, transform .5s ease-out; }
+	html.ms-js .ms-ans-q { transition-delay: .08s; }
+	html.ms-js .ms-ans-a { transition-delay: .16s; }
+	html.ms-js .ms-ans-row.is-in .ms-ans-tag,
+	html.ms-js .ms-ans-row.is-in .ms-ans-q,
+	html.ms-js .ms-ans-row.is-in .ms-ans-a { opacity: 1; transform: none; }
+
+	@media (prefers-reduced-motion: reduce) {
+		html.ms-js .ms-ans-rule,
+		html.ms-js .ms-ans-tag,
+		html.ms-js .ms-ans-q,
+		html.ms-js .ms-ans-a { transform: none !important; transition: none !important; opacity: 1 !important; }
+	}
+
+	:global(html.ms-js[data-fx='lite']) .ms-ans-rule,
+	:global(html.ms-js[data-fx='lite']) .ms-ans-tag,
+	:global(html.ms-js[data-fx='lite']) .ms-ans-q,
+	:global(html.ms-js[data-fx='lite']) .ms-ans-a { transform: none !important; transition: none !important; opacity: 1 !important; }
+</style>

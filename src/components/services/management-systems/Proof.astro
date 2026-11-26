@@ -1,0 +1,386 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro:assets';
+
+const screens = import.meta.glob('./proof/*.{png,jpg,jpeg,webp}', {
+	eager: true,
+	import: 'default',
+}) as Record<string, ImageMetadata>;
+
+function screenFor(name: string): ImageMetadata | null {
+	const hit = Object.entries(screens).find(([path]) => path.includes('/' + name + '.'));
+	return hit ? hit[1] : null;
+}
+
+const phoneScreen = screenFor('manager-phone');
+const webScreen = screenFor('admin-web');
+const webRatio = webScreen ? webScreen.width / webScreen.height : 0;
+const phoneRatio = phoneScreen ? phoneScreen.width / phoneScreen.height : 0;
+---
+
+<section id="ms-proof" class="ms-proof" aria-labelledby="ms-proof-title">
+	<div class="ms-proof-inner">
+		<div class="ms-proof-head ms-rise">
+			<p class="ms-proof-eyebrow">In use today</p>
+			<h2 id="ms-proof-title"><span class="ms-proof-strong">Built, and in use</span><span class="ms-proof-soft">on a real farm.</span></h2>
+			<p class="ms-proof-intro">Our broiler farm management system is in use at Bluelite Poultry in Kano. Here is how it looks, and what each part does for the people who run the farm.</p>
+		</div>
+
+		<div class="ms-proof-stage ms-fade" style={webScreen || phoneScreen ? `--ms-web-ratio:${webRatio};--ms-phone-ratio:${phoneRatio}` : undefined}>
+			<div class:list={['ms-device', 'ms-browser', webScreen && 'ms-has-image']} style={webScreen ? `--ms-web-ratio:${webRatio}` : undefined}>
+				<div class="ms-browser-bar" aria-hidden="true"><i></i><i></i><i></i></div>
+				<div class="ms-browser-screen">
+					{webScreen ? (
+						<Image src={webScreen} width={webScreen.width} height={webScreen.height} widths={[640, 960, 1280, 1600]} sizes="(max-width: 639px) 274px, 768px" format="webp" quality={80} loading="lazy" decoding="async" style="object-fit: cover; object-position: top left" alt="Batch A detail and financial summary in the farm management system on the web" />
+					) : (
+						<div class="ms-web-placeholder" aria-hidden="true">
+							<span class="ms-web-side"></span>
+							<span class="ms-web-tiles"><i></i><i></i><i></i><i></i></span>
+							<span class="ms-web-chart"><b class="ms-placeholder-label">Placeholder: admin screen on the web</b></span>
+							<span class="ms-web-table"></span>
+						</div>
+					)}
+				<!-- Adjust --x and --y when real screenshots replace the placeholders -->
+				<span class="ms-pin ms-pin-3" aria-hidden="true">3</span>
+				<span class="ms-pin ms-pin-4" aria-hidden="true">4</span>
+				</div>
+			</div>
+
+			<div class:list={['ms-device', 'ms-phone', phoneScreen && 'ms-has-image']} style={phoneScreen ? `--ms-phone-ratio:${phoneRatio}` : undefined}>
+				<div class="ms-phone-screen">
+					{phoneScreen ? (
+						<Image src={phoneScreen} width={phoneScreen.width} height={phoneScreen.height} widths={[360, 480, 720]} sizes="(max-width: 639px) 130px, 230px" format="webp" quality={80} loading="lazy" decoding="async" style="object-fit: cover; object-position: top center" alt="My batches list in the farm management system on a phone" />
+					) : (
+						<div class="ms-phone-placeholder" aria-hidden="true">
+							<span class="ms-ph-bar"></span>
+							<span class="ms-ph-strip"></span>
+							<span class="ms-ph-card1"></span>
+							<span class="ms-ph-card2"></span>
+							<span class="ms-ph-card3"></span>
+							<span class="ms-ph-summary"></span>
+							<b class="ms-placeholder-label ms-ph-label">Placeholder: manager screen on the phone</b>
+						</div>
+					)}
+				</div>
+				<!-- Adjust --x and --y when real screenshots replace the placeholders -->
+				<span class="ms-pin ms-pin-1" aria-hidden="true">1</span>
+				<span class="ms-pin ms-pin-2" aria-hidden="true">2</span>
+			</div>
+		</div>
+
+		<ol class="ms-proof-list">
+			<li class="ms-proof-item ms-rise">
+				<span class="ms-proof-chip" aria-hidden="true">1</span>
+				<h3 class="ms-proof-item-title">Your flock at a glance</h3>
+				<p class="ms-proof-item-text">A strip at the top shows how many batches are open, with the newest batch first and closed batches tucked away.</p>
+			</li>
+			<li class="ms-proof-item ms-rise ms-rise-d1">
+				<span class="ms-proof-chip" aria-hidden="true">2</span>
+				<h3 class="ms-proof-item-title">Records without a connection</h3>
+				<p class="ms-proof-item-text">Staff record on the phone even when the network drops, and the records sync when they are back online.</p>
+			</li>
+			<li class="ms-proof-item ms-rise ms-rise-d2">
+				<span class="ms-proof-chip" aria-hidden="true">3</span>
+				<h3 class="ms-proof-item-title">Break-even and what-if prices</h3>
+				<p class="ms-proof-item-text">The manager sees the price per bird that covers costs, and can try different prices before deciding.</p>
+			</li>
+			<li class="ms-proof-item ms-rise ms-rise-d3">
+				<span class="ms-proof-chip" aria-hidden="true">4</span>
+				<h3 class="ms-proof-item-title">The whole farm on the web</h3>
+				<p class="ms-proof-item-text">Admins sign in on a computer and see every batch and figure in one place.</p>
+			</li>
+		</ol>
+
+		<p class="ms-proof-role">Staff and managers on the phone. Admins and super admins on the web.</p>
+
+		<div class="ms-proof-close ms-rise">
+			<p class="ms-proof-close-line">Want a system like this for your organisation?</p>
+			<a class="ms-proof-button" href="/quote" data-quote data-quote-topic="Management systems">Tell us how you work</a>
+		</div>
+	</div>
+</section>
+
+<style>
+	.ms-proof {
+		width: 100%;
+		overflow-x: clip;
+		padding-block: clamp(3rem, 6vw, 5rem);
+		background: var(--ms-soft-step-1);
+		color: var(--ms-soft-text);
+	}
+
+	.ms-proof-inner {
+		width: min(calc(100% - 48px), var(--container-inner));
+		margin-inline: auto;
+	}
+
+	.ms-proof-head { max-width: 44rem; margin-inline: auto; text-align: center; }
+
+	.ms-proof-eyebrow {
+		margin: 0 0 1rem;
+		color: var(--ms-soft-accent);
+		font: 500 .75rem/1.2 var(--font-mono);
+		letter-spacing: .14em;
+		text-transform: uppercase;
+	}
+	.ms-proof-eyebrow::before {
+		display: inline-block;
+		width: 2rem;
+		height: 2px;
+		margin-right: .65rem;
+		vertical-align: middle;
+		background: var(--kt-clay);
+		content: '';
+	}
+
+	.ms-proof h2 {
+		margin: 0;
+		font: 600 clamp(2rem, 4.5vw, 3rem)/1.08 var(--font-heading);
+		letter-spacing: -.03em;
+	}
+	.ms-proof-strong, .ms-proof-soft { display: block; }
+	.ms-proof-soft { color: var(--ms-soft-muted); font-weight: 400; }
+
+	.ms-proof-intro {
+		margin: 1.5rem 0 0;
+		color: var(--ms-soft-muted);
+		font-size: var(--fs-lead);
+		line-height: 1.6;
+	}
+
+	.ms-proof-stage {
+		position: relative;
+		width: 100%;
+		max-width: 960px;
+		margin: clamp(2rem, 4vw, 3rem) auto 0;
+		aspect-ratio: 16 / 9;
+		container-type: inline-size;
+	}
+
+	.ms-device { position: absolute; overflow: hidden; border-radius: 1rem; }
+	.ms-device img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+	.ms-browser {
+		left: 15%;
+		top: 0;
+		width: 80%;
+		aspect-ratio: 16 / 10;
+		border: 1px solid var(--ms-soft-line);
+		border-radius: 1rem;
+		background: var(--ms-soft-tile);
+	}
+	.ms-browser.ms-has-image {
+		aspect-ratio: auto;
+		height: calc((80cqw - 2px) / var(--ms-web-ratio) + 26px);
+		top: calc(56.25cqw - (12cqw - 1.5px) / var(--ms-phone-ratio) - (40cqw - 1px) / var(--ms-web-ratio) - 14.5px);
+	}
+	.ms-browser.ms-has-image .ms-browser-bar { height: 24px; }
+	.ms-browser.ms-has-image .ms-browser-screen { top: 24px; }
+
+	.ms-browser-bar {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		height: 6%;
+		padding-inline: 2%;
+		border-bottom: 1px solid var(--ms-soft-border);
+	}
+	.ms-browser-bar i { width: 6px; height: 6px; border: 1px solid var(--ms-soft-line); border-radius: 50%; }
+	.ms-browser-screen { position: absolute; inset: 6% 0 0; overflow: hidden; }
+
+	.ms-phone {
+		left: 0;
+		bottom: 0;
+		width: 24%;
+		aspect-ratio: 9 / 19;
+		z-index: 2;
+		border: 1.5px solid var(--ms-soft-line);
+		border-radius: clamp(1.25rem, 3vw, 2rem);
+		background: var(--ms-soft-tile);
+	}
+	.ms-phone.ms-has-image {
+		aspect-ratio: auto;
+		height: calc((24cqw - 3px) / var(--ms-phone-ratio) + 3px);
+		bottom: 0;
+	}
+	.ms-phone-screen { position: absolute; inset: 0; overflow: hidden; }
+
+	.ms-placeholder-label {
+		color: var(--ms-soft-muted);
+		font: 500 .66rem/1.2 var(--font-mono);
+		letter-spacing: .12em;
+		text-transform: uppercase;
+		text-align: center;
+	}
+
+	.ms-web-placeholder,
+	.ms-phone-placeholder { position: absolute; inset: 0; }
+	.ms-web-placeholder span,
+	.ms-phone-placeholder span { position: absolute; display: block; border-radius: 8px; background: var(--ms-soft-fill); }
+	.ms-web-side { left: 0; top: 0; bottom: 0; width: 18%; border-radius: 0; }
+	.ms-web-tiles { left: 22%; right: 4%; top: 14%; height: 16%; display: flex; gap: 3%; background: none; }
+	.ms-web-tiles i { flex: 1; border-radius: 8px; background: var(--ms-soft-fill); }
+	.ms-web-chart { left: 22%; right: 4%; top: 36%; height: 36%; }
+	.ms-web-table { left: 22%; right: 4%; top: 76%; height: 18%; }
+	.ms-web-chart .ms-placeholder-label { position: absolute; left: 0; right: 0; top: 74%; }
+
+	.ms-ph-bar { left: 8%; right: 8%; top: 0; height: 7%; }
+	.ms-ph-strip { left: 8%; right: 8%; top: 9%; height: 8%; }
+	.ms-ph-card1 { left: 8%; right: 8%; top: 20%; height: 18%; }
+	.ms-ph-card2 { left: 8%; right: 8%; top: 41%; height: 18%; }
+	.ms-ph-card3 { left: 8%; right: 8%; top: 62%; height: 18%; }
+	.ms-ph-summary { left: 8%; right: 8%; top: 83%; height: 13%; }
+	.ms-ph-label { position: absolute; left: 8%; right: 8%; top: 94.5%; }
+
+	.ms-pin,
+	.ms-proof-chip {
+		display: grid;
+		place-items: center;
+		width: 28px;
+		height: 28px;
+		border: 2px solid var(--ms-soft-step-1);
+		border-radius: 50%;
+		background: var(--ms-soft-accent);
+		color: var(--ms-tab-thumb-text);
+		font: 500 .72rem/1 var(--font-mono);
+	}
+
+	.ms-pin {
+		position: absolute;
+		z-index: 3;
+		left: var(--x);
+		top: var(--y);
+		margin-left: -14px;
+		margin-top: -14px;
+		opacity: 1;
+		transform: none;
+		transition: opacity .45s ease-out, transform .45s ease-out;
+	}
+	html.ms-js .ms-proof-stage .ms-pin { opacity: 0; transform: scale(.5); }
+	.ms-pin-1 { --x: 83.33%; --y: 13.92%; }
+	.ms-pin-2 { --x: 36.81%; --y: 6.22%; }
+	.ms-pin-3 { --x: 53.91%; --y: 54.47%; }
+	.ms-pin-4 { --x: 30.19%; --y: 26.35%; }
+
+	.ms-proof-list {
+		list-style: none;
+		margin: clamp(2rem, 4vw, 3rem) 0 0;
+		padding: 0;
+		display: grid;
+	}
+	.ms-proof-item {
+		min-width: 0;
+		display: grid;
+		grid-template-columns: 28px minmax(0, 1fr);
+		grid-template-areas: 'chip title' '. text';
+		column-gap: .75rem;
+		row-gap: .5rem;
+	}
+	.ms-proof-chip { grid-area: chip; }
+	.ms-proof-item-title {
+		grid-area: title;
+		min-height: 28px;
+		display: flex;
+		align-items: center;
+		margin: 0;
+		color: var(--ms-soft-text);
+		font: 600 1.25rem/1.25 var(--font-heading);
+	}
+	.ms-proof-item-text {
+		grid-area: text;
+		margin: 0;
+		color: var(--ms-soft-muted);
+		font: 400 .95rem/1.55 var(--font-body);
+	}
+
+	.ms-proof-role {
+		margin: clamp(2rem, 4vw, 3rem) 0 0;
+		color: var(--ms-soft-muted);
+		font: 500 .72rem/1.5 var(--font-mono);
+		letter-spacing: .12em;
+		text-transform: uppercase;
+		text-align: center;
+	}
+
+	.ms-proof-close { margin-top: clamp(2rem, 4vw, 3rem); text-align: center; }
+	.ms-proof-close-line {
+		margin: 0;
+		color: var(--ms-soft-text);
+		font: 600 clamp(1.35rem, 2.5vw, 1.75rem)/1.3 var(--font-heading);
+	}
+	.ms-proof-button {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 3rem;
+		margin-top: 1.5rem;
+		padding: 0 1.5rem;
+		border: 1px solid var(--ms-soft-border);
+		border-radius: 999px;
+		background: var(--ms-tab-thumb);
+		color: var(--ms-tab-thumb-text);
+		font: 500 .8rem/1.2 var(--font-mono);
+		letter-spacing: .12em;
+		text-transform: uppercase;
+		text-decoration: none;
+	}
+	.ms-proof-button:focus-visible { outline: 2px solid var(--ms-soft-accent); outline-offset: 3px; }
+
+	@media (min-width: 1000px) {
+		.ms-proof-list { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.5rem; }
+	}
+
+	@media (min-width: 640px) and (max-width: 999px) {
+		.ms-proof-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem 1.5rem; }
+	}
+
+	@media (max-width: 639px) {
+		.ms-proof-inner { width: calc(100% - 40px); }
+		.ms-proof-stage { aspect-ratio: 8 / 7; }
+		.ms-browser { left: auto; right: 0; top: 0; width: 80%; }
+		.ms-browser.ms-has-image {
+			height: calc((80cqw - 2px) / var(--ms-web-ratio) + 18px);
+			top: calc(7cqw + (19cqw - 1.5px) / var(--ms-phone-ratio) - (40cqw - 1px) / var(--ms-web-ratio) - 7.5px);
+		}
+		.ms-browser.ms-has-image .ms-browser-bar { height: 16px; }
+		.ms-browser.ms-has-image .ms-browser-screen { top: 16px; }
+		.ms-phone { left: 0; top: 8%; bottom: auto; width: 38%; border-radius: 1.25rem; }
+		.ms-phone.ms-has-image {
+			height: calc((38cqw - 3px) / var(--ms-phone-ratio) + 3px);
+			top: 7cqw;
+			bottom: auto;
+		}
+		.ms-ph-label { top: 94.2%; font-size: .44rem; letter-spacing: .02em; line-height: 1.05; }
+		.ms-pin { width: 24px; height: 24px; margin-left: -12px; margin-top: -12px; font-size: .65rem; }
+		.ms-proof-list { grid-template-columns: minmax(0, 1fr); }
+		.ms-proof-item {
+			grid-template-columns: 28px minmax(0, 1fr);
+			grid-template-areas: 'chip title' '. text';
+			padding-block: 1.25rem;
+			border-top: 1px solid var(--ms-soft-border);
+		}
+		.ms-proof-item:last-child { border-bottom: 1px solid var(--ms-soft-border); }
+		.ms-proof-button { width: 100%; }
+	}
+
+	/* Entrance motion. Hidden states only exist with the page script. */
+	html.ms-js .ms-proof-stage .ms-browser { opacity: 0; transform: translateX(24px); transition: opacity .6s ease-out, transform .6s ease-out; }
+	html.ms-js .ms-proof-stage .ms-phone { opacity: 0; transform: translateY(24px); transition: opacity .6s ease-out .15s, transform .6s ease-out .15s; }
+	html.ms-js .ms-proof-stage.is-in .ms-browser,
+	html.ms-js .ms-proof-stage.is-in .ms-phone { opacity: 1; transform: none; }
+	html.ms-js .ms-proof-stage.is-in .ms-pin-1 { transition-delay: .5s; }
+	html.ms-js .ms-proof-stage.is-in .ms-pin-2 { transition-delay: .6s; }
+	html.ms-js .ms-proof-stage.is-in .ms-pin-3 { transition-delay: .7s; }
+	html.ms-js .ms-proof-stage.is-in .ms-pin-4 { transition-delay: .8s; }
+	html.ms-js .ms-proof-stage.is-in .ms-pin { opacity: 1; transform: none; }
+
+	@media (prefers-reduced-motion: reduce) {
+		html.ms-js .ms-proof-stage .ms-browser,
+		html.ms-js .ms-proof-stage .ms-phone,
+		html.ms-js .ms-proof-stage .ms-pin { opacity: 1 !important; transform: none !important; transition: none !important; }
+	}
+
+	:global(html.ms-js[data-fx='lite']) .ms-proof-stage .ms-browser,
+	:global(html.ms-js[data-fx='lite']) .ms-proof-stage .ms-phone,
+	:global(html.ms-js[data-fx='lite']) .ms-proof-stage .ms-pin { opacity: 1 !important; transform: none !important; transition: none !important; }
+</style>

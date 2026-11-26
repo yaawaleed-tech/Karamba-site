@@ -2,8 +2,12 @@
 import Layout from '../../layouts/Layout.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
-import Page from '../../components/services/management-systems/Page.astro';
+import ManagementSystemsPage from '../../components/services/management-systems/ManagementSystemsPage.astro';
 import { serviceBySlug } from '../../data/services';
 const entry = serviceBySlug('management-systems');
 ---
-<Layout title={entry.name} description={entry.metaDescription}><Header /><Page /><Footer /></Layout>
+<Layout title={entry.name} description={entry.metaDescription}>
+	<Header />
+	<ManagementSystemsPage />
+	<Footer />
+</Layout>

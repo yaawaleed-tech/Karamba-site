@@ -1,0 +1,243 @@
+---
+import { CONTACT_WHATSAPP_NUMBER } from '../../../data/contact';
+
+const WHATSAPP_HREF =
+  `https://wa.me/${CONTACT_WHATSAPP_NUMBER}?text=${encodeURIComponent('Hello Karamba, I would like a system to manage my work.')}`;
+---
+
+<section id="ms-closing" class="ms-cl" aria-labelledby="ms-closing-title">
+	<div class="ms-cl-panel">
+		<div class="ms-cl-inner">
+			<div class="ms-cl-copy ms-rise">
+				<p class="ms-cl-eyebrow">Start here</p>
+				<h2 id="ms-closing-title"><span class="ms-cl-strong">What should your</span><span class="ms-cl-soft">system manage?</span></h2>
+				<p class="ms-cl-line">Tell us how your farm, school, clinic, shop or team runs today, and we will design a system around it.</p>
+				<div class="ms-cl-actions">
+					<a class="ms-cl-primary" href="/quote" data-quote data-quote-topic="Management systems">Get a quote</a>
+					<a class="ms-cl-wa" href={WHATSAPP_HREF} target="_blank" rel="noopener">Message us on WhatsApp</a>
+				</div>
+			</div>
+
+			<figure class="ms-cl-chat ms-rise ms-rise-d1">
+				<div class="ms-chat-top">
+					<span class="ms-chat-avatar" aria-hidden="true">K</span>
+					<span class="ms-chat-name">Karamba Technologies</span>
+				</div>
+				<span class="ms-chat-rule" aria-hidden="true"></span>
+				<div class="ms-chat-thread">
+					<p class="ms-bubble ms-bubble-you">Hello Karamba, we want a system to manage our work.</p>
+					<div class="ms-chat-swap">
+						<span class="ms-typing" aria-hidden="true"><i></i><i></i><i></i></span>
+						<p class="ms-bubble ms-bubble-them ms-bubble-two">Hello! Tell us how your team works today.</p>
+					</div>
+					<p class="ms-bubble ms-bubble-them ms-bubble-three">We reply within 24 hours, then shape a plan and a quote with you.</p>
+				</div>
+				<figcaption class="ms-chat-caption">Sample chat</figcaption>
+			</figure>
+		</div>
+	</div>
+</section>
+
+<style>
+	.ms-cl {
+		scroll-margin-top: var(--header-h, 76px);
+		width: 100%;
+		padding-block: clamp(3rem, 6vw, 5rem);
+	}
+
+	.ms-cl-panel {
+		width: 100%;
+		border-top: 1px solid var(--ms-panel-border);
+		border-radius: 1.5rem 1.5rem 0 0;
+		background: var(--ms-panel-bg);
+		box-shadow: var(--ms-panel-inset);
+		color: var(--ms-panel-text);
+	}
+
+	.ms-cl-inner {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 28rem);
+		grid-template-areas: 'copy chat';
+		align-items: center;
+		gap: clamp(2rem, 6vw, 5rem);
+		width: min(calc(100% - 48px), var(--container-inner));
+		margin-inline: auto;
+		padding-block: clamp(3rem, 6vw, 5rem);
+	}
+
+	.ms-cl-copy { grid-area: copy; min-width: 0; }
+
+	.ms-cl-eyebrow {
+		margin: 0 0 1rem;
+		color: var(--ms-panel-accent);
+		font: 500 .75rem/1.2 var(--font-mono);
+		letter-spacing: .14em;
+		text-transform: uppercase;
+	}
+	.ms-cl-eyebrow::before {
+		display: inline-block;
+		width: 2rem;
+		height: 2px;
+		margin-right: .65rem;
+		vertical-align: middle;
+		background: var(--kt-clay);
+		content: '';
+	}
+
+	.ms-cl h2 {
+		margin: 0;
+		font: 600 clamp(2rem, 4vw, 3.25rem)/1.08 var(--font-heading);
+		letter-spacing: -.03em;
+	}
+	.ms-cl-strong, .ms-cl-soft { display: block; }
+	.ms-cl-strong { color: var(--ms-panel-text); }
+	.ms-cl-soft { color: var(--ms-panel-muted); font-weight: 400; }
+
+	.ms-cl-line {
+		margin: 1.5rem 0 0;
+		max-width: 34rem;
+		color: var(--ms-panel-muted);
+		font: 400 var(--fs-lead)/1.6 var(--font-body);
+	}
+
+	.ms-cl-actions {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: .75rem;
+		margin-top: 2rem;
+	}
+
+	.ms-cl-primary,
+	.ms-cl-wa {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 3rem;
+		padding: .75rem 1.4rem;
+		border-radius: 999px;
+		font: 600 .9rem/1.2 var(--font-body);
+		text-decoration: none;
+	}
+	.ms-cl-primary {
+		background: var(--kt-cream);
+		color: var(--kt-indigo);
+	}
+	.ms-cl-wa {
+		border: 1.5px solid var(--ms-panel-border);
+		color: var(--ms-panel-text);
+	}
+	.ms-cl-primary:focus-visible,
+	.ms-cl-wa:focus-visible { outline: 2px solid var(--ms-panel-accent); outline-offset: 3px; }
+
+	.ms-cl-chat {
+		grid-area: chat;
+		min-width: 0;
+		margin: 0;
+		padding: 1.25rem;
+		border: 1px solid var(--ms-panel-border);
+		border-radius: 1.5rem;
+		background: color-mix(in srgb, var(--kt-cream) 6%, transparent);
+	}
+
+	.ms-chat-top { display: flex; align-items: center; gap: .75rem; }
+	.ms-chat-avatar {
+		display: grid;
+		place-items: center;
+		width: 2rem;
+		height: 2rem;
+		flex: none;
+		border-radius: 50%;
+		background: var(--ms-panel-accent);
+		color: var(--kt-ink-deep);
+		font: 600 1rem/1 var(--font-heading);
+	}
+	.ms-chat-name { color: var(--ms-panel-text); font: 400 .9rem/1.3 var(--font-body); }
+	.ms-chat-rule { display: block; height: 1px; margin-block: 1rem; background: var(--ms-panel-border); }
+
+	.ms-chat-thread { display: grid; gap: .75rem; }
+	.ms-chat-swap { display: grid; min-width: 0; }
+	.ms-typing,
+	.ms-bubble-two { grid-area: 1 / 1; }
+	.ms-typing {
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		justify-self: start;
+		padding: .65rem .9rem;
+		border-radius: 1.1rem;
+		background: color-mix(in srgb, var(--kt-cream) 12%, transparent);
+		opacity: 0;
+	}
+	.ms-typing i { width: 6px; height: 6px; border-radius: 50%; background: var(--ms-panel-accent); opacity: .3; }
+	.ms-bubble {
+		max-width: 88%;
+		margin: 0;
+		padding: .65rem .9rem;
+		font: 400 .95rem/1.5 var(--font-body);
+	}
+	.ms-bubble-you {
+		justify-self: end;
+		border-radius: 1.1rem 1.1rem .3rem 1.1rem;
+		background: var(--ms-panel-accent);
+		color: var(--kt-ink-deep);
+	}
+	.ms-bubble-them {
+		justify-self: start;
+		border: 1px solid var(--ms-panel-border);
+		border-radius: 1.1rem 1.1rem 1.1rem .3rem;
+		background: color-mix(in srgb, var(--kt-cream) 12%, transparent);
+		color: var(--ms-panel-text);
+	}
+	.ms-chat-caption {
+		margin: 1rem 0 0;
+		color: var(--ms-panel-muted);
+		font: 500 .66rem/1.2 var(--font-mono);
+		letter-spacing: .12em;
+		text-transform: uppercase;
+	}
+
+	/* Entrance motion. Hidden states only exist under html.ms-js. */
+	html.ms-js .ms-bubble,
+	html.ms-js .ms-chat-swap .ms-typing { opacity: 0; }
+	html.ms-js .ms-cl-chat.is-in .ms-bubble { transform: translateY(12px) scale(.96); transition: opacity .5s ease-out, transform .5s ease-out; }
+	html.ms-js .ms-cl-chat.is-in .ms-bubble-you { transition-delay: .35s; }
+	html.ms-js .ms-cl-chat.is-in .ms-bubble-two { transition-delay: 2.1s; }
+	html.ms-js .ms-cl-chat.is-in .ms-bubble-three { transition-delay: 2.9s; }
+	html.ms-js .ms-cl-chat.is-in .ms-bubble { opacity: 1; transform: none; }
+	html.ms-js .ms-cl-chat.is-in .ms-typing { animation: ms-typing-window 1.15s linear .95s both; }
+	html.ms-js .ms-cl-chat.is-in .ms-typing i { animation: ms-dot-pulse .5s ease-in-out .95s 2 both; }
+	html.ms-js .ms-cl-chat.is-in .ms-typing i:nth-child(2) { animation-delay: 1.1s; }
+	html.ms-js .ms-cl-chat.is-in .ms-typing i:nth-child(3) { animation-delay: 1.25s; }
+	@keyframes ms-typing-window { 0%, 94% { opacity: 1; } 100% { opacity: 0; } }
+	@keyframes ms-dot-pulse { 0%, 100% { opacity: .3; } 50% { opacity: 1; } }
+
+	@media (max-width: 899px) {
+		.ms-cl-inner {
+			grid-template-columns: minmax(0, 1fr);
+			grid-template-areas: 'copy' 'chat';
+			gap: 2rem;
+		}
+	}
+
+	@media (max-width: 639px) {
+		.ms-cl-inner { width: calc(100% - 40px); }
+		.ms-cl-actions { flex-direction: column; align-items: stretch; }
+		.ms-cl-primary, .ms-cl-wa { width: 100%; min-height: 48px; }
+		.ms-cl-chat { padding: 1rem; }
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		html.ms-js .ms-cl-chat.is-in .ms-bubble,
+		html.ms-js .ms-cl-chat.is-in .ms-typing,
+		html.ms-js .ms-cl-chat.is-in .ms-typing i { animation: none; transition: none; }
+		html.ms-js .ms-typing { opacity: 0; }
+		html.ms-js .ms-bubble { opacity: 1; transform: none; }
+	}
+
+	:global(html.ms-js[data-fx='lite']) .ms-cl-chat.is-in .ms-bubble,
+	:global(html.ms-js[data-fx='lite']) .ms-cl-chat.is-in .ms-typing,
+	:global(html.ms-js[data-fx='lite']) .ms-cl-chat.is-in .ms-typing i { animation: none; transition: none; }
+	:global(html.ms-js[data-fx='lite']) .ms-typing { opacity: 0; }
+	:global(html.ms-js[data-fx='lite']) .ms-bubble { opacity: 1; transform: none; }
+</style>

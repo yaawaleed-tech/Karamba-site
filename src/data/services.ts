@@ -70,7 +70,7 @@ export const SERVICES: ServiceEntry[] = [
       tone: 'indigo',
     },
     metaDescription:
-      'Custom management systems for shops, schools, funds and any organisation that wants to automate its work.',
+      'Management systems for farms, schools, clinics, shops and teams. Records, roles, reports and approvals in one system, shaped to how you work.',
   },
   {
     slug: 'websites-and-branding',

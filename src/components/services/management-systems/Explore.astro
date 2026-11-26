@@ -1,0 +1,225 @@
+---
+import manifest from '../../../assets/brand/karamba-pieces/manifest.json';
+import { serviceBySlug } from '../../../data/services';
+
+/* Other services: one card per sibling service. Names, outcomes, links and
+   brand pieces all come from the shared data, so nothing is invented here. */
+interface ManifestPiece { k: string; file: string }
+
+const pieceUrls = import.meta.glob(
+  '../../../assets/brand/karamba-pieces/*.webp',
+  { query: '?url', import: 'default', eager: true },
+) as Record<string, string>;
+function pieceUrl(file: string): string {
+  const hit = Object.entries(pieceUrls).find(([path]) => path.endsWith('/' + file));
+  return hit ? hit[1] : '';
+}
+function pieceFile(facet: string): string {
+  const piece = (manifest.pieces as ManifestPiece[]).find((p) => p.k === facet);
+  return piece ? pieceUrl(piece.file) : '';
+}
+
+const cards = [
+  serviceBySlug('custom-software'),
+  serviceBySlug('websites-and-branding'),
+  serviceBySlug('automation-and-ai'),
+  serviceBySlug('cloud-and-support'),
+];
+const tones = ['tone-mist', 'tone-teal', 'tone-clay', 'tone-paper'];
+const staggers = ['ms-rise-d1', 'ms-rise-d2', 'ms-rise-d3', 'ms-rise-d4'];
+---
+
+<section id="ms-explore" class="ms-ex" aria-labelledby="ms-explore-title">
+	<div class="ms-ex-intro">
+		<p class="ms-eyebrow ms-rise">Other services</p>
+		<h2 id="ms-explore-title" class="ms-rise ms-rise-d1">More ways we can help.</h2>
+	</div>
+
+	<div class="ms-ex-grid">
+		{cards.map((entry, i) => (
+			<a
+				class={`ms-ex-card ms-rise ${staggers[i]} ${tones[i]}`}
+				href={`/services/${entry.slug}`}
+			>
+				<img
+					class="ms-ex-piece"
+					src={pieceFile(entry.facet)}
+					alt=""
+					aria-hidden="true"
+					loading="lazy"
+				/>
+				<h3 class="ms-ex-name">{entry.name}</h3>
+				<p class="ms-ex-outcome">{entry.outcome}</p>
+				<span class="ms-ex-arrow">
+					View service
+					<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
+				</span>
+			</a>
+		))}
+	</div>
+</section>
+
+<style>
+	.ms-ex {
+		scroll-margin-top: var(--header-h, 76px);
+		padding-block: clamp(2.75rem, 4.5vw, 4rem);
+	}
+
+	.ms-ex-intro {
+		max-width: var(--container-inner);
+		margin-inline: auto;
+		padding: 0 24px;
+	}
+
+	.ms-eyebrow {
+		margin: 0 0 1rem;
+		color: var(--kt-teal);
+		font: 500 .75rem/1.2 var(--font-mono);
+		letter-spacing: .14em;
+		text-transform: uppercase;
+	}
+	.ms-eyebrow::before {
+		display: inline-block;
+		width: 2rem;
+		height: 2px;
+		margin-right: .65rem;
+		vertical-align: middle;
+		background: var(--kt-clay);
+		content: '';
+	}
+
+	.ms-ex h2 {
+		margin: 0;
+		color: var(--color-text);
+		font: 600 clamp(2rem, 4.5vw, 3rem)/1.08 var(--font-heading);
+		letter-spacing: -.03em;
+	}
+
+	/* Card grid --------------------------------------------------------- */
+	.ms-ex-grid {
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: 1.5rem;
+		max-width: var(--container-inner);
+		margin: 2.5rem auto 0;
+		padding: 0 24px;
+	}
+
+	.ms-ex-card:focus-visible {
+		outline: 2px solid var(--ms-soft-accent);
+		outline-offset: 3px;
+		border-radius: 1.25rem;
+	}
+
+	.ms-ex-card {
+		--ex-tint: color-mix(in srgb, var(--kt-mist) 35%, var(--color-card-bg));
+		--ex-border: color-mix(in srgb, var(--kt-mist) 30%, transparent);
+		--ex-link: color-mix(in srgb, var(--color-accent-strong) 85%, var(--color-text));
+		display: flex;
+		flex-direction: column;
+		min-width: 0;
+		padding: 1.5rem;
+		border: 1px solid var(--ex-border);
+		border-radius: 1.25rem;
+		background: var(--ex-tint);
+		color: var(--color-text);
+		text-decoration: none;
+		transition: transform 250ms ease, border-color 250ms ease;
+	}
+	.ms-ex-card.tone-teal {
+		--ex-tint: color-mix(in srgb, var(--kt-teal) 14%, var(--color-card-bg));
+		--ex-border: color-mix(in srgb, var(--kt-teal) 30%, transparent);
+	}
+	.ms-ex-card.tone-clay {
+		--ex-tint: color-mix(in srgb, var(--kt-clay) 10%, var(--color-card-bg));
+		--ex-border: color-mix(in srgb, var(--kt-clay) 30%, transparent);
+	}
+	.ms-ex-card.tone-paper {
+		--ex-tint: var(--color-card-bg);
+		--ex-border: color-mix(in srgb, var(--kt-mist) 45%, transparent);
+	}
+
+	:global([data-theme='dark']) .ms-ex-card {
+		--ex-tint: color-mix(in srgb, var(--color-text) 6%, var(--color-bg));
+		--ex-border: color-mix(in srgb, var(--color-text) 22%, transparent);
+		--ex-link: var(--kt-teal-light);
+	}
+	:global([data-theme='dark']) .ms-ex-card.tone-teal {
+		--ex-tint: color-mix(in srgb, var(--kt-teal-light) 12%, color-mix(in srgb, var(--color-text) 6%, var(--color-bg)));
+		--ex-border: color-mix(in srgb, var(--kt-teal-light) 22%, transparent);
+	}
+	:global([data-theme='dark']) .ms-ex-card.tone-clay {
+		--ex-tint: color-mix(in srgb, var(--kt-clay-light) 10%, color-mix(in srgb, var(--color-text) 6%, var(--color-bg)));
+		--ex-border: color-mix(in srgb, var(--kt-clay-light) 22%, transparent);
+	}
+	:global([data-theme='dark']) .ms-ex-card.tone-paper {
+		--ex-border: color-mix(in srgb, var(--kt-mist) 22%, transparent);
+	}
+
+	.ms-ex-piece {
+		width: 72px;
+		height: 72px;
+		object-fit: contain;
+		margin-bottom: 1.25rem;
+		transition: transform 250ms ease;
+	}
+
+	.ms-ex-name {
+		margin: 0 0 .75rem;
+		color: var(--color-text);
+		font: 600 clamp(1.2rem, 1.5vw, 1.4rem)/1.2 var(--font-heading);
+		letter-spacing: -.01em;
+	}
+
+	.ms-ex-outcome {
+		margin: 0;
+		color: var(--color-text-muted);
+		font: 400 .92rem/1.6 var(--font-body);
+	}
+
+	.ms-ex-arrow {
+		display: inline-flex;
+		align-items: center;
+		gap: .4rem;
+		margin-top: auto;
+		padding-top: 1.5rem;
+		color: var(--ex-link);
+		font: 500 .72rem/1.2 var(--font-mono);
+		letter-spacing: .08em;
+		text-transform: uppercase;
+	}
+	.ms-ex-arrow svg { width: 1rem; height: 1rem; transition: transform 250ms ease; }
+
+	@media (hover: hover) and (pointer: fine) {
+		.ms-ex-card:hover,
+		:global(html.ms-js) .ms-ex-card:hover {
+			transform: translateY(-4px);
+			border-color: color-mix(in srgb, var(--color-accent) 60%, transparent);
+		}
+		.ms-ex-card:hover .ms-ex-piece { transform: rotate(6deg) scale(1.05); }
+		.ms-ex-card:hover .ms-ex-arrow svg { transform: translateX(3px); }
+	}
+
+	/* Gentle wave: cards 2 and 4 sit lower. */
+	@media (min-width: 900px) {
+		.ms-ex-card:nth-child(2),
+		.ms-ex-card:nth-child(4) { margin-top: 2.5rem; }
+	}
+	@media (min-width: 600px) and (max-width: 899px) {
+		.ms-ex-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+		.ms-ex-card:nth-child(2),
+		.ms-ex-card:nth-child(4) { margin-top: 2.5rem; }
+	}
+	@media (max-width: 599px) {
+		.ms-ex-grid { grid-template-columns: minmax(0, 1fr); }
+		.ms-ex-intro, .ms-ex-grid { padding-inline: 20px; }
+	}
+	:global(html[data-fx='lite']) .ms-ex-card,
+	:global(html[data-fx='lite']) .ms-ex-piece,
+	:global(html[data-fx='lite']) .ms-ex-arrow svg { transition: none; }
+	@media (hover: none) {
+		.ms-ex-card:hover { transform: none; }
+		.ms-ex-card:hover .ms-ex-piece { transform: none; }
+		.ms-ex-card:hover .ms-ex-arrow svg { transform: none; }
+	}
+</style>

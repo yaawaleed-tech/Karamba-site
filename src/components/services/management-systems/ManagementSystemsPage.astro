@@ -1,0 +1,64 @@
+---
+import './reveal.css';
+import './panel.css';
+import Hero from './Hero.astro';
+import Industries from './Industries.astro';
+import MovingParts from './MovingParts.astro';
+import ShapedToYou from './ShapedToYou.astro';
+import Proof from './Proof.astro';
+import Answers from './Answers.astro';
+import Closing from './Closing.astro';
+import Explore from './Explore.astro';
+const site = Astro.site;
+---
+
+<Hero />
+<Industries />
+<MovingParts />
+<ShapedToYou />
+<Proof />
+<Answers />
+<Closing />
+<Explore />
+
+<script type="application/ld+json" set:html={JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: new URL('/', site).toString() },
+    { '@type': 'ListItem', position: 2, name: 'Services', item: new URL('/services/', site).toString() },
+    { '@type': 'ListItem', position: 3, name: 'Management systems', item: new URL('/services/management-systems/', site).toString() },
+  ],
+})} />
+
+<script is:inline>
+	(function () {
+		var root = document.documentElement;
+		root.classList.add('ms-js');
+
+		var hero = document.querySelector('.ms-hero');
+		if (hero && 'IntersectionObserver' in window) {
+			var sceneObserver = new IntersectionObserver(function (entries) {
+				hero.classList.toggle('ms-paused', !entries[0].isIntersecting);
+			}, { threshold: 0.05 });
+			sceneObserver.observe(hero);
+		}
+
+		var targets = document.querySelectorAll('.ms-rise, .ms-fade, .ms-scale-in');
+		var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		var lite = root.getAttribute('data-fx') === 'lite';
+		if (reduced || lite || !('IntersectionObserver' in window)) {
+			for (var i = 0; i < targets.length; i++) targets[i].classList.add('is-in');
+			return;
+		}
+		var io = new IntersectionObserver(function (entries) {
+			for (var j = 0; j < entries.length; j++) {
+				if (entries[j].isIntersecting) {
+					entries[j].target.classList.add('is-in');
+					io.unobserve(entries[j].target);
+				}
+			}
+		}, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+		for (var k = 0; k < targets.length; k++) io.observe(targets[k]);
+	})();
+</script>
