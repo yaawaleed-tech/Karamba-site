@@ -9,6 +9,7 @@ import UseCases from './UseCases.astro';
 import Handover from './Handover.astro';
 import Closing from './Closing.astro';
 import Explore from './Explore.astro';
+const site = Astro.site;
 ---
 
 <Hero />
@@ -20,6 +21,16 @@ import Explore from './Explore.astro';
 	<Handover />
 	<Closing />
 	<Explore />
+
+<script type="application/ld+json" set:html={JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: new URL('/', site).toString() },
+    { '@type': 'ListItem', position: 2, name: 'Services', item: new URL('/services/', site).toString() },
+    { '@type': 'ListItem', position: 3, name: 'Custom software', item: new URL('/services/custom-software/', site).toString() },
+  ],
+})} />
 </main>
 
 <script is:inline>
